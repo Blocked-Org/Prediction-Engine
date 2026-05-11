@@ -58,3 +58,35 @@ def predict_batch(payload: BatchPredictionRequest) -> dict:
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     return {"results": results}
+
+from pydantic import BaseModel
+from rq import Queue
+from redis import Redis
+
+redis_conn = Redis(host=os.getenv('REDIS_HOST', 'localhost'), port=int(os.getenv('REDIS_PORT', 6379)), password=os.getenv('REDIS_PASSWORD', 'please_change_this_redis_password'))
+q = Queue(connection=redis_conn)
+
+class SimulationRequest(BaseModel):
+    budget: float
+    num_channels: int
+
+@app.post("/v1/simulate")
+def start_simulation(payload: SimulationRequest):
+    """Trigger background AI simulation."""
+    from src.worker.tasks import run_full_simulation_task
+    job = q.enqueue(run_full_simulation_task, payload.budget, payload.num_channels)
+    return {"job_id": job.id, "status": "queued"}
+
+@app.get("/v1/simulate/{job_id}")
+def get_simulation_status(job_id: str):
+    """Get the status of a background AI simulation."""
+    job = q.fetch_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    response = {"job_id": job.id, "status": job.get_status()}
+    if job.is_finished:
+        response["result"] = job.result
+    elif job.is_failed:
+        response["error"] = "Job failed"
+    return response
