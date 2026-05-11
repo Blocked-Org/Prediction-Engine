@@ -1,0 +1,49 @@
+# Copy to configs/dataset.yaml and adjust for your Kaggle CSV column names.
+# Example layout matches common Facebook / KAG-style marketing CSVs.
+
+raw_glob: "data/raw/*.csv"
+target_column: "Approved_Conversion"
+
+# Drop identifiers and any columns that would leak the label.
+drop_columns:
+  - "ad_id"
+  - "fb_campaign_id"
+  - "xyz_campaign_id"
+
+numeric_features:
+  - "Impressions"
+  - "Clicks"
+  - "Spent"
+  - "Total_Conversion"
+
+categorical_features:
+  - "age"
+  - "gender"
+  - "interest"
+
+# Fractions of rows for val and test (from shuffled full dataset after loading).
+val_size: 0.15
+test_size: 0.15
+random_state: 42
+
+# Robust scaling on numeric branch after imputation.
+scale_numeric: true
+
+outlier:
+  # IQR clipping is fit on training rows only (inside the sklearn Pipeline).
+  enabled: true
+  iqr_multiplier: 1.5
+  iqr_clip_columns:
+    - "Impressions"
+    - "Clicks"
+    - "Spent"
+
+# Output paths (relative to project root unless absolute).
+processed_dir: "data/processed"
+manifest_filename: "preprocessing_manifest.json"
+train_filename: "train.parquet"
+val_filename: "val.parquet"
+test_filename: "test.parquet"
+
+# Model artifact; metadata auto-saved as models/xgb_pipeline_metadata.json
+model_output_path: "models/xgb_pipeline.joblib"

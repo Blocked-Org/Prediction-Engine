@@ -1,0 +1,63 @@
+{
+  "metrics": {
+    "val_candidate_model_before_merge": {
+      "rmse": 3.1102257456561224,
+      "mae": 2.3957593056463424,
+      "r2": 0.7596877901568235
+    },
+    "test_candidate_model_before_merge": {
+      "rmse": 2.994591182815439,
+      "mae": 2.1739902178446453,
+      "r2": 0.9113690963532536
+    },
+    "test_final_model_after_merge": {
+      "rmse": 3.0678587011014233,
+      "mae": 2.1037627855936685,
+      "r2": 0.9069790436198665
+    }
+  },
+  "residual_dispersion_val": {
+    "residual_std": 3.0914844144271765,
+    "residual_mean": -0.34092272481610697,
+    "mae": 2.3957593056463424
+  },
+  "target_column": "Approved_Conversion",
+  "feature_columns": [
+    "Impressions",
+    "Clicks",
+    "Spent",
+    "Total_Conversion",
+    "age",
+    "gender",
+    "interest"
+  ],
+  "numeric_features": [
+    "Impressions",
+    "Clicks",
+    "Spent",
+    "Total_Conversion"
+  ],
+  "categorical_features": [
+    "age",
+    "gender",
+    "interest"
+  ],
+  "tuning": {
+    "best_params": {
+      "regressor__colsample_bytree": 0.8252439222197265,
+      "regressor__gamma": 0.00010672476836323731,
+      "regressor__learning_rate": 0.010815983055225093,
+      "regressor__max_depth": 11,
+      "regressor__min_child_weight": 0.2969622196375131,
+      "regressor__n_estimators": 899,
+      "regressor__reg_alpha": 0.006789053271698486,
+      "regressor__reg_lambda": 0.19069966103000435,
+      "regressor__subsample": 0.9033291826268561
+    },
+    "best_cv_score_rmse": 7.657005459858962,
+    "n_iter": 4,
+    "cv": 3,
+    "candidate_metrics_reference": "Val residuals use the pre-merge estimator for calibrated heuristics."
+  },
+  "approx_heuristic_z_95": 1.96
+}
