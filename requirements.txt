@@ -17,10 +17,15 @@ pyarrow>=15.0.0
 pymc>=5.10.0
 pymc-marketing>=0.4.0
 pymoo>=0.6.1
+mesa>=3.0.0
 
 # Background Worker
 redis>=5.0.0
-rq>=1.15.0
+celery>=5.3.0
 
-# Data Ingestion
+# Data Ingestion & LLM
 firecrawl-py>=0.0.10
+crawl4ai>=0.0.1
+llama-index>=0.10.0
+neo4j>=5.14.0
+weaviate-client>=4.4.0

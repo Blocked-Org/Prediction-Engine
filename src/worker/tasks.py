@@ -1,11 +1,13 @@
 import time
+from src.worker.main import celery_app
 from src.simulation.macro import run_bayesian_mmm
 from src.simulation.micro import run_agent_based_simulation
 from src.simulation.optimization import run_genetic_optimization
 
+@celery_app.task
 def run_full_simulation_task(budget: float, num_channels: int):
     """
-    Background task to run the complete simulation pipeline.
+    Background Celery task to run the complete simulation pipeline.
     """
     print(f"Starting full simulation task for budget: {budget}")
     

@@ -1,25 +1,26 @@
 import os
-import redis
-from rq import Worker, Queue, Connection
+from celery import Celery
 
-# Connect to Redis using environment variables or defaults
 REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
 REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
 REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', 'please_change_this_redis_password')
 
-# Establish Redis connection
-redis_conn = redis.Redis(
-    host=REDIS_HOST, 
-    port=REDIS_PORT, 
-    password=REDIS_PASSWORD
+broker_url = f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/0"
+
+celery_app = Celery(
+    "prediction_engine",
+    broker=broker_url,
+    backend=broker_url,
+    include=['src.worker.tasks']
 )
 
-def start_worker():
-    """Starts the RQ worker to listen for tasks."""
-    print("Starting background worker...")
-    with Connection(redis_conn):
-        worker = Worker(['default', 'high', 'low'])
-        worker.work()
+celery_app.conf.update(
+    task_serializer='json',
+    accept_content=['json'],
+    result_serializer='json',
+    timezone='Asia/Dhaka',
+    enable_utc=True,
+)
 
 if __name__ == '__main__':
-    start_worker()
+    celery_app.start()

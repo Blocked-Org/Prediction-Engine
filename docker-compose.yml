@@ -1,80 +1,33 @@
-# =============================================================================
-# Local AI / backend development stack (Docker Compose file format 3.8+)
-# =============================================================================
-# Services: PostgreSQL 16 + Apache AGE, Qdrant, Redis, optional pgAdmin.
-#
-# Quick start:
-#   1. Copy `.env.example` to `.env` and set strong passwords.
-#   2. `docker compose up -d`
-#   3. Optional UI for Postgres: `docker compose --profile admin up -d`
-#
-# Data lives in named volumes (survives `docker compose down`; use `down -v` to wipe).
-#
-# Compatible with Docker Compose v2+ (“Compose Specification”). The legacy top-level
-# `version:` key is omitted — current Docker Compose ignores it.
-# =============================================================================
-
 services:
-  # ---------------------------------------------------------------------------
-  # PostgreSQL 16 with Apache AGE (graph queries on top of Postgres)
-  # Official image docs: https://hub.docker.com/r/apache/age
-  # ---------------------------------------------------------------------------
-  postgres:
-    image: apache/age:release_PG16_1.6.0
-    container_name: predictionengine-postgres
+  neo4j:
+    image: neo4j:5.18.0
+    container_name: predictionengine-neo4j
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB:-appdb}
-      # Helpful defaults for local dev (tune for production separately)
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.utf8"
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-please_change_this_password}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${NEO4J_HTTP_PORT:-7474}:7474"
+      - "${NEO4J_BOLT_PORT:-7687}:7687"
     volumes:
-      # Cluster data (tables, indexes, WAL — keep this backed up in real prod)
-      - postgres_data:/var/lib/postgresql/data
-      # Runs *.sql once on first empty data directory — enables AGE in appdb
-      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
-    healthcheck:
-      # Values come from your host `.env` when you run Docker Compose (keeps CLI tools simple).
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U \"${POSTGRES_USER}\" -d \"${POSTGRES_DB:-appdb}\" -h 127.0.0.1 -p 5432",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      - neo4j_data:/data
 
-  # ---------------------------------------------------------------------------
-  # Qdrant — vector database (embeddings, semantic search, RAG)
-  # REST API on 6333; gRPC on 6334 (optional for some clients)
-  # ---------------------------------------------------------------------------
-  qdrant:
-    image: qdrant/qdrant:v1.13.6
-    container_name: predictionengine-qdrant
+  weaviate:
+    image: cr.weaviate.io/semitechnologies/weaviate:1.24.1
+    container_name: predictionengine-weaviate
     restart: unless-stopped
     ports:
-      - "${QDRANT_HTTP_PORT:-6333}:6333"
-      - "${QDRANT_GRPC_PORT:-6334}:6334"
-    volumes:
-      - qdrant_data:/qdrant/storage
+      - "${WEAVIATE_PORT:-8080}:8080"
+      - "${WEAVIATE_GRPC_PORT:-50051}:50051"
     environment:
-      # Log level: INFO is fine for local dev
-      QDRANT__LOG_LEVEL: ${QDRANT_LOG_LEVEL:-INFO}
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:6333/healthz >/dev/null || exit 1"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+      DEFAULT_VECTORIZER_MODULE: 'none'
+      ENABLE_MODULES: ''
+      CLUSTER_HOSTNAME: 'node1'
+    volumes:
+      - weaviate_data:/var/lib/weaviate
 
-  # ---------------------------------------------------------------------------
-  # Redis — cache, sessions, rate limits, Celery broker, etc.
-  # Append-only file (AOF) for durability across restarts
-  # ---------------------------------------------------------------------------
   redis:
     image: redis:7-alpine
     container_name: predictionengine-redis
@@ -84,57 +37,22 @@ services:
       --appendonly yes
       --appendfsync everysec
       --dir /data
-      --requirepass "${REDIS_PASSWORD}"
+      --requirepass "${REDIS_PASSWORD:-please_change_this_redis_password}"
     ports:
       - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-please_change_this_redis_password}", "ping"]
       interval: 10s
       timeout: 3s
       retries: 5
       start_period: 10s
 
-  # ---------------------------------------------------------------------------
-  # pgAdmin — web UI to browse Postgres (optional; not started by default)
-  # Start with: docker compose --profile admin up -d
-  # In pgAdmin, register server host: postgres  port: 5432  (same Docker network)
-  # ---------------------------------------------------------------------------
-  pgadmin:
-    profiles: ["admin"]
-    image: dpage/pgadmin4:8.14
-    container_name: predictionengine-pgadmin
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-      # Avoid setup wizard insisting on external email in some setups
-      PGADMIN_CONFIG_SERVER_MODE: "False"
-      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
-    ports:
-      - "${PGADMIN_PORT:-5050}:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      postgres:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:80/misc/ping | grep -q pong"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
-# =============================================================================
-# Named volumes — Docker manages these on your machine
-# =============================================================================
 volumes:
-  postgres_data:
-    name: predictionengine_postgres_data
-  qdrant_data:
-    name: predictionengine_qdrant_data
+  neo4j_data:
+    name: predictionengine_neo4j_data
+  weaviate_data:
+    name: predictionengine_weaviate_data
   redis_data:
     name: predictionengine_redis_data
-  pgadmin_data:
-    name: predictionengine_pgadmin_data
