@@ -1,0 +1,78 @@
+{
+  "simulation_scenario": {
+    "scenario_id": "sim_001",
+    "campaign_input": {
+      "campaign_id": "camp_2026_q3",
+      "channel_names": ["search", "social", "display"],
+      "date_range": {
+        "start_date": "2026-07-01",
+        "end_date": "2026-09-30"
+      },
+      "target_audience": {
+        "demographics": {
+          "age": "18-35",
+          "income": "medium-high"
+        },
+        "interests": ["technology", "gadgets"]
+      },
+      "region": "US-West",
+      "allocations": [
+        {
+          "channel_name": "search",
+          "spend": 50000.0,
+          "impressions": 1500000,
+          "clicks": 45000,
+          "conversions": 1200,
+          "ctr": 0.03,
+          "cpc": 1.11
+        },
+        {
+          "channel_name": "social",
+          "spend": 30000.0,
+          "impressions": 3000000,
+          "clicks": 30000,
+          "conversions": 600,
+          "ctr": 0.01,
+          "cpc": 1.00
+        }
+      ]
+    },
+    "competitor_signals": [
+      {
+        "competitor_name": "TechGiant Inc.",
+        "signal_type": "price_drop",
+        "impact_score": 0.75,
+        "description": "Major competitor dropped prices by 15% across key categories."
+      }
+    ]
+  },
+  "optimization_result": {
+    "campaign_id": "camp_2026_q3",
+    "optimized_allocations": [
+      {
+        "channel_name": "search",
+        "spend": 60000.0
+      },
+      {
+        "channel_name": "social",
+        "spend": 20000.0
+      }
+    ],
+    "expected_forecast": {
+      "campaign_id": "camp_2026_q3",
+      "estimated_revenue": 250000.0,
+      "uncertainty_bounds": {
+        "lower_bound": 230000.0,
+        "upper_bound": 270000.0,
+        "confidence_level": 0.95
+      }
+    },
+    "recommendations": [
+      {
+        "recommendation_id": "rec_001",
+        "action": "increase_search_spend",
+        "recommendation_reasoning": "Search shows higher expected ROI given the competitor price drop, while social engagement is projected to decline."
+      }
+    ]
+  }
+}
