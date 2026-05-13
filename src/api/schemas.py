@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import BaseModel, Field
-
+from pydantic import BaseModel, Field, ConfigDict
+from typing import Any, Annotated
+from datetime import date
 
 class ShapContribution(BaseModel):
     feature: str
@@ -45,3 +46,80 @@ class FullPredictionEnvelope(BaseModel):
 class ApiHealth(BaseModel):
     status: str = "ok"
 
+
+class SimulationRequest(BaseModel):
+    """
+    Request payload for a marketing simulation, defining timeframe, audience, and budgets.
+    """
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    campaign_timeframe: tuple[date, date] = Field(
+        ..., description="Tuple of start and end dates for the campaign timeframe."
+    )
+    target_demographics: dict[str, str | int | float] = Field(
+        ..., description="Key-value pairs defining target demographics."
+    )
+    budget_allocation: dict[str, Annotated[float, Field(ge=0.0)]] = Field(
+        ..., description="Budget allocated per channel, e.g., {'meta_ads': 1500.0}. Must be >= 0."
+    )
+
+
+class SimulationResponse(BaseModel):
+    """
+    Response payload containing the results of a marketing simulation.
+    """
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    projected_roi: float = Field(
+        ..., description="The projected Return on Investment."
+    )
+    incremental_roas: float = Field(
+        ..., description="The incremental Return on Ad Spend."
+    )
+    pareto_optimal_budgets: list[dict[str, float]] = Field(
+        ..., description="List of dictionaries showing alternative budget spreads."
+    )
+
+
+class HistoricalSpendRecord(BaseModel):
+    """
+    A single record of historical spend data used for forecasting.
+    """
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    date: date = Field(..., description="Date of the historical spend.")
+    channel: str = Field(..., description="The marketing channel used.")
+    spend: Annotated[float, Field(ge=0.0)] = Field(
+        ..., description="Amount spent on the channel."
+    )
+
+
+class ForecastRequest(BaseModel):
+    """
+    Request payload for generating sales forecasts based on historical data.
+    """
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    historical_spend_data: list[HistoricalSpendRecord] = Field(
+        ..., description="List of historical spend records."
+    )
+    exogenous_factors: dict[str, float] = Field(
+        ..., description="External factors impacting the forecast, e.g., competitor_share_of_voice."
+    )
+
+
+class ForecastResponse(BaseModel):
+    """
+    Response payload containing baseline, incremental sales, and a confidence range.
+    """
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    baseline_sales: float = Field(
+        ..., description="The projected baseline sales without intervention."
+    )
+    incremental_sales: float = Field(
+        ..., description="The projected incremental sales driven by marketing."
+    )
+    confidence_interval: tuple[float, float] = Field(
+        ..., description="Tuple of lower and upper bounds of the confidence interval."
+    )
