@@ -14,7 +14,7 @@ export interface DateRange {
 }
 
 export interface TargetAudience {
-  demographics: Record<string, any>;
+  demographics: Record<string, unknown>;
   interests: string[];
 }
 
