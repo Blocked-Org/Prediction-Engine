@@ -1,0 +1,177 @@
+import logging
+from typing import Any, Dict, List
+
+import mesa
+from pydantic import BaseModel, Field, validate_call
+
+# Configure module-level logger for defensive programming
+logger = logging.getLogger(__name__)
+
+
+class ConsumerAgent(mesa.Agent):
+    """
+    ConsumerAgent represents a single consumer within the MarketingEnvironment.
+
+    This agent is influenced by marketing campaigns which adjust its
+    conversion probability over time, modified by its innate brand loyalty.
+
+    Attributes:
+        demographic_segment (str): The demographic group of the agent (e.g., 'urban_millennial').
+        brand_loyalty (float): A value between 0.0 and 1.0 representing resilience to or affinity for marketing.
+        conversion_probability (float): Current probability that the agent will convert in a given step.
+        is_converted (bool): Tracks whether the agent has converted.
+    """
+
+    def __init__(
+        self,
+        unique_id: int,
+        model: mesa.Model,
+        demographic_segment: str,
+        brand_loyalty: float,
+        conversion_probability: float,
+    ) -> None:
+        """
+        Initializes the ConsumerAgent.
+
+        Args:
+            unique_id (int): Unique identifier for the agent.
+            model (mesa.Model): The environment model instance.
+            demographic_segment (str): Categorical string for demographics.
+            brand_loyalty (float): Loyalty score (0.0 to 1.0).
+            conversion_probability (float): Base probability of conversion (0.0 to 1.0).
+        """
+        super().__init__(unique_id, model)
+        self.demographic_segment = demographic_segment
+        self.brand_loyalty = brand_loyalty
+        self.conversion_probability = conversion_probability
+        self.is_converted = False
+
+    def step(self) -> None:
+        """
+        Agent's step in the simulation. Evaluates conversion based on probability.
+        Once converted, the agent remains converted.
+        """
+        try:
+            if not self.is_converted:
+                if self.random.random() < self.conversion_probability:
+                    self.is_converted = True
+                    logger.debug(f"Agent {self.unique_id} converted!")
+        except Exception as e:
+            logger.error(f"Error during agent step for ID {self.unique_id}: {e}", exc_info=True)
+
+
+def compute_conversions(model: mesa.Model) -> int:
+    """
+    Computes the total number of conversions in the current environment.
+
+    Args:
+        model (mesa.Model): The simulation environment.
+
+    Returns:
+        int: Total number of converted agents.
+    """
+    try:
+        # In Mesa 3.0+, we can iterate over model.agents or schedule.agents.
+        # Fallback to schedule.agents for compatibility.
+        agents = getattr(model, "agents", model.schedule.agents)
+        return sum(1 for a in agents if getattr(a, "is_converted", False))
+    except Exception as e:
+        logger.error(f"Failed to compute conversions: {e}")
+        return 0
+
+
+class EnvironmentConfig(BaseModel):
+    """
+    Pydantic schema to validate the configuration parameters of the MarketingEnvironment.
+    Ensures strict typing and constraints for the simulation.
+    """
+    num_agents: int = Field(1000, gt=0, description="Total number of agents to simulate.")
+    ad_exposure: float = Field(0.1, ge=0.0, le=1.0, description="Intensity of the marketing campaign (0.0 to 1.0).")
+
+
+class MarketingEnvironment(mesa.Model):
+    """
+    Agent-based model simulating a dynamic marketing environment.
+
+    This model creates a population of ConsumerAgents and steps them through
+    marketing campaign pushes. It uses Mesa 3.0 compatible agent management.
+
+    Attributes:
+        config (EnvironmentConfig): Validated configuration parameters.
+        schedule (mesa.time.RandomActivation): The scheduler for the model.
+        datacollector (mesa.DataCollector): Collects simulation metrics per step.
+    """
+
+    @validate_call
+    def __init__(self, num_agents: int = 1000, ad_exposure: float = 0.1) -> None:
+        """
+        Initializes the MarketingEnvironment model.
+
+        Args:
+            num_agents (int): The number of consumer agents to generate. Default 1000.
+            ad_exposure (float): The base advertising exposure level. Default 0.1.
+        """
+        super().__init__()
+        
+        # Strict validation using Pydantic
+        self.config = EnvironmentConfig(num_agents=num_agents, ad_exposure=ad_exposure)
+        self.ad_exposure = self.config.ad_exposure
+        
+        self.schedule = mesa.time.RandomActivation(self)
+        
+        demographic_segments = ['urban_millennial', 'rural', 'suburban_family', 'gen_z_student']
+
+        for i in range(self.config.num_agents):
+            try:
+                # Randomize agent attributes
+                segment = self.random.choice(demographic_segments)
+                loyalty = self.random.uniform(0.0, 1.0)
+                base_prob = self.random.uniform(0.01, 0.1)
+                
+                agent = ConsumerAgent(
+                    unique_id=i,
+                    model=self,
+                    demographic_segment=segment,
+                    brand_loyalty=loyalty,
+                    conversion_probability=base_prob
+                )
+                
+                # Mesa 3.0 AgentSet pattern or traditional schedule add
+                self.schedule.add(agent)
+                
+            except Exception as e:
+                logger.error(f"Failed to initialize agent {i}: {e}", exc_info=True)
+                raise
+        
+        # Setup data collector to track total conversions per step
+        self.datacollector = mesa.DataCollector(
+            model_reporters={"Total_Conversions": compute_conversions}
+        )
+
+    def step(self) -> None:
+        """
+        Advances the simulation by one step. 
+        Applies a marketing campaign push which slightly increases the 
+        conversion probability of each agent based on their brand loyalty 
+        and the environment's ad exposure parameter.
+        """
+        try:
+            # Access agents via Mesa 3.0 AgentSet if available, else use schedule
+            agents = getattr(self, "agents", self.schedule.agents)
+            
+            # Apply the marketing push (increase conversion probability)
+            for agent in agents:
+                if isinstance(agent, ConsumerAgent) and not agent.is_converted:
+                    # Brand loyalty modifies how much ad_exposure impacts the probability.
+                    boost = agent.brand_loyalty * self.ad_exposure * 0.05
+                    agent.conversion_probability = min(1.0, agent.conversion_probability + boost)
+
+            # Collect data before agents potentially change state in this step
+            self.datacollector.collect(self)
+            
+            # Execute step on all agents
+            self.schedule.step()
+            
+        except Exception as e:
+            logger.error(f"Error during environment step: {e}", exc_info=True)
+            raise
