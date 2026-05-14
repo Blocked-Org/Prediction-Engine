@@ -2,6 +2,9 @@ import os
 import logging
 from typing import Any, Dict
 
+from dotenv import load_dotenv
+load_dotenv()  # Must run before os.getenv('REDIS_URL') below
+
 from celery import Celery
 
 from src.api.schemas import SimulationRequest

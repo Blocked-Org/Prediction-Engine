@@ -64,3 +64,41 @@ export interface OptimizationResult {
   expected_forecast: ForecastOutput;
   recommendations: Recommendation[];
 }
+
+// === NEW: Real Backend API Contracts (Day 6) ===
+
+export interface SimulationRequest {
+  campaign_timeframe: [string, string]    // ["2024-01-01", "2024-06-30"]
+  target_demographics: Record<string, string | number>
+  budget_allocation: Record<string, number>  // {"Meta": 5000, "Google": 3000}
+}
+
+export interface SimulationResponse {
+  projected_roi: number
+  incremental_roas: number
+  pareto_optimal_budgets: Record<string, number>[]
+}
+
+export interface SimulationTaskResponse {
+  task_id: string
+  status: "processing" | "SUCCESS" | "FAILURE" | "PENDING"
+  result?: SimulationResponse
+  error?: string
+}
+
+export interface HistoricalSpendRecord {
+  date: string          // "2024-01-01"
+  channel: string       // "Meta"
+  spend: number         // 5000.0
+}
+
+export interface ForecastRequest {
+  historical_spend_data: HistoricalSpendRecord[]
+  exogenous_factors: Record<string, number>
+}
+
+export interface ForecastResponse {
+  baseline_sales: number
+  incremental_sales: number
+  confidence_interval: [number, number]   // [lower_5th, upper_95th] — REAL PyMC quantiles
+}

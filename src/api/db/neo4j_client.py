@@ -9,8 +9,10 @@ logger = logging.getLogger(__name__)
 
 class Neo4jSettings(BaseSettings):
     """Configuration for Neo4j Database Connection."""
+    # Field names match the env var names in .env exactly.
+    # NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD are the AuraDB variables.
     neo4j_uri: str = "bolt://localhost:7687"
-    neo4j_user: str = "neo4j"
+    neo4j_username: str = "neo4j"
     neo4j_password: str = "password"
     
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
@@ -46,7 +48,7 @@ class Neo4jManager:
         try:
             self.driver = GraphDatabase.driver(
                 self.settings.neo4j_uri,
-                auth=(self.settings.neo4j_user, self.settings.neo4j_password)
+                auth=(self.settings.neo4j_username, self.settings.neo4j_password)
             )
             logger.info(f"Successfully connected to Neo4j at {self.settings.neo4j_uri}")
         except Exception as e:

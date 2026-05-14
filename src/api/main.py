@@ -12,6 +12,9 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from dotenv import load_dotenv
+load_dotenv()  # Load .env before any os.getenv() calls
+
 from celery.result import AsyncResult
 from src.api.worker import celery_app, run_simulation_task
 
@@ -42,12 +45,10 @@ app = FastAPI(
     description="Graph-Augmented Bayesian Simulation Engine API"
 )
 
-# Configure CORS Middleware
-# Allows requests from the Next.js frontend
-frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+# Configure CORS Middleware — locked to Dev A's Next.js port for integration day
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[frontend_url],
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -93,22 +94,42 @@ def get_facade() -> FastApiPredictionFacade:
 @app.get("/health")
 def health_check() -> dict[str, Any]:
     """
-    Basic health-check endpoint.
+    Live health-check endpoint. Probes Neo4j and Redis connectivity.
+    Each probe is isolated — a failing service reports 'error' without crashing.
     
     Returns:
-        dict: A dictionary containing the overall status and service statuses.
+        dict: Overall status ('ok'/'degraded') and per-service statuses.
     """
+    services: dict[str, str] = {}
+
+    # --- Neo4j Probe ---
     try:
-        return {
-            "status": "ok",
-            "services": {
-                "redis": "pending",
-                "neo4j": "pending"
-            }
-        }
+        from src.api.db.neo4j_client import Neo4jManager
+        mgr = Neo4jManager()
+        ok = mgr.verify_connectivity()
+        services["neo4j"] = "ok" if ok else "error"
     except Exception as exc:
-        logger.error("Health check failed: %s", exc)
-        raise HTTPException(status_code=500, detail="Health check failed") from exc
+        logger.warning("Neo4j health probe failed: %s", exc)
+        services["neo4j"] = "error"
+    finally:
+        try:
+            mgr.close()  # type: ignore[possibly-undefined]
+        except Exception:
+            pass
+
+    # --- Redis Probe ---
+    try:
+        import redis as redis_lib
+        redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+        r = redis_lib.from_url(redis_url, socket_connect_timeout=2)
+        r.ping()
+        services["redis"] = "ok"
+    except Exception as exc:
+        logger.warning("Redis health probe failed: %s", exc)
+        services["redis"] = "error"
+
+    overall = "ok" if all(v == "ok" for v in services.values()) else "degraded"
+    return {"status": overall, "services": services}
 
 
 @app.get("/healthz", response_model=ApiHealth)
@@ -217,32 +238,30 @@ def get_task_status(task_id: str) -> Any:
 @app.post("/api/v1/forecast", response_model=ForecastResponse)
 def forecast(payload: ForecastRequest) -> ForecastResponse:
     """
-    Mock endpoint for Sales Forecasting.
+    Endpoint for Sales Forecasting using Bayesian Marketing Mix Modeling.
     
     Args:
         payload (ForecastRequest): The request payload containing historical 
             spend data and exogenous factors.
             
     Returns:
-        ForecastResponse: The mock forecast results including baseline sales, 
+        ForecastResponse: The forecast results including baseline sales, 
             incremental sales, and confidence intervals.
             
     Raises:
         HTTPException: If an error occurs during forecast processing.
     """
-    # NOTE: These are mock routes for Day 1 of the hackathon and will be wired to Celery tasks on Day 6.
     try:
+        from src.simulation.engine_runner import run_macro_forecast
+        
         logger.info(
             "Received forecast request with %d historical spend records", 
             len(payload.historical_spend_data)
         )
         
-        mock_response = ForecastResponse(
-            baseline_sales=50000.0,
-            incremental_sales=12000.50,
-            confidence_interval=(45000.0, 65000.0)
-        )
-        return mock_response
+        response = run_macro_forecast(payload)
+        return response
+        
     except Exception as exc:
         logger.error("Error processing forecast request: %s", exc)
         raise HTTPException(status_code=500, detail="Internal server error during forecasting") from exc

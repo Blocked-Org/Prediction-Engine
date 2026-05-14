@@ -35,12 +35,13 @@ def adstock_transformation(x: TensorVariable, lambda_decay: TensorVariable) -> T
         return x_t + decay * a_tm1
 
     # Use PyTensor scan for efficient recursive/autoregressive computation
-    results, _ = pytensor.scan(
+    results = pytensor.scan(
         fn=step_func,
         sequences=[x],
         outputs_info=[pt.as_tensor_variable(np.float64(0.0))],
         non_sequences=[lambda_decay],
-        strict=True
+        strict=True,
+        return_updates=False
     )
     return results
 
@@ -282,7 +283,7 @@ class BayesianSimulationEngine:
         
         # Perform prior predictive check to simulate outcomes
         with sim_model:
-            prior_checks = pm.sample_prior_predictive(samples=100, random_seed=42)
+            prior_checks = pm.sample_prior_predictive(draws=100, random_seed=42)
             
         # Extract mean predicted target from the prior
         # prior_checks.prior_predictive is an xarray.Dataset
