@@ -35,3 +35,45 @@ def run_full_simulation_task(budget: float, num_channels: int):
         "micro_results": micro_results,
         "optimization": opt_results
     }
+
+import os
+from firecrawl import FirecrawlApp
+from src.api.db.neo4j_client import Neo4jManager
+
+@celery_app.task
+def scrape_competitor_data_task(url: str, prompt: str = None):
+    """
+    Background Celery task to scrape exogenous competitor data using Firecrawl.
+    Ingests extracted markdown insights directly into Neo4j graph nodes.
+    """
+    api_key = os.getenv("FIRECRAWL_API_KEY", "dummy_key")
+    app = FirecrawlApp(api_key=api_key)
+    
+    try:
+        print(f"Scraping data from {url} via Firecrawl...")
+        result = app.scrape_url(url, params={
+            'formats': ['markdown'], 
+            'onlyMainContent': True
+        })
+        
+        markdown_content = result.get('markdown', 'No content found')
+        
+        neo_mgr = Neo4jManager()
+        neo_mgr.connect()
+        
+        query = (
+            "MERGE (c:CompetitorContext {url: $url}) "
+            "SET c.content = $content, c.scraped_at = timestamp() "
+            "RETURN c"
+        )
+        
+        if neo_mgr.driver:
+            with neo_mgr.driver.session() as session:
+                session.run(query, url=url, content=markdown_content[:2000]) # Cap for safety
+                print("Neo4j node 'CompetitorContext' updated successfully.")
+                
+        return {"status": "success", "url": url, "bytes_extracted": len(markdown_content)}
+
+    except Exception as e:
+        print(f"Scraping task failed: {e}")
+        return {"status": "error", "message": str(e)}
