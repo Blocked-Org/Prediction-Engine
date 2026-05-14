@@ -35,7 +35,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navMain = [
     { title: t('title'), url: "/dashboard", icon: LayoutDashboard },
     { title: t('advanced_visualizations'), url: "/dashboard/analytics", icon: BarChart3 },
-    { title: "Settings", url: "/dashboard/settings", icon: Settings },
+    { title: t('settings'), url: "/dashboard/settings", icon: Settings },
   ];
 
   return (
@@ -59,7 +59,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Menu</SidebarGroupLabel>
+          <SidebarGroupLabel className="font-noto-bengali">{t('menu')}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navMain.map((item) => (

@@ -3,7 +3,16 @@ import { ExecutiveReport } from '../ExecutiveReport'
 
 // Mock next-intl hook
 jest.mock('next-intl', () => ({
-  useLocale: () => 'en'
+  useLocale: () => 'en',
+  useTranslations: () => (key: string) => {
+    const messages: Record<string, string> = {
+      'title': 'Executive AI Report',
+      'cloud': 'Cloud (Gemini)',
+      'offline': 'Offline (Gemma4:26b)',
+      'generate': 'Generate Executive Summary'
+    };
+    return messages[key] || key;
+  }
 }))
 
 // Mock react-markdown

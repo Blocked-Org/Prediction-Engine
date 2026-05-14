@@ -47,57 +47,6 @@ type SimulationData = {
   }
 }
 
-const columns: ColumnDef<Allocation>[] = [
-  {
-    accessorKey: "channel_name",
-    header: "Channel",
-    cell: ({ row }) => <div className="capitalize">{row.getValue("channel_name")}</div>
-  },
-  {
-    accessorKey: "spend",
-    header: "Spend ($)",
-    cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("spend"))
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(amount)
-      return <div className="font-medium">{formatted}</div>
-    },
-  },
-  {
-    accessorKey: "impressions",
-    header: "Impressions",
-    cell: ({ row }) => row.getValue("impressions")?.toLocaleString()
-  },
-  {
-    accessorKey: "clicks",
-    header: "Clicks",
-    cell: ({ row }) => row.getValue("clicks")?.toLocaleString()
-  },
-  {
-    accessorKey: "conversions",
-    header: "Conversions",
-    cell: ({ row }) => row.getValue("conversions")?.toLocaleString()
-  },
-  {
-    accessorKey: "ctr",
-    header: "CTR",
-    cell: ({ row }) => {
-      const ctr = parseFloat(row.getValue("ctr"))
-      return <div>{(ctr * 100).toFixed(1)}%</div>
-    }
-  },
-  {
-    accessorKey: "cpc",
-    header: "CPC ($)",
-    cell: ({ row }) => {
-      const cpc = parseFloat(row.getValue("cpc"))
-      return <div>${cpc.toFixed(2)}</div>
-    }
-  },
-]
-
 /**
  * Main dashboard page component.
  * Responsible for fetching mock API data and rendering the analytics interface.
@@ -106,6 +55,56 @@ const columns: ColumnDef<Allocation>[] = [
  */
 export default function DashboardPage() {
   const t = useTranslations('Dashboard');
+  const columns: ColumnDef<Allocation>[] = [
+    {
+      accessorKey: "channel_name",
+      header: t("channel"),
+      cell: ({ row }) => <div className="capitalize">{row.getValue("channel_name")}</div>
+    },
+    {
+      accessorKey: "spend",
+      header: t("spend"),
+      cell: ({ row }) => {
+        const amount = parseFloat(row.getValue("spend"))
+        const formatted = new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+        }).format(amount)
+        return <div className="font-medium">{formatted}</div>
+      },
+    },
+    {
+      accessorKey: "impressions",
+      header: t("impressions"),
+      cell: ({ row }) => row.getValue("impressions")?.toLocaleString()
+    },
+    {
+      accessorKey: "clicks",
+      header: t("clicks"),
+      cell: ({ row }) => row.getValue("clicks")?.toLocaleString()
+    },
+    {
+      accessorKey: "conversions",
+      header: t("conversions"),
+      cell: ({ row }) => row.getValue("conversions")?.toLocaleString()
+    },
+    {
+      accessorKey: "ctr",
+      header: t("ctr"),
+      cell: ({ row }) => {
+        const ctr = parseFloat(row.getValue("ctr"))
+        return <div>{(ctr * 100).toFixed(1)}%</div>
+      }
+    },
+    {
+      accessorKey: "cpc",
+      header: t("cpc"),
+      cell: ({ row }) => {
+        const cpc = parseFloat(row.getValue("cpc"))
+        return <div>${cpc.toFixed(2)}</div>
+      }
+    },
+  ]
   const [data, setData] = useState<SimulationData | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -125,11 +124,11 @@ export default function DashboardPage() {
   }, [])
 
   if (loading) {
-    return <div className="flex h-full items-center justify-center">Loading simulation data...</div>
+    return <div className="flex h-full items-center justify-center font-noto-bengali">{t('loading_simulation')}</div>
   }
 
   if (!data) {
-    return <div className="flex h-full items-center justify-center text-destructive">Failed to load data.</div>
+    return <div className="flex h-full items-center justify-center text-destructive font-noto-bengali">{t('load_failed')}</div>
   }
 
   const { simulation_scenario, optimization_result } = data
@@ -151,7 +150,7 @@ export default function DashboardPage() {
               ${optimization_result.expected_forecast.estimated_revenue.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">
-              95% confidence interval
+              {t('confidence_interval')}
             </p>
           </CardContent>
         </Card>
@@ -165,7 +164,7 @@ export default function DashboardPage() {
               ${optimization_result.optimized_allocations.reduce((acc: number, curr: OptimizedAllocation) => acc + curr.spend, 0).toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">
-              Across {optimization_result.optimized_allocations.length} channels
+              {t('across_channels', { count: optimization_result.optimized_allocations.length })}
             </p>
           </CardContent>
         </Card>

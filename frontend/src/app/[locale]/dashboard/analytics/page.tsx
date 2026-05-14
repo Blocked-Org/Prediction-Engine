@@ -49,11 +49,11 @@ export default function AnalyticsPage() {
   }, [])
 
   if (loading) {
-    return <div className="flex h-full items-center justify-center">Loading analytics data...</div>
+    return <div className="flex h-full items-center justify-center font-noto-bengali">{t('loading_analytics')}</div>
   }
 
   if (!data) {
-    return <div className="flex h-full items-center justify-center text-destructive">Failed to load data.</div>
+    return <div className="flex h-full items-center justify-center text-destructive font-noto-bengali">{t('load_failed')}</div>
   }
 
   const { optimization_result } = data
