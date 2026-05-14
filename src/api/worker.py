@@ -56,3 +56,25 @@ def run_simulation_task(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         logger.error(f"Task {self.request.id} failed: {e}", exc_info=True)
         # Re-raise so Celery catches the failure
         raise
+
+@celery_app.task(name="scrape_competitor_data", bind=True)
+def scrape_competitor_data(self, url: str) -> Dict[str, Any]:
+    """
+    Celery task to scrape competitor intelligence using Firecrawl and ingest into Neo4j.
+    
+    Args:
+        url (str): The competitor URL to scrape.
+        
+    Returns:
+        Dict[str, Any]: Execution status and metrics.
+    """
+    logger.info(f"Task {self.request.id} started scraping: {url}")
+    try:
+        from src.preprocessing.web_scraper import CompetitorScraper
+        scraper = CompetitorScraper()
+        result = scraper.scrape_and_ingest(url)
+        logger.info(f"Task {self.request.id} completed scraping successfully.")
+        return result
+    except Exception as e:
+        logger.error(f"Task {self.request.id} scraping failed: {e}", exc_info=True)
+        raise
