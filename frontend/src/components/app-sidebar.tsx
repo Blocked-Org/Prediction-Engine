@@ -20,15 +20,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { Link } from "@/i18n/routing"
+import { useTranslations } from "next-intl"
 import { UserButton, Show } from "@clerk/nextjs"
-
-const data = {
-  navMain: [
-    { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-    { title: "Analytics", url: "/dashboard/analytics", icon: BarChart3 },
-    { title: "Settings", url: "/dashboard/settings", icon: Settings },
-  ],
-}
 
 /**
  * Application Sidebar Component.
@@ -38,6 +31,13 @@ const data = {
  * @returns {JSX.Element} The composed sidebar element.
  */
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const t = useTranslations('Dashboard');
+  const navMain = [
+    { title: t('title'), url: "/dashboard", icon: LayoutDashboard },
+    { title: t('advanced_visualizations'), url: "/dashboard/analytics", icon: BarChart3 },
+    { title: "Settings", url: "/dashboard/settings", icon: Settings },
+  ];
+
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -62,12 +62,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupLabel>Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {data.navMain.map((item) => (
+              {navMain.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <Link href={item.url}>
                       <item.icon />
-                      <span>{item.title}</span>
+                      <span className="font-noto-bengali">{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

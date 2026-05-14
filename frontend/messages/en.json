@@ -1,6 +1,33 @@
 {
   "HomePage": {
-    "title": "Welcome to Simulation Engine",
-    "description": "Predictive MMM and ABM engine for optimizing marketing spend."
+    "title": "Predictive Brand Simulation Engine",
+    "description": "A high-performance Graph-Augmented Bayesian Simulation platform. Optimize marketing spend with predictive MMM, multi-agent frameworks, and advanced deterministic metrics.",
+    "top_badge": "Version 1.0 is live",
+    "get_started": "Enter Dashboard",
+    "sign_in": "Sign In",
+    "language": "Language",
+    "english": "English",
+    "bengali": "Bengali"
+  },
+  "Dashboard": {
+    "title": "Campaign Analytics",
+    "estimated_revenue": "Estimated Revenue",
+    "total_spend": "Total Spend (Optimized)",
+    "recommendations": "AI Recommendations",
+    "transactional_logs": "Transactional Logs (Current Allocations)",
+    "advanced_visualizations": "Advanced Visualizations",
+    "pareto_optimal": "Pareto-Optimal Allocation",
+    "pareto_desc": "Budget distribution across channels",
+    "saturation_curve": "Saturation S-Curve (Simulation)",
+    "saturation_desc": "Modeled diminishing returns based on total spend"
+  },
+  "ExecutiveReport": {
+    "title": "Executive AI Report",
+    "description": "Generate a natural language summary using advanced LLM orchestration.",
+    "cloud": "Cloud (Gemini)",
+    "offline": "Offline (Gemma4:26b)",
+    "generate": "Generate Executive Summary",
+    "generating": "Generating...",
+    "generation_failed": "Generation Failed"
   }
 }

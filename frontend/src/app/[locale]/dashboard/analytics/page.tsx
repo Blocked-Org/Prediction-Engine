@@ -6,9 +6,11 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useTranslations } from "next-intl"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import dynamic from 'next/dynamic'
 import { SimulationScenario, OptimizationResult, ChannelAllocation } from '@/lib/types/contracts'
+import { ExecutiveReport } from '@/components/ExecutiveReport'
 
 type SimulationData = {
   simulation_scenario: SimulationScenario;
@@ -27,6 +29,7 @@ const SaturationCurveChart = dynamic(
 )
 
 export default function AnalyticsPage() {
+  const t = useTranslations('Dashboard');
   const [data, setData] = useState<SimulationData | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -63,14 +66,14 @@ export default function AnalyticsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">Advanced Visualizations</h1>
+        <h1 className="text-3xl font-bold tracking-tight font-noto-bengali">{t('advanced_visualizations')}</h1>
       </div>
       
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Pareto-Optimal Allocation</CardTitle>
-            <CardDescription>Budget distribution across channels</CardDescription>
+            <CardTitle className="font-noto-bengali">{t('pareto_optimal')}</CardTitle>
+            <CardDescription className="font-noto-bengali">{t('pareto_desc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <AllocationDonutChart allocations={optimizedAllocations} />
@@ -79,14 +82,16 @@ export default function AnalyticsPage() {
         
         <Card>
           <CardHeader>
-            <CardTitle>Saturation S-Curve (Simulation)</CardTitle>
-            <CardDescription>Modeled diminishing returns based on total spend</CardDescription>
+            <CardTitle className="font-noto-bengali">{t('saturation_curve')}</CardTitle>
+            <CardDescription className="font-noto-bengali">{t('saturation_desc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <SaturationCurveChart maxSpend={totalSpend} estimatedRevenue={estimatedRevenue} />
           </CardContent>
         </Card>
       </div>
+
+      <ExecutiveReport simulationData={data} />
     </div>
   )
 }

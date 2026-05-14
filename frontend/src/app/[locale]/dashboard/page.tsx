@@ -6,6 +6,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useTranslations } from "next-intl"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DataTable } from "@/components/DataTable"
 import { ColumnDef } from "@tanstack/react-table"
@@ -104,6 +105,7 @@ const columns: ColumnDef<Allocation>[] = [
  * @returns {JSX.Element} The rendered dashboard layout.
  */
 export default function DashboardPage() {
+  const t = useTranslations('Dashboard');
   const [data, setData] = useState<SimulationData | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -136,13 +138,13 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">Campaign Analytics</h1>
+        <h1 className="text-3xl font-bold tracking-tight font-noto-bengali">{t('title')}</h1>
       </div>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Estimated Revenue</CardTitle>
+            <CardTitle className="text-sm font-medium font-noto-bengali">{t('estimated_revenue')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -156,7 +158,7 @@ export default function DashboardPage() {
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Spend (Optimized)</CardTitle>
+            <CardTitle className="text-sm font-medium font-noto-bengali">{t('total_spend')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -170,7 +172,7 @@ export default function DashboardPage() {
         
         <Card className="col-span-2">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">AI Recommendations</CardTitle>
+            <CardTitle className="text-sm font-medium font-noto-bengali">{t('recommendations')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-sm">
@@ -186,7 +188,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="mt-4">
-        <h2 className="text-xl font-semibold mb-4">Transactional Logs (Current Allocations)</h2>
+        <h2 className="text-xl font-semibold mb-4 font-noto-bengali">{t('transactional_logs')}</h2>
         <DataTable columns={columns} data={allocations} />
       </div>
     </div>

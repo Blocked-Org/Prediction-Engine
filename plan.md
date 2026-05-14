@@ -18,7 +18,7 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
 | **Day 2** | Dashboard UI scaffolding (shadcn/ui), DataTables for mock transaction logs. | Implement core Bayesian MMM (Adstock & Hill functions) using PyMC-Marketing. |
 | **Day 3** | Implement complex visualisations (Lightweight Charts & Chart.js) using mock data. | Implement Agent-Based Modeling (Mesa 3.0) and Markov Chain attribution. |
 | **Day 4** | Set up LlamaIndex on the frontend, connect to Vercel AI SDK for mock executive reports. | Implement NSGA-II Genetic Algorithm (pymoo) and SHAP TreeExplainer for deterministic metrics. |
-| **Day 5** | Implement local Ollama (Qwen3-8B) fallback, refine Bangla text and font subsetting. | Build web scraping workers (Firecrawl/Crawl4AI) and transition models to Celery/RQ workers. |
+| **Day 5** | Implement local Ollama (gemma4:26b) fallback, refine Bangla text and font subsetting. | Build web scraping workers (Firecrawl/Crawl4AI) and transition models to Celery/RQ workers. |
 | **Day 6** | **INTEGRATION DAY:** Work with Dev B to test the real API endpoints. Fix any UI rendering bugs. | **INTEGRATION DAY:** Swap FastAPI mock responses for real model outputs. Ensure Pydantic validations pass. |
 | **Day 7** | Vercel Edge caching (ISR), selective prefetching. UI Polish. | Final testing, database indexing, latency optimization. Prepare for presentation. |
 
@@ -41,7 +41,7 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
 4. **LLM Orchestration (Layer 5):**
    * Integrate the Vercel AI SDK (Claude 3.5 Sonnet / Gemini Flash).
    * Feed the mock API JSON data directly into the LLM context window to generate natural-language "Executive Reports" in Bangla and English.
-   * Setup a local instance of Ollama running `Qwen3-8B`. Build a toggle in the UI to switch between "Cloud AI" and "Offline AI".
+   * Setup a local instance of Ollama running `gemma4:26b`. Build a toggle in the UI to switch between "Cloud AI" and "Offline AI".
 5. **Edge Optimization (Day 7):**
    * Configure `revalidate` on static pages (ISR).
    * Implement dynamic imports (`next/dynamic`) for the chart libraries so the initial page load is instant.
