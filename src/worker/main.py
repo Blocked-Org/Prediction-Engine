@@ -1,6 +1,13 @@
 import os
+import logging
+import time
 from celery import Celery
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(name)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+logger.info("Starting src.worker.main initialization...")
+_start_time = time.time()
 REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
 REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
 REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', 'please_change_this_redis_password')
@@ -21,6 +28,8 @@ celery_app.conf.update(
     timezone='Asia/Dhaka',
     enable_utc=True,
 )
+
+logger.info(f"src.worker.main initialization completed in {time.time() - _start_time:.4f} seconds.")
 
 if __name__ == '__main__':
     celery_app.start()

@@ -12,6 +12,9 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from celery.result import AsyncResult
+from src.api.worker import celery_app, run_simulation_task
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -147,42 +150,68 @@ def predict_batch(payload: BatchPredictionRequest) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
-@app.post("/api/v1/simulate", response_model=SimulationResponse)
-def simulate(payload: SimulationRequest) -> SimulationResponse:
+@app.post("/api/v1/simulate")
+def simulate(payload: SimulationRequest) -> dict[str, str]:
     """
-    Mock endpoint for Marketing Simulation.
+    Endpoint for Marketing Simulation. Enqueues a task to process the simulation.
     
     Args:
         payload (SimulationRequest): The request payload containing timeframe, 
             demographics, and budget allocation.
             
     Returns:
-        SimulationResponse: The mock simulation results including ROI, ROAS, 
-            and optimal budget allocations.
+        dict: A dictionary containing the task ID and status.
             
     Raises:
-        HTTPException: If an error occurs during simulation processing.
+        HTTPException: If an error occurs enqueuing the task.
     """
-    # NOTE: These are mock routes for Day 1 of the hackathon and will be wired to Celery tasks on Day 6.
     try:
         logger.info(
-            "Received simulation request for timeframe: %s to %s", 
+            "Enqueuing simulation request for timeframe: %s to %s", 
             payload.campaign_timeframe[0], 
             payload.campaign_timeframe[1]
         )
         
-        mock_response = SimulationResponse(
-            projected_roi=2.5,
-            incremental_roas=1.8,
-            pareto_optimal_budgets=[
-                {"meta_ads": 1000.0, "google_ads": 2000.0},
-                {"meta_ads": 1500.0, "google_ads": 1500.0}
-            ]
-        )
-        return mock_response
+        # Enqueue the Celery task
+        task = run_simulation_task.delay(payload.model_dump())
+        
+        return {"task_id": task.id, "status": "processing"}
     except Exception as exc:
-        logger.error("Error processing simulation request: %s", exc)
-        raise HTTPException(status_code=500, detail="Internal server error during simulation") from exc
+        logger.error("Error enqueuing simulation request: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error enqueuing simulation") from exc
+
+
+@app.get("/api/v1/task/{task_id}")
+def get_task_status(task_id: str) -> Any:
+    """
+    Retrieve the status and result of a Celery task.
+    
+    Args:
+        task_id (str): The Celery task ID.
+        
+    Returns:
+        Any: The task status. If successful, returns the SimulationResponse payload.
+    """
+    task_result = AsyncResult(task_id, app=celery_app)
+    
+    if task_result.state == "SUCCESS":
+        # Validate and return the SimulationResponse
+        return {
+            "task_id": task_id,
+            "status": task_result.state,
+            "result": SimulationResponse(**task_result.result).model_dump()
+        }
+    elif task_result.state == "FAILURE":
+        return {
+            "task_id": task_id,
+            "status": task_result.state,
+            "error": str(task_result.info)
+        }
+    else:
+        return {
+            "task_id": task_id,
+            "status": task_result.state
+        }
 
 
 @app.post("/api/v1/forecast", response_model=ForecastResponse)

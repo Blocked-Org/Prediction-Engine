@@ -6,7 +6,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Any, Annotated
-from datetime import date
+import datetime
 
 class ShapContribution(BaseModel):
     feature: str
@@ -51,9 +51,9 @@ class SimulationRequest(BaseModel):
     """
     Request payload for a marketing simulation, defining timeframe, audience, and budgets.
     """
-    model_config = ConfigDict(extra="forbid", strict=True)
+    model_config = ConfigDict(extra="forbid")
 
-    campaign_timeframe: tuple[date, date] = Field(
+    campaign_timeframe: tuple[datetime.date, datetime.date] = Field(
         ..., description="Tuple of start and end dates for the campaign timeframe."
     )
     target_demographics: dict[str, str | int | float] = Field(
@@ -68,7 +68,7 @@ class SimulationResponse(BaseModel):
     """
     Response payload containing the results of a marketing simulation.
     """
-    model_config = ConfigDict(extra="forbid", strict=True)
+    model_config = ConfigDict(extra="forbid")
 
     projected_roi: float = Field(
         ..., description="The projected Return on Investment."
@@ -85,12 +85,12 @@ class HistoricalSpendRecord(BaseModel):
     """
     A single record of historical spend data used for forecasting.
     """
-    model_config = ConfigDict(extra="forbid", strict=True)
+    model_config = ConfigDict(extra="forbid")
 
-    date: date = Field(..., description="Date of the historical spend.")
+    date: datetime.date = Field(..., description="Date of the historical spend.")
     channel: str = Field(..., description="The marketing channel used.")
-    spend: Annotated[float, Field(ge=0.0)] = Field(
-        ..., description="Amount spent on the channel."
+    spend: float = Field(..., ge=0.0, 
+        description="Amount spent on the channel."
     )
 
 
@@ -98,7 +98,7 @@ class ForecastRequest(BaseModel):
     """
     Request payload for generating sales forecasts based on historical data.
     """
-    model_config = ConfigDict(extra="forbid", strict=True)
+    model_config = ConfigDict(extra="forbid")
 
     historical_spend_data: list[HistoricalSpendRecord] = Field(
         ..., description="List of historical spend records."
@@ -112,7 +112,7 @@ class ForecastResponse(BaseModel):
     """
     Response payload containing baseline, incremental sales, and a confidence range.
     """
-    model_config = ConfigDict(extra="forbid", strict=True)
+    model_config = ConfigDict(extra="forbid")
 
     baseline_sales: float = Field(
         ..., description="The projected baseline sales without intervention."

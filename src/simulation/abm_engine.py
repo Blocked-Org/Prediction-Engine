@@ -24,7 +24,6 @@ class ConsumerAgent(mesa.Agent):
 
     def __init__(
         self,
-        unique_id: int,
         model: mesa.Model,
         demographic_segment: str,
         brand_loyalty: float,
@@ -34,13 +33,12 @@ class ConsumerAgent(mesa.Agent):
         Initializes the ConsumerAgent.
 
         Args:
-            unique_id (int): Unique identifier for the agent.
             model (mesa.Model): The environment model instance.
             demographic_segment (str): Categorical string for demographics.
             brand_loyalty (float): Loyalty score (0.0 to 1.0).
             conversion_probability (float): Base probability of conversion (0.0 to 1.0).
         """
-        super().__init__(unique_id, model)
+        super().__init__(model)
         self.demographic_segment = demographic_segment
         self.brand_loyalty = brand_loyalty
         self.conversion_probability = conversion_probability
@@ -71,10 +69,8 @@ def compute_conversions(model: mesa.Model) -> int:
         int: Total number of converted agents.
     """
     try:
-        # In Mesa 3.0+, we can iterate over model.agents or schedule.agents.
-        # Fallback to schedule.agents for compatibility.
-        agents = getattr(model, "agents", model.schedule.agents)
-        return sum(1 for a in agents if getattr(a, "is_converted", False))
+        # Mesa 3.0+ AgentSet: iterate directly over model.agents
+        return sum(1 for a in model.agents if getattr(a, "is_converted", False))
     except Exception as e:
         logger.error(f"Failed to compute conversions: {e}")
         return 0
@@ -94,11 +90,11 @@ class MarketingEnvironment(mesa.Model):
     Agent-based model simulating a dynamic marketing environment.
 
     This model creates a population of ConsumerAgents and steps them through
-    marketing campaign pushes. It uses Mesa 3.0 compatible agent management.
+    marketing campaign pushes. Uses the Mesa 3.0+ AgentSet API for agent
+    management and random-order activation.
 
     Attributes:
         config (EnvironmentConfig): Validated configuration parameters.
-        schedule (mesa.time.RandomActivation): The scheduler for the model.
         datacollector (mesa.DataCollector): Collects simulation metrics per step.
     """
 
@@ -117,8 +113,6 @@ class MarketingEnvironment(mesa.Model):
         self.config = EnvironmentConfig(num_agents=num_agents, ad_exposure=ad_exposure)
         self.ad_exposure = self.config.ad_exposure
         
-        self.schedule = mesa.time.RandomActivation(self)
-        
         demographic_segments = ['urban_millennial', 'rural', 'suburban_family', 'gen_z_student']
 
         for i in range(self.config.num_agents):
@@ -128,16 +122,13 @@ class MarketingEnvironment(mesa.Model):
                 loyalty = self.random.uniform(0.0, 1.0)
                 base_prob = self.random.uniform(0.01, 0.1)
                 
-                agent = ConsumerAgent(
-                    unique_id=i,
+                # Mesa 3.0+: agents auto-register with model.agents on construction
+                ConsumerAgent(
                     model=self,
                     demographic_segment=segment,
                     brand_loyalty=loyalty,
                     conversion_probability=base_prob
                 )
-                
-                # Mesa 3.0 AgentSet pattern or traditional schedule add
-                self.schedule.add(agent)
                 
             except Exception as e:
                 logger.error(f"Failed to initialize agent {i}: {e}", exc_info=True)
@@ -156,11 +147,8 @@ class MarketingEnvironment(mesa.Model):
         and the environment's ad exposure parameter.
         """
         try:
-            # Access agents via Mesa 3.0 AgentSet if available, else use schedule
-            agents = getattr(self, "agents", self.schedule.agents)
-            
             # Apply the marketing push (increase conversion probability)
-            for agent in agents:
+            for agent in self.agents:
                 if isinstance(agent, ConsumerAgent) and not agent.is_converted:
                     # Brand loyalty modifies how much ad_exposure impacts the probability.
                     boost = agent.brand_loyalty * self.ad_exposure * 0.05
@@ -169,8 +157,8 @@ class MarketingEnvironment(mesa.Model):
             # Collect data before agents potentially change state in this step
             self.datacollector.collect(self)
             
-            # Execute step on all agents
-            self.schedule.step()
+            # Execute step on all agents in random order (replaces RandomActivation)
+            self.agents.shuffle_do("step")
             
         except Exception as e:
             logger.error(f"Error during environment step: {e}", exc_info=True)

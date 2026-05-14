@@ -10,6 +10,29 @@ from src.simulation.markov_attribution import build_transition_matrix, calculate
 logger = logging.getLogger(__name__)
 
 
+import numpy as np
+
+def cast_to_native(data: Any) -> Any:
+    """
+    Utility function to recursively cast numpy data types to native Python types.
+    This ensures that Pydantic does not fail serialization when returning the final dictionary.
+    - np.float64 and np.float32 are cast to float
+    - np.int64 and np.int32 are cast to int
+    - np.ndarray is cast to list
+    """
+    if isinstance(data, dict):
+        return {k: cast_to_native(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [cast_to_native(v) for v in data]
+    elif isinstance(data, np.ndarray):
+        return cast_to_native(data.tolist())
+    elif isinstance(data, (np.float32, np.float64)):
+        return float(data)
+    elif isinstance(data, (np.int32, np.int64)):
+        return int(data)
+    return data
+
+
 def run_micro_simulation(params: Union[SimulationRequest, Dict[str, Any]]) -> SimulationResponse:
     """
     Executes a micro-level simulation bridging the Agent-Based Model and
@@ -49,7 +72,10 @@ def run_micro_simulation(params: Union[SimulationRequest, Dict[str, Any]]) -> Si
             
         # 2. Generate mock user journeys based on ABM output
         # Access agents carefully depending on Mesa version (fallback to schedule.agents)
-        agents = getattr(env, "agents", env.schedule.agents)
+        if hasattr(env, "agents"):
+            agents = env.agents
+        else:
+            agents = env.schedule.agents
         journeys = []
         
         for agent in agents:

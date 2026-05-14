@@ -8,7 +8,10 @@ utilizing PyMC for probabilistic programming to model marketing effectiveness.
 import logging
 from typing import Dict, List, Optional
 
+import numpy as np
+
 import pymc as pm
+import pytensor
 import pytensor.tensor as pt
 from pytensor.tensor.variable import TensorVariable
 
@@ -32,10 +35,10 @@ def adstock_transformation(x: TensorVariable, lambda_decay: TensorVariable) -> T
         return x_t + decay * a_tm1
 
     # Use PyTensor scan for efficient recursive/autoregressive computation
-    results, _ = pt.scan(
+    results, _ = pytensor.scan(
         fn=step_func,
         sequences=[x],
-        outputs_info=[pt.as_tensor_variable(0.0)],
+        outputs_info=[pt.as_tensor_variable(np.float64(0.0))],
         non_sequences=[lambda_decay],
         strict=True
     )
