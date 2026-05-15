@@ -5,10 +5,14 @@ from src.worker.main import celery_app
 logger = logging.getLogger(__name__)
 logger.info("Initializing src.worker.tasks module (lightweight import)...")
 
-@celery_app.task
+@celery_app.task(soft_time_limit=120, time_limit=180)
 def run_full_simulation_task(budget: float, num_channels: int):
     """
     Background Celery task to run the complete simulation pipeline.
+    
+    Time limits:
+      - Soft: 120s (raises SoftTimeLimitExceeded, allows cleanup)
+      - Hard: 180s (kills the task outright)
     """
     logger.info(f"Starting full simulation task for budget: {budget}")
     
@@ -36,16 +40,19 @@ def run_full_simulation_task(budget: float, num_channels: int):
         "optimization": opt_results
     }
 
-import os
-from firecrawl import FirecrawlApp
-from src.api.db.neo4j_client import Neo4jManager
 
-@celery_app.task
+@celery_app.task(soft_time_limit=60, time_limit=90)
 def scrape_competitor_data_task(url: str, prompt: str = None):
     """
     Background Celery task to scrape exogenous competitor data using Firecrawl.
     Ingests extracted markdown insights directly into Neo4j graph nodes.
+    
+    Uses lazy imports to avoid loading firecrawl/neo4j at worker startup.
     """
+    import os
+    from firecrawl import FirecrawlApp
+    from src.api.db.neo4j_client import Neo4jManager
+
     api_key = os.getenv("FIRECRAWL_API_KEY", "dummy_key")
     app = FirecrawlApp(api_key=api_key)
     
@@ -77,3 +84,4 @@ def scrape_competitor_data_task(url: str, prompt: str = None):
     except Exception as e:
         print(f"Scraping task failed: {e}")
         return {"status": "error", "message": str(e)}
+

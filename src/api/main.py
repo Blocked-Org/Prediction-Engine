@@ -20,6 +20,7 @@ from src.api.worker import celery_app, run_simulation_task
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 
 from src.api.schemas import (
     ApiHealth,
@@ -53,6 +54,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# GZip Middleware — aggressively compress large JSON payloads (SHAP arrays,
+# Pareto optimal outputs) before they reach the frontend or LLM orchestration.
+# minimum_size=500 avoids compressing tiny health-check responses.
+app.add_middleware(GZipMiddleware, minimum_size=500)
 
 
 def build_facade() -> FastApiPredictionFacade:
@@ -171,10 +177,14 @@ def predict_batch(payload: BatchPredictionRequest) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
-@app.post("/api/v1/simulate")
+@app.post("/api/v1/simulate", status_code=202)
 def simulate(payload: SimulationRequest) -> dict[str, str]:
     """
     Endpoint for Marketing Simulation. Enqueues a task to process the simulation.
+    
+    Returns HTTP 202 Accepted with a task_id for the frontend to poll.
+    The heavy Bayesian MMM + NSGA-II computation runs in the Celery worker,
+    NOT in the main FastAPI thread.
     
     Args:
         payload (SimulationRequest): The request payload containing timeframe, 
@@ -193,7 +203,7 @@ def simulate(payload: SimulationRequest) -> dict[str, str]:
             payload.campaign_timeframe[1]
         )
         
-        # Enqueue the Celery task
+        # Enqueue the Celery task — does NOT block the ASGI thread
         task = run_simulation_task.delay(payload.model_dump())
         
         return {"task_id": task.id, "status": "processing"}
@@ -206,21 +216,28 @@ def simulate(payload: SimulationRequest) -> dict[str, str]:
 def get_task_status(task_id: str) -> Any:
     """
     Retrieve the status and result of a Celery task.
+    Supports both simulation and forecast tasks.
     
     Args:
         task_id (str): The Celery task ID.
         
     Returns:
-        Any: The task status. If successful, returns the SimulationResponse payload.
+        Any: The task status. If successful, returns the result payload.
     """
     task_result = AsyncResult(task_id, app=celery_app)
     
     if task_result.state == "SUCCESS":
-        # Validate and return the SimulationResponse
+        result = task_result.result
+        # Attempt to validate as SimulationResponse, fallback to raw result
+        try:
+            validated = SimulationResponse(**result).model_dump()
+        except Exception:
+            # May be a ForecastResponse or other result type
+            validated = result
         return {
             "task_id": task_id,
             "status": task_result.state,
-            "result": SimulationResponse(**task_result.result).model_dump()
+            "result": validated
         }
     elif task_result.state == "FAILURE":
         return {
@@ -235,27 +252,47 @@ def get_task_status(task_id: str) -> Any:
         }
 
 
-@app.post("/api/v1/forecast", response_model=ForecastResponse)
-def forecast(payload: ForecastRequest) -> ForecastResponse:
+@app.post("/api/v1/forecast", status_code=202)
+def forecast_async(payload: ForecastRequest) -> dict[str, str]:
     """
-    Endpoint for Sales Forecasting using Bayesian Marketing Mix Modeling.
+    Async endpoint for Sales Forecasting using Bayesian MMM.
     
-    Args:
-        payload (ForecastRequest): The request payload containing historical 
-            spend data and exogenous factors.
-            
-    Returns:
-        ForecastResponse: The forecast results including baseline sales, 
-            incremental sales, and confidence intervals.
-            
-    Raises:
-        HTTPException: If an error occurs during forecast processing.
+    Enqueues the PyMC inference to Celery to avoid blocking the main
+    FastAPI thread (PyMC sample_prior_predictive with 200 draws can take
+    5-30+ seconds under load).
+    
+    Returns HTTP 202 Accepted with a task_id for polling via /api/v1/task/{id}.
+    """
+    try:
+        from src.api.worker import run_forecast_task
+
+        logger.info(
+            "Enqueuing forecast request with %d historical spend records", 
+            len(payload.historical_spend_data)
+        )
+        
+        task = run_forecast_task.delay(payload.model_dump())
+        return {"task_id": task.id, "status": "processing"}
+        
+    except Exception as exc:
+        logger.error("Error enqueuing forecast request: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error enqueuing forecast") from exc
+
+
+@app.post("/api/v1/forecast/sync", response_model=ForecastResponse)
+def forecast_sync(payload: ForecastRequest) -> ForecastResponse:
+    """
+    Synchronous fallback for small/quick forecast requests.
+    
+    WARNING: This runs PyMC inference in the main thread. Use only for 
+    development, demos, or payloads with < 10 historical records. 
+    Production traffic should use the async /api/v1/forecast endpoint.
     """
     try:
         from src.simulation.engine_runner import run_macro_forecast
         
         logger.info(
-            "Received forecast request with %d historical spend records", 
+            "Running SYNC forecast with %d historical spend records", 
             len(payload.historical_spend_data)
         )
         
@@ -263,5 +300,6 @@ def forecast(payload: ForecastRequest) -> ForecastResponse:
         return response
         
     except Exception as exc:
-        logger.error("Error processing forecast request: %s", exc)
+        logger.error("Error processing sync forecast request: %s", exc)
         raise HTTPException(status_code=500, detail="Internal server error during forecasting") from exc
+

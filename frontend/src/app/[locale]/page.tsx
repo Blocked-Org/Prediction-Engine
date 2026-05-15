@@ -22,6 +22,7 @@ export default function HomePage() {
             <Link 
               href="/" 
               locale="en" 
+              prefetch={false}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${locale === 'en' ? 'bg-white dark:bg-zinc-700 shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
             >
               {t('english')}
@@ -29,6 +30,7 @@ export default function HomePage() {
             <Link 
               href="/" 
               locale="bn" 
+              prefetch={false}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${locale === 'bn' ? 'bg-white dark:bg-zinc-700 shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
             >
               {t('bengali')}
@@ -65,7 +67,7 @@ export default function HomePage() {
 
         <div className="flex flex-col sm:flex-row gap-4 mt-4 w-full sm:w-auto relative">
           <Show when="signed-in">
-            <Link href="/dashboard">
+            <Link href="/dashboard" prefetch={false}>
               <Button size="lg" className="w-full sm:w-auto gap-2 flex text-base h-12 px-8">
                 {t('get_started')} <ArrowRight className="h-4 w-4" />
               </Button>

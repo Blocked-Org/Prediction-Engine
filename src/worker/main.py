@@ -27,6 +27,11 @@ celery_app.conf.update(
     result_serializer='json',
     timezone='Asia/Dhaka',
     enable_utc=True,
+    # Production safety: prevent long-running tasks from wedging workers
+    task_soft_time_limit=120,
+    task_time_limit=180,
+    result_expires=3600,
+    worker_prefetch_multiplier=1,
 )
 
 logger.info(f"src.worker.main initialization completed in {time.time() - _start_time:.4f} seconds.")

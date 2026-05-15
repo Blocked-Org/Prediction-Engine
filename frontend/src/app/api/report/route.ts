@@ -3,7 +3,7 @@ import { google } from '@ai-sdk/google';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 
 const ollamaBaseURL = process.env.OLLAMA_BASE_URL ?? 'http://127.0.0.1:11434/v1';
-const ollamaModel = process.env.OLLAMA_MODEL ?? 'gemma4:26b';
+const ollamaModel = process.env.OLLAMA_MODEL ?? 'qwen3:8b';
 const googleModel = process.env.GOOGLE_MODEL ?? 'gemini-2.0-flash';
 
 // Ollama exposes an OpenAI-compatible REST API at /v1.
@@ -63,8 +63,13 @@ function buildFallbackReport(simulationData: any, locale: string) {
  * @returns {Promise<Response>} An HTTP Response delivering the generated markdown report.
  */
 export async function POST(req: Request) {
+  let simulationData: any = null;
+  let locale = 'en';
   try {
-    const { simulationData, locale, provider } = await req.json();
+    const body = await req.json();
+    simulationData = body.simulationData;
+    locale = body.locale;
+    const provider = body.provider;
 
     const language = locale === 'bn' ? 'Bengali (বাংলা)' : 'English';
 
@@ -98,7 +103,7 @@ Rules:
     });
   } catch (error) {
     console.error('LLM API Error:', error instanceof Error ? error.message : error);
-    return new Response('**Executive Summary**\n\n- A fallback report could not be generated because the local model request failed.', {
+    return new Response(buildFallbackReport(simulationData, locale), {
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
       },

@@ -35,7 +35,8 @@
     "conversions": "Conversions",
     "ctr": "CTR",
     "cpc": "CPC ($)",
-    "toggle_language": "Toggle language"
+    "toggle_language": "Toggle language",
+    "reporting": "Reporting"
   },
   "ExecutiveReport": {
     "title": "Executive AI Report",
@@ -45,5 +46,14 @@
     "generate": "Generate Executive Summary",
     "generating": "Generating...",
     "generation_failed": "Generation Failed"
+  },
+  "Reporting": {
+    "title": "Cached Reporting",
+    "cached_badge": "ISR · Edge Cached",
+    "roi": "Projected ROI",
+    "roi_desc": "Revenue / Total Spend ratio",
+    "allocation_breakdown": "Optimized Allocation Breakdown",
+    "allocation_desc": "Pareto-optimal budget distribution per channel",
+    "share": "Share (%)"
   }
 }

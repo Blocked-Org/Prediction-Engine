@@ -27,12 +27,12 @@ export default function LanguageSwitcher() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
-          <Link href={pathname} locale="en" className={`w-full font-noto-bengali ${locale === 'en' ? 'font-bold' : ''}`}>
+          <Link href={pathname} locale="en" prefetch={false} className={`w-full font-noto-bengali ${locale === 'en' ? 'font-bold' : ''}`}>
             {tHome('english')}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href={pathname} locale="bn" className={`w-full font-noto-bengali ${locale === 'bn' ? 'font-bold' : ''}`}>
+          <Link href={pathname} locale="bn" prefetch={false} className={`w-full font-noto-bengali ${locale === 'bn' ? 'font-bold' : ''}`}>
             {tHome('bengali')}
           </Link>
         </DropdownMenuItem>

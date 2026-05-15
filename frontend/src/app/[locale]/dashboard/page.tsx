@@ -8,8 +8,23 @@
 import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { DataTable } from "@/components/DataTable"
 import { ColumnDef } from "@tanstack/react-table"
+import dynamic from 'next/dynamic'
+import type { ComponentType } from 'react'
+
+interface DataTableProps<TData, TValue> {
+  columns: ColumnDef<TData, TValue>[]
+  data: TData[]
+}
+
+const DynamicDataTable = dynamic(
+  () => import("@/components/DataTable").then((mod) => mod.DataTable),
+  {
+    ssr: false,
+    loading: () => <div className="h-48 flex items-center justify-center text-muted-foreground animate-pulse">Loading table...</div>
+  }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+) as ComponentType<DataTableProps<any, any>>
 
 type Allocation = {
   channel_name: string
@@ -188,7 +203,7 @@ export default function DashboardPage() {
 
       <div className="mt-4">
         <h2 className="text-xl font-semibold mb-4 font-noto-bengali">{t('transactional_logs')}</h2>
-        <DataTable columns={columns} data={allocations} />
+        <DynamicDataTable columns={columns} data={allocations} />
       </div>
     </div>
   )

@@ -5,7 +5,7 @@
  */
 "use client"
 import * as React from "react"
-import { LayoutDashboard, Settings, BarChart3, Home } from "lucide-react"
+import { LayoutDashboard, Settings, BarChart3, Home, FileText } from "lucide-react"
 
 import {
   Sidebar,
@@ -35,6 +35,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navMain = [
     { title: t('title'), url: "/dashboard", icon: LayoutDashboard },
     { title: t('advanced_visualizations'), url: "/dashboard/analytics", icon: BarChart3 },
+    { title: t('reporting'), url: "/dashboard/reporting", icon: FileText },
     { title: t('settings'), url: "/dashboard/settings", icon: Settings },
   ];
 
@@ -44,7 +45,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/">
+              <Link href="/" prefetch={false}>
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <Home className="size-4" />
                 </div>
@@ -65,7 +66,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               {navMain.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <Link href={item.url}>
+                    <Link href={item.url} prefetch={false}>
                       <item.icon />
                       <span className="font-noto-bengali">{item.title}</span>
                     </Link>

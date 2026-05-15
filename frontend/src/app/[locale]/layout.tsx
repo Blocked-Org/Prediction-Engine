@@ -20,7 +20,9 @@ const geistMono = Geist_Mono({
 const notoSansBengali = Noto_Sans_Bengali({
   variable: '--font-noto-bengali',
   subsets: ['bengali'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '600'],
+  display: 'swap',
+  preload: false,
 })
 
 export const metadata: Metadata = {

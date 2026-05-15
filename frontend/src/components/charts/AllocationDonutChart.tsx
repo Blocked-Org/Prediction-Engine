@@ -38,8 +38,19 @@ export function AllocationDonutChart({ allocations }: AllocationDonutChartProps)
     plugins: {
       legend: {
         position: 'right' as const,
+        labels: {
+          font: {
+            family: 'var(--font-noto-bengali), ui-sans-serif, system-ui, sans-serif',
+          }
+        }
       },
       tooltip: {
+        titleFont: {
+          family: 'var(--font-noto-bengali), ui-sans-serif, system-ui, sans-serif',
+        },
+        bodyFont: {
+          family: 'var(--font-noto-bengali), ui-sans-serif, system-ui, sans-serif',
+        },
         callbacks: {
           label: function(context: TooltipItem<'doughnut'>) {
             let label = context.label || '';

@@ -2,10 +2,15 @@
 
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Bot, Cloud, Server, Loader2, AlertCircle } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
+import { Bot, Cloud, Server, Loader2, AlertCircle, Zap } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useLocale, useTranslations } from 'next-intl';
 import { SimulationScenario, OptimizationResult } from '@/lib/types/contracts'
+
+const ReactMarkdown = dynamic(() => import('react-markdown'), {
+  ssr: false,
+  loading: () => <div className="h-12 flex items-center justify-center text-muted-foreground animate-pulse">Loading...</div>
+});
 
 type SimulationData = {
   simulation_scenario: SimulationScenario;
@@ -39,7 +44,8 @@ export function ExecutiveReport({ simulationData }: ExecutiveReportProps) {
         throw new Error(`Server returned ${res.status}`);
       }
       const text = await res.text();
-      setCompletion(text);
+      const cleanedText = text.replace(/<\|?think\|?>[\s\S]*?(?:<\/\|?think\|?>|$)/gi, '').trim();
+      setCompletion(cleanedText);
     } catch (e: any) {
       setError(e);
     } finally {
@@ -61,6 +67,12 @@ export function ExecutiveReport({ simulationData }: ExecutiveReportProps) {
         </div>
         
         <div className="flex items-center gap-3 bg-muted p-2 rounded-lg self-start md:self-auto font-noto-bengali">
+          {provider === 'offline' && (
+            <div className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 rounded-full animate-in fade-in zoom-in duration-300 shadow-sm">
+              <Zap className="h-3 w-3 fill-current" />
+              <span>Fast Profile Active</span>
+            </div>
+          )}
           <button 
             onClick={() => setProvider('cloud')}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
@@ -110,7 +122,7 @@ export function ExecutiveReport({ simulationData }: ExecutiveReportProps) {
               <p className="opacity-90 mt-1">
                 {error.message || (
                   provider === 'offline'
-                    ? 'Failed to connect to local Ollama. Is Gemma4:26b loaded?'
+                    ? 'Failed to connect to local Ollama. Is qwen3:8b loaded?'
                     : 'Failed to connect to Google Gemini. Check GOOGLE_GENERATIVE_AI_API_KEY.'
                 )}
               </p>

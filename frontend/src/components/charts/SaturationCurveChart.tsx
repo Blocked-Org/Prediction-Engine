@@ -22,6 +22,7 @@ export function SaturationCurveChart({ maxSpend, estimatedRevenue }: SaturationC
       layout: {
         background: { type: ColorType.Solid, color: 'transparent' },
         textColor: '#333',
+        fontFamily: 'var(--font-noto-bengali), ui-sans-serif, system-ui, sans-serif',
       },
       width: chartContainerRef.current.clientWidth,
       height: 300,
