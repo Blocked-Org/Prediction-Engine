@@ -102,6 +102,17 @@ The Python unit test harness is fully wired using `pytest`.
 pytest
 ```
 
+**Developer / Coverage:**
+Install developer test dependencies (one-time) before running coverage reports:
+```powershell
+pip install -r requirements-dev.txt
+```
+
+Run the full test suite with coverage:
+```powershell
+pytest --cov=src --cov-report=term-missing
+```
+
 ## Troubleshooting & Robust Installation
 
 If you face difficulties installing tools and dependencies, check the following common issues:

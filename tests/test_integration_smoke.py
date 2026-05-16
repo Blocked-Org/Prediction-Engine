@@ -66,8 +66,8 @@ def test_simulate_endpoint_real_engines(mock_delay):
     }
 
     response = client.post("/api/v1/simulate", json=payload)
-    assert response.status_code == 200, (
-        f"Expected 200 from /api/v1/simulate, got {response.status_code}: {response.text}"
+    assert response.status_code == 202, (
+        f"Expected 202 from /api/v1/simulate, got {response.status_code}: {response.text}"
     )
 
     data = response.json()
@@ -103,9 +103,10 @@ def test_forecast_endpoint_real_pymc():
         }
     }
 
-    response = client.post("/api/v1/forecast", json=payload)
+    # Use the synchronous fallback endpoint to test PyMC without requiring a live Redis broker.
+    response = client.post("/api/v1/forecast/sync", json=payload)
     assert response.status_code == 200, (
-        f"Expected 200 from /api/v1/forecast, got {response.status_code}: {response.text}"
+        f"Expected 200 from /api/v1/forecast/sync, got {response.status_code}: {response.text}"
     )
 
     data = response.json()

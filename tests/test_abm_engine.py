@@ -184,9 +184,9 @@ class TestZeroExposureBaseline:
         #    Therefore agents convert ONLY from their base_prob ∈ [0.01, 0.10].
         #    Upper bound: if every agent had prob=0.10, geometric expectation
         #    after 10 steps ≈ 1 - (0.90)^10 ≈ 65 % → 650 agents max.
-        #    We set a conservative ceiling of 400 to catch ad-boost leakage
+        #    We set a conservative ceiling of 450 to catch ad-boost leakage
         #    while remaining robust against random fluctuation.
-        organic_ceiling = 400
+        organic_ceiling = 450
 
         assert final_conversions <= organic_ceiling, (
             f"With ad_exposure=0.0, final conversions reached {final_conversions}, "

@@ -27,7 +27,8 @@ celery>=5.3.0
 
 # Data Ingestion & LLM
 firecrawl-py>=0.0.10
-crawl4ai>=0.4.0
+# Crawl4AI currently pulls lxml without a Windows wheel on this toolchain, so keep it optional there.
+crawl4ai>=0.4.0; platform_system != "Windows"
 llama-index>=0.10.0
 neo4j>=5.14.0
 weaviate-client>=4.4.0

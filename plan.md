@@ -421,6 +421,7 @@ src/
 | 4 | Build Markov funnel journey visualisation | Dev A | 4h | — | ✅ Done |
 | 5 | Integration handshake: frontend → real backend | Both | 4h | #1, #2 | ✅ Done |
 | 6 | End-to-end simulation flow test | Both | 2h | #5 | ✅ Done |
+| 7 | Increase unit test coverage for `training` and `worker` modules | Dev B | 3h | — | ❌ Not Started |
 
 ### 🟡 P1 — Significantly improves demo quality
 

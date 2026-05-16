@@ -28,7 +28,7 @@ def test_simulate_endpoint(mock_async_result, mock_delay):
     
     # 2. Test the POST /simulate endpoint
     response = client.post("/api/v1/simulate", json=payload)
-    assert response.status_code == 200, f"Expected 200, got {response.status_code}. Detail: {response.text}"
+    assert response.status_code == 202, f"Expected 202, got {response.status_code}. Detail: {response.text}"
     
     data = response.json()
     assert data["task_id"] == "test-task-123"

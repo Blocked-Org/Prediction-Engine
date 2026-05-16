@@ -22,6 +22,13 @@ Write-Host "  -> Installing Python requirements..." -ForegroundColor Yellow
 & .\.venv\Scripts\python.exe -m pip install --upgrade pip
 & .\.venv\Scripts\pip.exe install -r requirements.txt
 
+# Install developer/test dependencies if present
+if (Test-Path "requirements-dev.txt") {
+    Write-Host "  -> Installing developer requirements (tests, coverage, parquet engines)..." -ForegroundColor Yellow
+    & .\.venv\Scripts\pip.exe install -r requirements-dev.txt
+    Write-Host "  ✅ Developer requirements installed." -ForegroundColor Green
+}
+
 # 2. Environment Variables Sync
 Write-Host "`n[2/3] Syncing Environment Variables..." -ForegroundColor Yellow
 if (-not (Test-Path ".\.env")) {
