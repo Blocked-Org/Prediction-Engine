@@ -8,6 +8,7 @@ export default function HomePage() {
   const t = useTranslations('HomePage')
   const locale = useLocale()
   const dashboardUrl = `/${locale}/dashboard`
+  const onboardingUrl = `/${locale}/onboarding`
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-zinc-50 to-white dark:from-zinc-950 dark:to-zinc-900 font-sans">
@@ -40,7 +41,11 @@ export default function HomePage() {
             <UserButton />
           </Show>
           <Show when="signed-out">
-            <SignInButton mode="modal" forceRedirectUrl={dashboardUrl} signUpForceRedirectUrl={dashboardUrl}>
+            <SignInButton
+              mode="modal"
+              forceRedirectUrl={dashboardUrl}
+              signUpForceRedirectUrl={onboardingUrl}
+            >
               <Button variant="default" size="sm">{t('sign_in')}</Button>
             </SignInButton>
           </Show>
@@ -74,7 +79,11 @@ export default function HomePage() {
             </Link>
           </Show>
           <Show when="signed-out">
-            <SignInButton mode="modal" forceRedirectUrl={dashboardUrl} signUpForceRedirectUrl={dashboardUrl}>
+            <SignInButton
+              mode="modal"
+              forceRedirectUrl={dashboardUrl}
+              signUpForceRedirectUrl={onboardingUrl}
+            >
               <Button size="lg" className="w-full sm:w-auto gap-2 flex text-base h-12 px-8">
                 {t('get_started')} <ArrowRight className="h-4 w-4" />
               </Button>

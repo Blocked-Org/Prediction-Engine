@@ -30,6 +30,7 @@ from src.api.schemas import (
     ForecastRequest,
     ForecastResponse
 )
+from src.api.routes.simulate import router as simulate_router
 from src.api.service import FastApiPredictionFacade
 
 # Configure structured logging
@@ -59,6 +60,8 @@ app.add_middleware(
 # Pareto optimal outputs) before they reach the frontend or LLM orchestration.
 # minimum_size=500 avoids compressing tiny health-check responses.
 app.add_middleware(GZipMiddleware, minimum_size=500)
+
+app.include_router(simulate_router)
 
 
 def build_facade() -> FastApiPredictionFacade:

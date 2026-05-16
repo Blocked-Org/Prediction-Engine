@@ -1,31 +1,122 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
-import createMiddleware from 'next-intl/middleware';
-import { routing } from './i18n/routing';
+import {
+  clerkClient,
+  clerkMiddleware,
+  createRouteMatcher,
+} from "@clerk/nextjs/server";
+import createIntlMiddleware from "next-intl/middleware";
+import { type NextRequest, NextResponse } from "next/server";
+import { routing } from "./i18n/routing";
+import {
+  fetchOnboardingStatus,
+  isOnboardedFromClaims,
+} from "./lib/onboarding";
 
-const handleI18nRouting = createMiddleware(routing);
+const intlMiddleware = createIntlMiddleware(routing);
 
 const isProtectedRoute = createRouteMatcher([
-  '/:locale/dashboard(.*)'
+  "/:locale/dashboard(.*)",
+  "/:locale/onboarding",
 ]);
 
-import { NextResponse } from 'next/server';
+const isOnboardingRoute = createRouteMatcher(["/:locale/onboarding"]);
+
+// Public auth routes — must pass through next-intl (en|bn) before Clerk
+const isAuthRoute = createRouteMatcher([
+  "/(en|bn)/sign-in(.*)",
+  "/(en|bn)/sign-up(.*)",
+]);
+
+const isApiRoute = (req: NextRequest) =>
+  req.nextUrl.pathname.startsWith("/api") ||
+  req.nextUrl.pathname.startsWith("/trpc");
+
+function isIntlRedirect(response: NextResponse): boolean {
+  return (
+    response.status === 307 ||
+    response.status === 308 ||
+    Boolean(response.headers.get("location"))
+  );
+}
+
+function localeFromPathname(pathname: string): string {
+  const segment = pathname.split("/").filter(Boolean)[0];
+  if (segment && routing.locales.includes(segment as "en" | "bn")) {
+    return segment;
+  }
+  return routing.defaultLocale;
+}
+
+async function resolveOnboarded(
+  userId: string,
+  sessionClaims: Parameters<typeof isOnboardedFromClaims>[0]
+): Promise<boolean> {
+  if (isOnboardedFromClaims(sessionClaims)) {
+    return true;
+  }
+
+  const status = await fetchOnboardingStatus(userId);
+  if (!status?.is_onboarded) {
+    return false;
+  }
+
+  try {
+    const client = await clerkClient();
+    await client.users.updateUser(userId, {
+      publicMetadata: { isOnboarded: true },
+    });
+  } catch {
+    // Backfill metadata is best-effort; graph status still gates access.
+  }
+
+  return true;
+}
 
 export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) {
-    await auth.protect();
-  }
-  
-  // Skip next-intl for API routes to prevent 307 redirects to /en/api/
-  if (req.nextUrl.pathname.startsWith('/api')) {
+  if (isApiRoute(req)) {
     return NextResponse.next();
   }
 
-  return handleI18nRouting(req);
+  const intlResponse = intlMiddleware(req);
+
+  if (isIntlRedirect(intlResponse)) {
+    return intlResponse;
+  }
+
+  if (isAuthRoute(req)) {
+    return intlResponse;
+  }
+
+  if (isProtectedRoute(req)) {
+    const { userId, sessionClaims } = await auth();
+
+    if (!userId) {
+      await auth.protect();
+      return intlResponse;
+    }
+
+    const locale = localeFromPathname(req.nextUrl.pathname);
+    const onboarded = await resolveOnboarded(
+      userId,
+      sessionClaims as Parameters<typeof isOnboardedFromClaims>[0]
+    );
+
+    if (!onboarded && !isOnboardingRoute(req)) {
+      const onboardingUrl = new URL(`/${locale}/onboarding`, req.url);
+      return NextResponse.redirect(onboardingUrl);
+    }
+
+    if (onboarded && isOnboardingRoute(req)) {
+      const dashboardUrl = new URL(`/${locale}/dashboard`, req.url);
+      return NextResponse.redirect(dashboardUrl);
+    }
+  }
+
+  return intlResponse;
 });
 
 export const config = {
   matcher: [
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    '/(api|trpc)(.*)',
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/(api|trpc)(.*)",
   ],
 };
