@@ -3,10 +3,9 @@
  */
 import { POST } from '../route'
 
-// Mock Vercel AI SDK
 jest.mock('ai', () => ({
-  generateText: jest.fn(async () => ({
-    text: 'mocked-stream'
+  streamText: jest.fn(() => ({
+    toTextStreamResponse: jest.fn(() => new Response('mocked-stream', { status: 200 }))
   }))
 }))
 

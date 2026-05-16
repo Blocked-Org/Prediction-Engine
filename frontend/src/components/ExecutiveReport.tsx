@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react';
+import { useCompletion } from '@ai-sdk/react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Bot, Cloud, Server, Loader2, AlertCircle, Zap } from 'lucide-react';
 import dynamic from 'next/dynamic';
@@ -26,32 +27,22 @@ export function ExecutiveReport({ simulationData }: ExecutiveReportProps) {
   const t = useTranslations('ExecutiveReport');
   const [provider, setProvider] = useState<'cloud' | 'offline'>('cloud');
   
-  const [completion, setCompletion] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
-  const handleGenerate = async () => {
-    setIsLoading(true);
-    setError(null);
-    setCompletion('');
-    try {
-      const res = await fetch('/api/report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ simulationData, locale, provider })
-      });
-      if (!res.ok) {
-        throw new Error(`Server returned ${res.status}`);
-      }
-      const text = await res.text();
-      const cleanedText = text.replace(/<\|?think\|?>[\s\S]*?(?:<\/\|?think\|?>|$)/gi, '').trim();
-      setCompletion(cleanedText);
-    } catch (e: any) {
-      setError(e);
-    } finally {
-      setIsLoading(false);
+  const { completion, complete, isLoading, error } = useCompletion({
+    api: '/api/report',
+    body: {
+      simulationData,
+      locale,
+      provider
+    },
+    onError: (err) => {
+      console.error('Completion error:', err);
     }
+  });
+
+  const handleGenerate = () => {
+    complete('Please generate the Executive Summary.');
   };
+
 
   return (
     <Card className="mt-6 w-full shadow-lg border-primary/20">

@@ -21,6 +21,17 @@ jest.mock('react-markdown', () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>
 }), { virtual: true })
 
+// Mock useCompletion from @ai-sdk/react
+const mockComplete = jest.fn();
+jest.mock('@ai-sdk/react', () => ({
+  useCompletion: () => ({
+    completion: '### Mocked Summary\nHere is your data.',
+    complete: mockComplete,
+    isLoading: false,
+    error: null
+  })
+}));
+
 describe('ExecutiveReport Component', () => {
   const mockSimulationData = {
     simulation_scenario: {
@@ -49,7 +60,6 @@ describe('ExecutiveReport Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    global.fetch = jest.fn();
   });
 
   it('renders the component headers and toggles successfully', () => {
@@ -61,45 +71,21 @@ describe('ExecutiveReport Component', () => {
     expect(screen.getByText('Generate Executive Summary')).toBeInTheDocument()
   })
 
-  it('calls fetch with stringified data when button is clicked', async () => {
-    const mockFetch = global.fetch as jest.Mock;
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      text: async () => 'Mocked text response'
-    } as Response)
-
+  it('calls useCompletion.complete when button is clicked', async () => {
     render(<ExecutiveReport simulationData={mockSimulationData} />)
     
     const generateBtn = screen.getByText('Generate Executive Summary')
     fireEvent.click(generateBtn)
 
     await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('/api/report', expect.objectContaining({
-        method: 'POST',
-        body: JSON.stringify({
-          simulationData: mockSimulationData,
-          locale: 'en',
-          provider: 'cloud'
-        })
-      }))
+      expect(mockComplete).toHaveBeenCalledWith('Please generate the Executive Summary.')
     })
-    mockFetch.mockRestore();
   })
 
   it('renders markdown text when completion is populated', async () => {
-    const mockFetch = global.fetch as jest.Mock;
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      text: async () => '### Mocked Summary\nHere is your data.'
-    } as Response)
-
     render(<ExecutiveReport simulationData={mockSimulationData} />)
     
-    const generateBtn = screen.getByText('Generate Executive Summary')
-    fireEvent.click(generateBtn)
-
     expect(await screen.findByText(/Mocked Summary/i)).toBeInTheDocument()
     expect(await screen.findByText(/Here is your data/i)).toBeInTheDocument()
-    mockFetch.mockRestore();
   })
 })

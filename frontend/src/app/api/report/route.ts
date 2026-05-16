@@ -1,16 +1,6 @@
-import { generateText } from 'ai';
-import { google } from '@ai-sdk/google';
-import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
-
-const ollamaBaseURL = process.env.OLLAMA_BASE_URL ?? 'http://127.0.0.1:11434/v1';
-const ollamaModel = process.env.OLLAMA_MODEL ?? 'gemma4:26b';
-const googleModel = process.env.GOOGLE_MODEL ?? 'gemini-2.0-flash';
-
-// Ollama exposes an OpenAI-compatible REST API at /v1.
-const ollamaProvider = createOpenAICompatible({
-  name: 'ollama',
-  baseURL: ollamaBaseURL,
-});
+import { streamText } from 'ai';
+import { getLanguageModel } from '@/lib/llm/provider';
+import { retrieveGraphContext } from '@/lib/llm/retriever';
 
 /**
  * Local AI Strategy Generator
@@ -57,10 +47,7 @@ function buildFallbackReport(simulationData: any, locale: string) {
  * Next.js API Route for `/api/report`
  * Handles POST requests to generate AI-driven executive reports dynamically.
  * Routes traffic either to a local Ollama instance (`offline`) or Google Gemini (`cloud`).
- * Returns a fallback deterministic generation if the local LLM times out or is offline.
- * 
- * @param {Request} req - The incoming Next.js API request containing JSON body `{ simulationData, locale, provider }`.
- * @returns {Promise<Response>} An HTTP Response delivering the generated markdown report.
+ * Uses `streamText` to deliver real-time typewriter effect.
  */
 export async function POST(req: Request) {
   let simulationData: any = null;
@@ -68,39 +55,47 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     simulationData = body.simulationData;
-    locale = body.locale;
-    const provider = body.provider;
+    locale = body.locale || 'en';
+    const provider = body.provider || 'cloud';
+
+    // To support useChat, the frontend sends a `messages` array. We extract the last user message
+    // or rely on the initial payload. If `messages` is present, it's a chat sequence.
+    const messages = body.messages;
 
     const language = locale === 'bn' ? 'Bengali (বাংলা)' : 'English';
+    const campaignId = simulationData?.simulation_scenario?.campaign_input?.campaign_id;
+
+    // Retrieve rich context from Neo4j
+    let neo4jContext = "No specific graph context retrieved.";
+    if (campaignId) {
+      neo4jContext = await retrieveGraphContext(campaignId);
+    }
 
     const systemPrompt = `You are an expert Marketing Data Analyst. 
-Your goal is to write a brief, professional Executive Summary for a CMO based on the provided Simulation Engine results.
+Your goal is to write a brief, professional Executive Summary for a CMO based on the provided Simulation Engine results and Knowledge Graph context.
 
 Rules:
 1. You MUST respond exclusively in the following language: ${language}.
 2. Summarize the Pareto-optimal budget allocations and the expected revenue.
 3. Highlight the AI recommendations provided in the data.
-4. Keep the report under 3 paragraphs and use professional formatting (bullet points, bold text).
-5. Do not invent any data not present in the context.`;
+4. Integrate any relevant insights from the Neo4j Knowledge Graph Context.
+5. Keep the report under 3 paragraphs and use professional formatting (bullet points, bold text).
+6. Do not invent any data not present in the context.
 
-    const prompt = `Simulation Data Context:\n${JSON.stringify(simulationData, null, 2)}\n\nPlease generate the Executive Summary.`;
+${neo4jContext}
+`;
 
-    const model = provider === 'offline'
-      ? ollamaProvider(ollamaModel)
-      : google(googleModel);
+    const promptText = body.prompt || `Simulation Data Context:\n${JSON.stringify(simulationData, null, 2)}\n\nPlease generate the Executive Summary.`;
 
-    const result = await generateText({
+    const model = getLanguageModel(provider);
+
+    const result = streamText({
       model,
       system: systemPrompt,
-      prompt: prompt,
+      prompt: promptText,
     });
 
-    const text = result.text?.trim() || buildFallbackReport(simulationData, locale);
-    return new Response(text, {
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-      },
-    });
+    return result.toTextStreamResponse();
   } catch (error) {
     console.error('LLM API Error:', error instanceof Error ? error.message : error);
     return new Response(buildFallbackReport(simulationData, locale), {

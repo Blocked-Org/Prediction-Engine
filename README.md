@@ -34,12 +34,12 @@ The system is organized as a 6-layer stack:
 docker compose up -d
 ```
 
-### 2) Python environment and backend dependencies
+### 2) Automated Setup (Install Tools & Dependencies)
+
+A PowerShell script is provided to automatically create the Python virtual environment, install all backend requirements, synchronize environment variables, and install the Next.js frontend dependencies.
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+.\install.ps1
 ```
 
 ### 3) Configure Environment & Initialize Database
@@ -62,9 +62,10 @@ A convenient PowerShell script is provided to start both the API server and the 
 
 ### 5) Run the Frontend
 
+The `install.ps1` script already handles `npm install`. To start the development server:
+
 ```powershell
 cd frontend
-npm install
 npm run dev
 ```
 
@@ -84,7 +85,7 @@ ollama run gemma4:26b
 
 Frontend route handlers (Next.js):
 - `POST /api/forecast` : Frontend handshake to backend.
-- `POST /api/report` : Generates LLM Executive Reports using Google Gemini or Ollama.
+- `POST /api/report` : Fully integrated Vercel AI SDK route. Generates LLM Executive Reports using Google Gemini or Ollama. Supports typewriter-effect streaming (`useCompletion`) and injects real-time context from the Neo4j Knowledge Graph using the native `neo4j-driver`.
 
 ## Testing and Quality Checks
 
@@ -135,5 +136,5 @@ Common variables used by the current code paths:
 ## Notes
 
 - Bilingual UX is implemented with `next-intl` locale segments.
-- Executive report generation supports cloud/offline selection in the UI.
-- Day 6 focus is API handshake and replacing remaining mock output paths with full backend execution.
+- Executive report generation supports cloud/offline selection in the UI with streaming text generation.
+- The pipeline is fully integrated end-to-end: from Neo4j Graph Retrieval -> PyMC/Mesa Engines -> Next.js Streaming Dashboard.

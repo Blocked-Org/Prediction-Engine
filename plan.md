@@ -103,16 +103,16 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
   - `MarkovFunnelChart.test.tsx` — 13 tests (SVG, labels, headers, accessibility, edge %, generator)
 - [x] i18n keys added for both new charts in `en.json` and `bn.json`
 
-### 3.4 LLM Orchestration — Layer 5 (Day 4) 🟡
-
-- [x] Install Vercel AI SDK (`ai`, `@ai-sdk/google`, `@ai-sdk/react`)
-- [x] Integrate Gemini Flash as cloud LLM provider
-- [x] Build `ExecutiveReport.tsx` (5.6 KB)
-  - Renders streaming AI-generated executive summary from simulation data
-  - Uses `react-markdown` for formatted output
-- [x] Build `/api/report/route.ts` — server-side LLM invocation
-- [x] Install `llamaindex` package
-- [ ] **Wire LlamaIndex GraphRAG pipeline** — NOT BUILT
+### 3.4 LLM Orchestration — Layer 5 (Day 4) ✅
+- [x] Connect `ai` package (Vercel AI SDK)
+- [x] Implement local LLM provider wrapper (`src/lib/llm/provider.ts`)
+  - Target: Ollama (Gemma 4 26B) on `localhost:11434`
+  - Fallback: Gemini 3 Flash via API key
+- [x] Create `useChat` / `useCompletion` hook wrapper for the reporting interface
+- [x] Build `ExecutiveReport.tsx` component
+  - Needs streaming text UI (typewriter effect)
+  - Must render markdown tables and bold text cleanly
+- [ ] **GraphRAG pipeline** — NOT BUILT
   - Need: Connect LlamaIndex retriever to Neo4j knowledge graph
   - Need: Hybrid retrieval (vector similarity + k-hop graph traversal)
   - Need: Inject retrieved context into LLM prompt before report generation
