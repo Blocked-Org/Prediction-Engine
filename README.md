@@ -42,7 +42,15 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### 3) Start the Backend (FastAPI + Celery)
+### 3) Configure Environment & Initialize Database
+
+Ensure your `.env` points to the local Docker services (e.g., `NEO4J_URI=bolt://localhost:7687`), then run the index creation script to prepare the graph database:
+
+```powershell
+python scripts/create_neo4j_indexes.py
+```
+
+### 4) Start the Backend (FastAPI + Celery)
 
 A convenient PowerShell script is provided to start both the API server and the background worker simultaneously:
 
@@ -52,7 +60,7 @@ A convenient PowerShell script is provided to start both the API server and the 
 
 *(Alternatively, run them separately using `uvicorn src.api.main:app --reload --port 8000` and `celery -A src.worker.main worker --loglevel=info --pool=solo`)*
 
-### 4) Run the Frontend
+### 5) Run the Frontend
 
 ```powershell
 cd frontend
@@ -62,7 +70,7 @@ npm run dev
 
 App URL: `http://localhost:3000/en` or `http://localhost:3000/bn`
 
-### 5) LLM Fallback (Optional)
+### 6) LLM Fallback (Optional)
 For offline local AI reporting, ensure Ollama is installed and running:
 ```powershell
 ollama run gemma4:26b
