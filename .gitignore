@@ -18,4 +18,3 @@ models/*.joblib
 data/processed/
 data/raw/*.parquet
 artifacts/shap/
-main.latex

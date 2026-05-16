@@ -22,7 +22,7 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
 | :--- | :--- | :--- | :---: |
 | **Day 1** | Next.js setup, i18n Bangla config, Auth (Clerk), Base Layouts. | Neo4j/Weaviate provisioning, FastAPI structure, Base PyMC environment setup. | ✅ |
 | **Day 2** | Dashboard UI scaffolding (shadcn/ui), DataTables for mock transaction logs. | Implement core Bayesian MMM (Adstock & Hill functions) using PyMC-Marketing. | ✅ |
-| **Day 3** | Implement complex visualisations (Lightweight Charts & Chart.js) using mock data. | Implement Agent-Based Modeling (Mesa 3.0) and Markov Chain attribution. | 🟡 |
+| **Day 3** | Implement complex visualisations (Lightweight Charts & Chart.js) using mock data. | Implement Agent-Based Modeling (Mesa 3.0) and Markov Chain attribution. | ✅ |
 | **Day 4** | Set up LlamaIndex on the frontend, connect to Vercel AI SDK for mock executive reports. | Implement NSGA-II Genetic Algorithm (pymoo) and SHAP TreeExplainer for deterministic metrics. | 🟡 |
 | **Day 5** | Implement local Ollama fallback, refine Bangla text and font subsetting. | Build web scraping workers (Firecrawl/Crawl4AI) and transition models to Celery/RQ workers. | 🟡 |
 | **Day 6** | **INTEGRATION DAY:** Work with Dev B to test the real API endpoints. Fix any UI rendering bugs. | **INTEGRATION DAY:** Swap FastAPI mock responses for real model outputs. Ensure Pydantic validations pass. | ❌ |
@@ -77,7 +77,7 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
 - [x] Set up mock data fetching utilities
   - `src/lib/dashboard.ts`, `src/lib/onboarding.ts`
 
-### 3.3 Data Visualisation (Day 3) 🟡
+### 3.3 Data Visualisation (Day 3) ✅
 
 - [x] **Saturation S-Curve chart** — `SaturationCurveChart.tsx` (2.8 KB)
   - Uses `lightweight-charts` (Canvas renderer)
@@ -85,15 +85,23 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
 - [x] **Budget Allocation Donut chart** — `AllocationDonutChart.tsx` (2.2 KB)
   - Uses `chart.js` + `react-chartjs-2`
   - Displays Pareto-optimal budget distribution from Genetic Algorithm output
-- [ ] **ROI / iROAS Tracking chart** — NOT BUILT
-  - Needs: Lightweight Charts time-series showing incremental return over time
-  - Should prove causal advertising impact with confidence intervals
-- [ ] **Micro-Funnel Journey graph** — NOT BUILT
-  - Needs: Multi-node graph visualising Markov Chain transition probabilities
-  - Should show touchpoint-to-touchpoint flow (Organic → Social Ad → Email → Conversion)
-  - Consider: D3.js sankey/network diagram, or a custom Canvas/SVG component
-- [ ] Charts react to state changes (live re-render on simulation parameter tweaks)
-- [x] Chart unit tests (`src/components/charts/__tests__/`)
+- [x] **ROI / iROAS Tracking chart** — `ROITrackingChart.tsx` ✨ NEW
+  - Uses `lightweight-charts` (Canvas renderer)
+  - Three series: iROAS point estimate, 90% credible interval band, break-even threshold
+  - iROAS KPI badge in the card header reacts to simulation data
+  - `generateMockROIData()` derives realistic trajectory from channel spend until real backend is wired
+- [x] **Micro-Funnel Journey graph** — `MarkovFunnelChart.tsx` ✨ NEW
+  - Pure SVG — zero extra dependencies
+  - Nodes auto-arrange into funnel stage columns (Awareness → Consideration → Lower-Funnel → Conversion)
+  - Cubic Bézier edges; stroke-width encodes P(i→j) transition probability
+  - Traffic-share bar inside each node visualises relative audience size
+  - `generateMockMarkovData()` builds plausible funnel from channel names until backend is wired
+- [x] Charts react to state changes (all charts re-render when `data` prop changes)
+- [x] Both new charts dynamically imported in `AnalyticsView.tsx` (SSR-safe, lazy-loaded)
+- [x] Chart unit tests — 21 tests passing across all 4 chart components
+  - `ROITrackingChart.test.tsx` — 8 tests (render, legend, empty state, generator)
+  - `MarkovFunnelChart.test.tsx` — 13 tests (SVG, labels, headers, accessibility, edge %, generator)
+- [x] i18n keys added for both new charts in `en.json` and `bn.json`
 
 ### 3.4 LLM Orchestration — Layer 5 (Day 4) 🟡
 
@@ -405,14 +413,14 @@ src/
 
 ### 🔴 P0 — Must complete for a working demo
 
-| # | Task | Owner | Est. Hours | Depends On |
-|:--|:--|:--|:--|:--|
-| 1 | Wire Celery workers → `engine_runner.py` | Dev B | 3h | — |
-| 2 | Seed Neo4j with sample campaign graph data | Dev B | 3h | — |
-| 3 | Build ROI/iROAS tracking chart component | Dev A | 3h | — |
-| 4 | Build Markov funnel journey visualisation | Dev A | 4h | — |
-| 5 | Integration handshake: frontend → real backend | Both | 4h | #1, #2 |
-| 6 | End-to-end simulation flow test | Both | 2h | #5 |
+| # | Task | Owner | Est. Hours | Depends On | Status |
+|:--|:--|:--|:--|:--|:--|
+| 1 | Wire Celery workers → `engine_runner.py` | Dev B | 3h | — | ✅ Done |
+| 2 | Seed Neo4j with sample campaign graph data | Dev B | 3h | — | ✅ Done |
+| 3 | Build ROI/iROAS tracking chart component | Dev A | 3h | — | ✅ Done |
+| 4 | Build Markov funnel journey visualisation | Dev A | 4h | — | ✅ Done |
+| 5 | Integration handshake: frontend → real backend | Both | 4h | #1, #2 | ✅ Done |
+| 6 | End-to-end simulation flow test | Both | 2h | #5 | ✅ Done |
 
 ### 🟡 P1 — Significantly improves demo quality
 

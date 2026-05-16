@@ -1,87 +1,161 @@
-import time
+"""
+src/worker/tasks.py — Celery task definitions wired to the real simulation engines.
+
+This module is the canonical entry point for background simulation work.
+All heavy computation (PyMC, ABM, Markov, NSGA-II, SHAP) runs here —
+NOT in the FastAPI ASGI thread.
+
+Two Celery apps co-exist in this repo:
+  • src/worker/main.py   — the "standalone" Celery app (legacy, broker-only config)
+  • src/api/worker.py    — the "API-coupled" worker (imports engine_runner directly)
+
+This file plugs the gap in src/worker/main.py by wiring its tasks to the
+real engine pipeline, matching the contract established by src/api/worker.py.
+"""
+
 import logging
+from typing import Any, Dict
+
 from src.worker.main import celery_app
 
 logger = logging.getLogger(__name__)
-logger.info("Initializing src.worker.tasks module (lightweight import)...")
 
-@celery_app.task(soft_time_limit=120, time_limit=180)
-def run_full_simulation_task(budget: float, num_channels: int):
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Task 1: Full Micro + Macro Simulation Pipeline
+# ─────────────────────────────────────────────────────────────────────────────
+
+@celery_app.task(
+    name="tasks.run_full_simulation_task",
+    bind=True,
+    soft_time_limit=120,
+    time_limit=180,
+    max_retries=1,
+)
+def run_full_simulation_task(self, payload: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Background Celery task to run the complete simulation pipeline.
-    
+    Background Celery task: execute the complete simulation pipeline.
+
+    Pipeline sequence:
+        1. Deserialise payload into SimulationRequest (Pydantic-validated)
+        2. ABM (Mesa 3.0) — 1 000 agents, 10 simulation steps
+        3. Markov Chain attribution — transition matrix + Removal Effect
+        4. _fetch_competitor_proxy() — reads CompetitorContext count from Neo4j
+        5. Bayesian MMM (PyMC-Marketing) — 50-draw prior predictive
+        6. NSGA-II budget optimisation (pymoo) — Pareto frontier
+        7. Return SimulationResponse-compatible dict
+
     Time limits:
-      - Soft: 120s (raises SoftTimeLimitExceeded, allows cleanup)
-      - Hard: 180s (kills the task outright)
+        Soft: 120 s  → raises SoftTimeLimitExceeded (allows cleanup)
+        Hard: 180 s  → Celery kills the process outright
+
+    Args:
+        payload: JSON-serialisable dict matching SimulationRequest fields.
+
+    Returns:
+        dict: SimulationResponse fields (projected_roi, incremental_roas,
+              pareto_optimal_budgets).
     """
-    logger.info(f"Starting full simulation task for budget: {budget}")
-    
-    # Lazy imports to prevent heavy ML library loading on worker startup
-    logger.info("Importing heavy ML simulation libraries...")
-    from src.simulation.macro import run_bayesian_mmm
-    from src.simulation.micro import run_agent_based_simulation
-    from src.simulation.optimization import run_genetic_optimization
-    logger.info("ML libraries loaded successfully.")
+    logger.info("Task %s: starting full simulation pipeline.", self.request.id)
 
-    # 1. Macro Simulation (Placeholder)
-    # run_bayesian_mmm(data, target_col, spend_cols)
-    time.sleep(2) # simulate delay
-    
-    # 2. Micro Simulation
-    micro_results = run_agent_based_simulation(agents_count=1000, transition_matrix=None)
-    time.sleep(2) # simulate delay
-    
-    # 3. Optimization
-    opt_results = run_genetic_optimization(total_budget=budget, num_channels=num_channels)
-    
-    return {
-        "status": "completed",
-        "micro_results": micro_results,
-        "optimization": opt_results
-    }
+    # Lazy imports — keeps worker startup fast; heavy libs load only when needed
+    from src.api.schemas import SimulationRequest
+    from src.simulation.engine_runner import run_micro_simulation
 
-
-@celery_app.task(soft_time_limit=60, time_limit=90)
-def scrape_competitor_data_task(url: str, prompt: str = None):
-    """
-    Background Celery task to scrape exogenous competitor data using Firecrawl.
-    Ingests extracted markdown insights directly into Neo4j graph nodes.
-    
-    Uses lazy imports to avoid loading firecrawl/neo4j at worker startup.
-    """
-    import os
-    from firecrawl import FirecrawlApp
-    from src.api.db.neo4j_client import Neo4jManager
-
-    api_key = os.getenv("FIRECRAWL_API_KEY", "dummy_key")
-    app = FirecrawlApp(api_key=api_key)
-    
     try:
-        print(f"Scraping data from {url} via Firecrawl...")
-        result = app.scrape_url(url, params={
-            'formats': ['markdown'], 
-            'onlyMainContent': True
-        })
-        
-        markdown_content = result.get('markdown', 'No content found')
-        
-        neo_mgr = Neo4jManager()
-        neo_mgr.connect()
-        
-        query = (
-            "MERGE (c:CompetitorContext {url: $url}) "
-            "SET c.content = $content, c.scraped_at = timestamp() "
-            "RETURN c"
+        request = SimulationRequest(**payload)
+        response = run_micro_simulation(request)
+        result = response.model_dump()
+        logger.info("Task %s: simulation completed successfully.", self.request.id)
+        return result
+
+    except Exception as exc:
+        logger.error(
+            "Task %s: simulation failed — %s", self.request.id, exc, exc_info=True
         )
-        
-        if neo_mgr.driver:
-            with neo_mgr.driver.session() as session:
-                session.run(query, url=url, content=markdown_content[:2000]) # Cap for safety
-                print("Neo4j node 'CompetitorContext' updated successfully.")
-                
-        return {"status": "success", "url": url, "bytes_extracted": len(markdown_content)}
+        raise self.retry(exc=exc, countdown=5) from exc
 
-    except Exception as e:
-        print(f"Scraping task failed: {e}")
-        return {"status": "error", "message": str(e)}
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Task 2: Bayesian MMM Macro Forecast
+# ─────────────────────────────────────────────────────────────────────────────
+
+@celery_app.task(
+    name="tasks.run_forecast_task",
+    bind=True,
+    soft_time_limit=120,
+    time_limit=180,
+    max_retries=1,
+)
+def run_forecast_task(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Background Celery task: execute Bayesian MMM macro forecast.
+
+    Offloads PyMC sample_prior_predictive (200 draws) from the main ASGI
+    thread. Draws take 5–30 s depending on channel count and exogenous factors.
+
+    Args:
+        payload: JSON-serialisable dict matching ForecastRequest fields.
+
+    Returns:
+        dict: ForecastResponse fields (baseline_sales, incremental_sales,
+              confidence_interval).
+    """
+    logger.info("Task %s: starting macro forecast.", self.request.id)
+
+    from src.api.schemas import ForecastRequest
+    from src.simulation.engine_runner import run_macro_forecast
+
+    try:
+        request = ForecastRequest(**payload)
+        response = run_macro_forecast(request)
+        result = response.model_dump()
+        logger.info("Task %s: forecast completed successfully.", self.request.id)
+        return result
+
+    except Exception as exc:
+        logger.error(
+            "Task %s: forecast failed — %s", self.request.id, exc, exc_info=True
+        )
+        raise self.retry(exc=exc, countdown=5) from exc
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Task 3: Competitor Intelligence Scraping → Neo4j Ingestion
+# ─────────────────────────────────────────────────────────────────────────────
+
+@celery_app.task(
+    name="tasks.scrape_competitor_data_task",
+    bind=True,
+    soft_time_limit=60,
+    time_limit=90,
+)
+def scrape_competitor_data_task(self, url: str) -> Dict[str, Any]:
+    """
+    Background Celery task: scrape competitor intelligence via Firecrawl/Crawl4AI
+    and ingest the extracted markdown into Neo4j as a CompetitorContext node.
+
+    The engine_runner._fetch_competitor_proxy() reads the node count from
+    Neo4j in every simulation run, so keeping this data fresh directly
+    improves simulation accuracy.
+
+    Args:
+        url: The competitor URL to scrape.
+
+    Returns:
+        dict: Execution status, URL, and byte count.
+    """
+    logger.info("Task %s: scraping competitor URL: %s", self.request.id, url)
+
+    from src.preprocessing.web_scraper import CompetitorScraper
+
+    try:
+        scraper = CompetitorScraper()
+        result = scraper.scrape_and_ingest(url)
+        logger.info("Task %s: scraping completed — %s", self.request.id, result)
+        return result
+    except Exception as exc:
+        logger.error(
+            "Task %s: scraping failed — %s", self.request.id, exc, exc_info=True
+        )
+        return {"status": "error", "url": url, "message": str(exc)}
