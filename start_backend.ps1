@@ -15,10 +15,20 @@ $ErrorActionPreference = "Stop"
 
 $VenvPython  = ".\.venv\Scripts\python.exe"
 $VenvActivate = ".\.venv\Scripts\Activate.ps1"
+$UvicornPath = ".\.venv\Scripts\uvicorn.exe"
+$CeleryPath  = ".\.venv\Scripts\celery.exe"
 
 # Activate virtual environment
 Write-Host "✅ Activating virtual environment..." -ForegroundColor Cyan
 & $VenvActivate
+
+# Verify critical executables exist
+if (-not (Test-Path $UvicornPath) -or -not (Test-Path $CeleryPath)) {
+    Write-Host "❌ Backend tools missing from .venv! Your 'pip install' likely failed midway." -ForegroundColor Red
+    Write-Host "   -> This is typically caused by missing Microsoft C++ Build Tools on Windows (failing to build lxml)." -ForegroundColor Yellow
+    Write-Host "   -> Please review the README.md Troubleshooting section to resolve this." -ForegroundColor Yellow
+    exit 1
+}
 
 # Verify .env exists
 if (-not (Test-Path ".\.env")) {

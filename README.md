@@ -42,19 +42,17 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### 3) Run FastAPI
+### 3) Start the Backend (FastAPI + Celery)
+
+A convenient PowerShell script is provided to start both the API server and the background worker simultaneously:
 
 ```powershell
-uvicorn src.api.main:app --reload --port 8000
+.\start_backend.ps1
 ```
 
-### 4) Run Celery worker
+*(Alternatively, run them separately using `uvicorn src.api.main:app --reload --port 8000` and `celery -A src.worker.main worker --loglevel=info --pool=solo`)*
 
-```powershell
-celery -A src.worker.main worker --loglevel=info
-```
-
-### 5) Run frontend
+### 4) Run the Frontend
 
 ```powershell
 cd frontend
@@ -62,34 +60,55 @@ npm install
 npm run dev
 ```
 
-App URL: `http://localhost:3000/en`
+App URL: `http://localhost:3000/en` or `http://localhost:3000/bn`
 
-## API Endpoints (Current)
+### 5) LLM Fallback (Optional)
+For offline local AI reporting, ensure Ollama is installed and running:
+```powershell
+ollama run gemma4:26b
+```
 
-- `GET /health`
-- `GET /healthz`
-- `POST /v1/predict/batch`
-- `POST /api/v1/simulate` (mock response path, queued integration planned)
-- `POST /api/v1/forecast` (mock response path, queued integration planned)
+## API Endpoints (Fully Integrated)
+
+- `GET /health` : System health check
+- `POST /api/v1/simulate` : Triggers the Triple-Engine (Macro MMM, Micro ABM, Optimization) via Celery.
+- `POST /api/v1/forecast` : Triggers predictive forecasting via Celery.
 
 Frontend route handlers (Next.js):
-- `POST /api/forecast`
-- `POST /api/report`
+- `POST /api/forecast` : Frontend handshake to backend.
+- `POST /api/report` : Generates LLM Executive Reports using Google Gemini or Ollama.
 
 ## Testing and Quality Checks
 
-Frontend:
-
+**Frontend:**
 ```powershell
 cd frontend
 npm run test
 npm run build
 ```
 
-Backend:
+**Backend:**
+The Python unit test harness is fully wired using `pytest`.
+```powershell
+pytest
+```
 
-- Python unit test harness is not fully wired yet in this repo state.
-- If adding backend tests, install `pytest` in the active environment and run from repository root.
+## Troubleshooting & Robust Installation
+
+If you face difficulties installing tools and dependencies, check the following common issues:
+
+1. **`pip install` fails on Windows (lxml wheel error):**
+   * Some packages (like `crawl4ai` and `weaviate-client`) depend on `lxml`, which requires **Microsoft C++ Build Tools** to compile on Windows.
+   * **Fix:** Download the [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/), check "Desktop development with C++", and install it. Only then should you run `pip install -r requirements.txt`.
+   * *Fallback Fix:* If you strictly cannot install build tools, install standard dependencies individually (`fastapi uvicorn celery redis pydantic pyyaml pymc...` etc.) and omit `crawl4ai` or `lxml`.
+   * *Symptom:* The `.\start_backend.ps1` script will tell you `uvicorn.exe` or `celery.exe` is missing.
+
+2. **Docker commands fail (`docker compose up`):**
+   * If you receive an error like "The term 'docker' is not recognized", ensure **Docker Desktop** is installed and running on your machine.
+   * **Fix:** Launch the Docker Desktop UI, wait for the engine to initialize, and restart your VS Code terminal before trying again.
+
+3. **Frontend node issues:**
+   * The frontend enforces Node `>=20.0.0` in `package.json`. Make sure you are not using outdated node versions to avoid Next.js build errors.
 
 ## Environment Variables
 
