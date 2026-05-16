@@ -66,3 +66,49 @@ class CompetitorScraper:
         finally:
             if self.neo_mgr.driver:
                 self.neo_mgr.close()
+
+import asyncio
+
+class Crawl4AiScraper:
+    """
+    Scrapes exogenous competitor intelligence using Crawl4AI (for high-volume undefended targets)
+    and ingests the resulting markdown directly into the Neo4j Graph Database.
+    """
+    def __init__(self) -> None:
+        self.neo_mgr = Neo4jManager()
+
+    async def scrape_and_ingest(self, url: str) -> Dict[str, Any]:
+        logger.info(f"Initiating Crawl4AI scrape for URL: {url}")
+        try:
+            from crawl4ai import AsyncWebCrawler
+            
+            async with AsyncWebCrawler() as crawler:
+                result = await crawler.arun(url=url)
+            
+            markdown_content = result.markdown
+            if not markdown_content:
+                logger.warning(f"No markdown content extracted from {url}")
+                return {"status": "empty", "url": url}
+            
+            logger.info("Successfully scraped content. Ingesting into Neo4j...")
+            
+            self.neo_mgr.connect()
+            query = (
+                "MERGE (c:CompetitorContext {url: $url}) "
+                "SET c.content = $content, c.scraped_at = timestamp() "
+                "RETURN c"
+            )
+            if self.neo_mgr.driver:
+                with self.neo_mgr.driver.session() as session:
+                    session.run(query, url=url, content=markdown_content[:5000]) 
+                    logger.info("Neo4j 'CompetitorContext' node merged successfully via Crawl4AI.")
+                    
+            return {"status": "success", "url": url, "bytes_extracted": len(markdown_content)}
+
+        except Exception as e:
+            logger.error(f"Crawl4AI scraping failed for {url}: {e}", exc_info=True)
+            return {"status": "error", "message": str(e)}
+        finally:
+            if hasattr(self, 'neo_mgr') and self.neo_mgr.driver:
+                self.neo_mgr.close()
+

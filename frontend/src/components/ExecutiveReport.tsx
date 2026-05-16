@@ -122,7 +122,7 @@ export function ExecutiveReport({ simulationData }: ExecutiveReportProps) {
               <p className="opacity-90 mt-1">
                 {error.message || (
                   provider === 'offline'
-                    ? 'Failed to connect to local Ollama. Is qwen3:8b loaded?'
+                    ? 'Failed to connect to local Ollama. Is gemma4:26b loaded?'
                     : 'Failed to connect to Google Gemini. Check GOOGLE_GENERATIVE_AI_API_KEY.'
                 )}
               </p>

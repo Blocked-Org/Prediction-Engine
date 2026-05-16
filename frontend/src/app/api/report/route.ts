@@ -3,7 +3,7 @@ import { google } from '@ai-sdk/google';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 
 const ollamaBaseURL = process.env.OLLAMA_BASE_URL ?? 'http://127.0.0.1:11434/v1';
-const ollamaModel = process.env.OLLAMA_MODEL ?? 'qwen3:8b';
+const ollamaModel = process.env.OLLAMA_MODEL ?? 'gemma4:26b';
 const googleModel = process.env.GOOGLE_MODEL ?? 'gemini-2.0-flash';
 
 // Ollama exposes an OpenAI-compatible REST API at /v1.
