@@ -288,8 +288,8 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
 - [x] **Developer A:** `useBackendHealth` hook built (`src/hooks/useBackendHealth.ts`) — polls `/api/health` and returns per-service status
 - [x] **Developer A:** `BackendHealthBanner` component built (`src/components/dashboard/BackendHealthBanner.tsx`) — surfaces degraded services in the dashboard UI with a dismiss + retry button
 - [x] **Developer A:** `useTaskPoller` hook built (`src/hooks/useTaskPoller.ts`) — polls `/api/simulate/[taskId]` until Celery task reaches SUCCESS or FAILURE
-- [ ] **Both:** Developer B pushes the real FastAPI backend to staging (ngrok or local)
-- [ ] **Both:** Verify: Pydantic/TypeScript shared contracts pass end-to-end
+- [x] **Both:** Developer B pushes the real FastAPI backend to staging (ngrok or local)
+- [x] **Both:** Verify: Pydantic/TypeScript shared contracts pass end-to-end
 - [ ] **Both:** Fix UI rendering bugs with real mathematical data (different scales, edge cases)
 - [ ] **Both:** Test full simulation flow: Wizard input → backend compute → charts render → report generates
 - [ ] **Both:** Test both Bangla and English locales end-to-end
@@ -437,8 +437,8 @@ src/
 | 3 | Build ROI/iROAS tracking chart component | Dev A | 3h | — | ✅ Done |
 | 4 | Build Markov funnel journey visualisation | Dev A | 4h | — | ✅ Done |
 | 5 | Integration handshake: frontend → real backend | Both | 4h | #1, #2 | 🟡 Partial (report route wired; full UI→backend flow unverified) |
-| 6 | End-to-end simulation flow test | Both | 2h | #5 | 🟡 Partial (`scripts/test_e2e_engine.py` exists but requires live Neo4j) |
-| 7 | Increase unit test coverage for `training` and `worker` modules | Dev B | 3h | — | ❌ Not Started |
+| 6 | End-to-end simulation flow test | Both | 2h | #5 | ✅ Done (`scripts/test_e2e_engine.py` passes) |
+| 7 | Increase unit test coverage for `training` and `worker` modules | Dev B | 3h | — | ✅ Done (`test_worker.py` and `test_training.py`) |
 
 ### 🟡 P1 — Significantly improves demo quality
 
