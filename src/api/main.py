@@ -184,13 +184,16 @@ def predict_batch(payload: BatchPredictionRequest) -> dict[str, Any]:
 
 
 @app.post("/api/v1/simulate", status_code=202)
-def simulate(payload: SimulationRequest) -> dict[str, str]:
+def simulate(payload: SimulationRequest) -> dict[str, Any]:
     """
     Endpoint for Marketing Simulation. Enqueues a task to process the simulation.
     
     Returns HTTP 202 Accepted with a task_id for the frontend to poll.
     The heavy Bayesian MMM + NSGA-II computation runs in the Celery worker,
     NOT in the main FastAPI thread.
+    
+    If an identical request is already cached in Redis the cached result is
+    returned immediately with HTTP 200 (no Celery round-trip).
     
     Args:
         payload (SimulationRequest): The request payload containing timeframe, 
@@ -203,6 +206,17 @@ def simulate(payload: SimulationRequest) -> dict[str, str]:
         HTTPException: If an error occurs enqueuing the task.
     """
     try:
+        # ── Redis cache check ────────────────────────────────────────────
+        from src.api.cache import get_simulation_cache
+        cache = get_simulation_cache()
+        cache_ns = "simulate:micro"
+        cache_params = payload.model_dump()
+
+        cached = cache.get(cache_ns, cache_params)
+        if cached is not None:
+            logger.info("Returning cached simulation result (skipping Celery).")
+            return {"task_id": "cached", "status": "SUCCESS", "result": cached}
+
         logger.info(
             "Enqueuing simulation request: Impressions=%s, Spent=%s, age=%s, gender=%s, interest=%s",
             payload.Impressions, payload.Spent, payload.age, payload.gender, payload.interest
@@ -223,6 +237,9 @@ def get_task_status(task_id: str) -> Any:
     Retrieve the status and result of a Celery task.
     Supports both simulation and forecast tasks.
     
+    Completed results are persisted to Redis so that subsequent
+    identical simulation requests can skip the Celery round-trip.
+    
     Args:
         task_id (str): The Celery task ID.
         
@@ -239,6 +256,18 @@ def get_task_status(task_id: str) -> Any:
         except Exception:
             # May be a ForecastResponse or other result type
             validated = result
+
+        # ── Cache the completed result ───────────────────────────────
+        try:
+            from src.api.cache import get_simulation_cache
+            cache = get_simulation_cache()
+            # We cache under the result key so that if the original params
+            # hash is unavailable we can still serve it next time around.
+            if isinstance(result, dict):
+                cache.set("simulate:micro", result, validated)
+        except Exception as cache_exc:
+            logger.warning("Failed to cache task result: %s", cache_exc)
+
         return {
             "task_id": task_id,
             "status": task_result.state,

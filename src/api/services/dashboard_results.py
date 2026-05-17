@@ -285,8 +285,33 @@ def get_dashboard_results(
     if campaign is None:
         return DashboardResultsResponse(status="no_campaign")
 
+    # ── Redis cache layer ────────────────────────────────────────────────
+    # Cache key is a deterministic hash of the campaign properties dict
+    # so identical onboarding inputs skip the full ABM → Bayesian pipeline.
+    from src.api.cache import get_simulation_cache
+    cache = get_simulation_cache()
+    cache_ns = "simulate:results"
+    cache_params = {
+        "clerk_user_id": clerk_user_id,
+        **{k: v for k, v in campaign.items() if k != "competitor_names"},
+        "competitor_names": sorted(campaign.get("competitor_names") or []),
+    }
+
+    cached = cache.get(cache_ns, cache_params)
+    if cached is not None:
+        try:
+            return DashboardResultsResponse(**cached)
+        except Exception:
+            logger.warning("Cached payload failed validation — recomputing.")
+
     try:
-        return build_dashboard_results(campaign)
+        result = build_dashboard_results(campaign)
+        # Persist to cache (1 hour TTL)
+        try:
+            cache.set(cache_ns, cache_params, result.model_dump())
+        except Exception as cache_err:
+            logger.warning("Failed to write simulation cache: %s", cache_err)
+        return result
     except Exception as exc:
         logger.exception(
             "Dashboard simulation failed for user %s: %s",
@@ -294,3 +319,4 @@ def get_dashboard_results(
             exc,
         )
         return DashboardResultsResponse(status="processing")
+
