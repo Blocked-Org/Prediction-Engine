@@ -78,5 +78,53 @@ class NLPPipeline:
                 raise
         return self.sentiment_model, self.sentiment_tokenizer
 
+    def preprocess_banglish(self, text: str) -> str:
+        """
+        Handles Banglish (code-mixed Bengali and English) text preprocessing.
+        Translates common Romanized Bengali marketing terms back into Bengali script 
+        to improve csebuetnlp/banglabert sentiment analysis accuracy.
+        """
+        if not text:
+            return text
+            
+        # Dictionary of common Banglish marketing/ad-copy words
+        banglish_map = {
+            "valo": "ভালো",
+            "bhalo": "ভালো",
+            "khub": "খুব",
+            "darun": "দারুণ",
+            "osadharon": "অসাধারণ",
+            "kom": "কম",
+            "dam": "দাম",
+            "price": "প্রাইস",
+            "offer": "অফার",
+            "discount": "ডিসকাউন্ট",
+            "product": "প্রোডাক্ট",
+            "kemon": "কেমন",
+            "kobe": "কবে",
+            "ashbe": "আসবে",
+            "delivery": "ডেলিভারি",
+            "baje": "বাজে",
+            "fau": "ফাউ",
+            "faltu": "ফালতু",
+            "best": "সেরা",
+            "kinechi": "কিনেছি",
+            "kinbo": "কিনব"
+        }
+        
+        # Simple token replacement (case-insensitive)
+        words = text.split()
+        processed_words = []
+        for word in words:
+            clean_word = word.lower().strip(".,!?()\"'")
+            if clean_word in banglish_map:
+                # Replace with Bengali word but preserve original punctuation
+                # For a robust system, we would use a proper transliteration model (e.g., bnlp)
+                processed_words.append(banglish_map[clean_word])
+            else:
+                processed_words.append(word)
+                
+        return " ".join(processed_words)
+
 # Global instance for easy import
 nlp_pipeline = NLPPipeline()
