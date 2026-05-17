@@ -1,19 +1,55 @@
 import neo4j from 'neo4j-driver';
-
+import weaviate from 'weaviate-ts-client';
+import { WeaviateVectorStore, VectorStoreIndex } from 'llamaindex';
 const NEO4J_URI = process.env.NEO4J_URI || 'bolt://localhost:7687';
 const NEO4J_USERNAME = process.env.NEO4J_USERNAME || 'neo4j';
 const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || 'password';
 
 const driver = neo4j.driver(NEO4J_URI, neo4j.auth.basic(NEO4J_USERNAME, NEO4J_PASSWORD));
 
+const WEAVIATE_URL = process.env.WEAVIATE_URL || 'localhost:8080';
+
+const weaviateClient = weaviate.client({
+  scheme: 'http',
+  host: WEAVIATE_URL,
+});
+
+/**
+ * Connects to Weaviate for vector similarity retrieval.
+ */
+async function retrieveVectorContext(query: string): Promise<string> {
+  try {
+    const vectorStore = new WeaviateVectorStore({
+      weaviateClient,
+      indexName: 'Campaign', // Will fall back if not populated yet
+    });
+    
+    const index = await VectorStoreIndex.fromVectorStore(vectorStore);
+    const retriever = index.asRetriever({ similarityTopK: 3 });
+    const nodes = await retriever.retrieve({ query });
+    
+    if (nodes.length === 0) return "";
+    
+    const contextLines = ["### Weaviate Vector Retrieval (Semantic Matches)"];
+    nodes.forEach((n) => {
+      contextLines.push(`- ${n.node.text}`);
+    });
+    return contextLines.join('\\n');
+  } catch (error: any) {
+    console.warn("Weaviate vector retrieval skipped (likely unpopulated):", error.message || error);
+    return "";
+  }
+}
+
 /**
  * Connects to Neo4j to retrieve the top campaign context and competitor intelligence.
  * This satisfies the 'LlamaIndex -> Neo4j context' integration for the prompt.
  * 
  * @param campaignId The unique ID of the campaign to retrieve context for
+ * @param userQuery Optional user query to perform semantic similarity search in Weaviate
  * @returns Formatted context string to inject into the LLM system prompt
  */
-export async function retrieveGraphContext(campaignId: string): Promise<string> {
+export async function retrieveGraphContext(campaignId: string, userQuery?: string): Promise<string> {
   const session = driver.session();
   try {
     // We execute a graph traversal to gather Campaign, its Target Audience, 
@@ -58,7 +94,16 @@ export async function retrieveGraphContext(campaignId: string): Promise<string> 
       intelligence.forEach((intel: string) => contextLines.push(`  - ${intel}`));
     }
 
-    return contextLines.join('\n');
+    let finalContext = contextLines.join('\n');
+
+    if (userQuery) {
+      const vectorContext = await retrieveVectorContext(userQuery);
+      if (vectorContext) {
+        finalContext += '\n\n' + vectorContext;
+      }
+    }
+
+    return finalContext;
   } catch (error) {
     console.error("Neo4j Retrieval Error:", error);
     return "Error retrieving context from Neo4j knowledge graph.";

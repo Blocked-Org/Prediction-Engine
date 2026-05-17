@@ -2,6 +2,7 @@ import os
 import logging
 import time
 from celery import Celery
+from celery.schedules import crontab
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(name)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -32,6 +33,14 @@ celery_app.conf.update(
     task_time_limit=180,
     result_expires=3600,
     worker_prefetch_multiplier=1,
+    beat_schedule={
+        'daily-competitor-scraping': {
+            'task': 'tasks.scrape_competitor_data_task',
+            # Run at midnight every day
+            'schedule': crontab(hour=0, minute=0),
+            'args': ('https://example-competitor.com/news',),
+        },
+    }
 )
 
 logger.info(f"src.worker.main initialization completed in {time.time() - _start_time:.4f} seconds.")

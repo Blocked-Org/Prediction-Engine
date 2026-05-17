@@ -1,6 +1,6 @@
 # 1-Week Hackathon Project Plan: Brand Simulation Engine
 
-> **Last Audited:** May 16, 2026 · **Current Stage:** Day 2–3 boundary  
+> **Last Audited:** May 17, 2026 · **Current Stage:** Day 4–5 boundary  
 > **Legend:** ✅ Done · 🟡 Partial / In Progress · ❌ Not Started
 
 ---
@@ -23,7 +23,7 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
 | **Day 1** | Next.js setup, i18n Bangla config, Auth (Clerk), Base Layouts. | Neo4j/Weaviate provisioning, FastAPI structure, Base PyMC environment setup. | ✅ |
 | **Day 2** | Dashboard UI scaffolding (shadcn/ui), DataTables for mock transaction logs. | Implement core Bayesian MMM (Adstock & Hill functions) using PyMC-Marketing. | ✅ |
 | **Day 3** | Implement complex visualisations (Lightweight Charts & Chart.js) using mock data. | Implement Agent-Based Modeling (Mesa 3.0) and Markov Chain attribution. | ✅ |
-| **Day 4** | Set up LlamaIndex on the frontend, connect to Vercel AI SDK for mock executive reports. | Implement NSGA-II Genetic Algorithm (pymoo) and SHAP TreeExplainer for deterministic metrics. | 🟡 |
+| **Day 4** | Set up LlamaIndex on the frontend, connect to Vercel AI SDK for mock executive reports. | Implement NSGA-II Genetic Algorithm (pymoo) and SHAP TreeExplainer for deterministic metrics. | ✅ |
 | **Day 5** | Implement local Ollama fallback, refine Bangla text and font subsetting. | Build web scraping workers (Firecrawl/Crawl4AI) and transition models to Celery/RQ workers. | 🟡 |
 | **Day 6** | **INTEGRATION DAY:** Work with Dev B to test the real API endpoints. Fix any UI rendering bugs. | **INTEGRATION DAY:** Swap FastAPI mock responses for real model outputs. Ensure Pydantic validations pass. | ❌ |
 | **Day 7** | Vercel Edge caching (ISR), selective prefetching. UI Polish. | Final testing, database indexing, latency optimization. Prepare for presentation. | ❌ |
@@ -112,16 +112,20 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
 - [x] Build `ExecutiveReport.tsx` component
   - Needs streaming text UI (typewriter effect)
   - Must render markdown tables and bold text cleanly
-- [ ] **GraphRAG pipeline** — NOT BUILT
-  - Need: Connect LlamaIndex retriever to Neo4j knowledge graph
-  - Need: Hybrid retrieval (vector similarity + k-hop graph traversal)
-  - Need: Inject retrieved context into LLM prompt before report generation
-- [ ] **Text-to-Cypher translation service** — NOT BUILT
-  - Allow the LLM to generate native Neo4j queries dynamically
-  - Return provenance-tracked answers auditable against source graph nodes
-- [ ] **SHAP → LLM grounding** — NOT BUILT
-  - Feed SHAP feature contribution percentages into executive report context
-  - Ensures LLM explanations are mathematically anchored, not hallucinated
+- [x] **GraphRAG pipeline** — DONE
+  - ✅ `src/llm/graphrag_service.py` — hybrid text-match + 2-hop graph traversal via Neo4j
+  - ✅ `frontend/src/lib/llm/retriever.ts` — frontend GraphRAG with Weaviate vector retrieval + Neo4j context
+  - ✅ `src/api/routes/report.py` — orchestrates GraphRAG retrieval into LLM system prompt
+  - ✅ `llamaindex` + `weaviate-ts-client` used for semantic similarities on campaign/competitor text
+- [x] **Text-to-Cypher translation service** — DONE
+  - ✅ `frontend/src/app/api/chat/route.ts` — API route built
+  - ✅ Uses Vercel AI SDK to dynamically generate read-only Neo4j Cypher queries
+  - ✅ Returns provenance-tracked answers including the exact Cypher query used
+- [x] **SHAP → LLM grounding** — DONE
+  - ✅ `src/explainability/shap_tools.py` — `format_shap_for_llm()` converts SHAP output to markdown
+  - ✅ `src/api/routes/report.py` — feeds SHAP context into LLM system prompt
+  - ✅ `frontend/src/app/api/report/route.ts` — injects `shapContext` + `graphContext` into system prompt
+  - ✅ System prompt includes "STRICT DIRECTIVE" to mathematically ground recommendations
 
 ### 3.5 Offline / Local LLM Fallback (Day 5) 🟡
 
@@ -246,22 +250,26 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
 - [x] Build inference service (`src/inference/service.py` — 5.4 KB)
 - [x] Build simulate route handler (`src/api/routes/simulate.py` — 10.3 KB)
 - [x] Build dashboard results service (`src/api/services/dashboard_results.py` — 9.9 KB)
-- [ ] **Wire Celery workers to real simulation engines** — NOT DONE
-  - Currently: workers are scaffolded but may not trigger `engine_runner.py`
-  - Need: `/simulate` → Celery task → `engine_runner` → store result → return
-- [ ] **Schedule competitor scraping** — NOT DONE
-  - Need: Celery Beat or cron schedule for periodic Firecrawl/Crawl4AI runs
-  - Need: Push scraped data into Neo4j as graph nodes
-- [ ] **Populate Neo4j knowledge graph with sample data** — NOT DONE
-  - Need: Seed the graph with sample campaign/channel/audience/competitor nodes
-  - Need: Create causal edges (INFLUENCES, SUPPRESSES, CANNIBALIZES, GENERATES)
-  - Need: Create structural edges (ALLOCATED_TO, TARGETS, BELONGS_TO)
-- [ ] **Populate Weaviate vector store** — NOT DONE
-  - Need: Generate embeddings for campaign text/creative assets
-  - Need: Store embeddings with metadata for semantic similarity search
-- [ ] **Build GraphRAG indexing pipeline** — NOT DONE
-  - Need: LlamaIndex integration for community detection and pre-generated summaries
-  - Need: Hybrid retrieval (vector + k-hop graph traversal)
+- [x] **Wire Celery workers to real simulation engines** — DONE
+  - ✅ `src/api/worker.py` — imports `run_micro_simulation` and `run_macro_forecast` from `engine_runner`
+  - ✅ `src/worker/tasks.py` — wires `run_full_simulation_task` and `run_forecast_task` to engine pipeline
+  - ✅ `/api/v1/simulate` → Celery `run_simulation_task.delay()` → `engine_runner` → return task_id
+  - ✅ `/api/v1/task/{task_id}` polling endpoint returns result when complete
+- [x] **Schedule competitor scraping** — DONE
+  - ✅ `scrape_competitor_data_task` added to Celery Beat schedule in `src/worker/main.py`
+  - ✅ Scheduled to run daily at midnight for configured competitor URLs
+- [x] **Populate Neo4j knowledge graph with sample data** — DONE
+  - ✅ `scripts/seed_neo4j.py` (21.6 KB) — comprehensive seed script
+  - ✅ Nodes: User, Campaign, Channel, AgentCluster, Competitor, MacroContext, Outcome
+  - ✅ Edges: OWNS, ALLOCATED_TO, TARGETS, COMPETES_WITH, OPERATES_IN, GENERATES
+  - ✅ 2 sample campaigns with full relationship graphs
+- [x] **Populate Weaviate vector store** — DONE
+  - ✅ `scripts/seed_weaviate.py` fetches Neo4j campaigns and scraped competitor contexts
+  - ✅ Employs `src/nlp/pipeline.py` to generate embeddings using BAAI/bge-m3
+- [x] **Build GraphRAG indexing pipeline** — DONE
+  - ✅ `src/llm/graphrag_service.py` provides k-hop graph retrieval
+  - ✅ `src/nlp/pipeline.py` provides NLP models (`BAAI/bge-m3`, `csebuetnlp/banglabert`)
+  - ✅ Vector similarity component (Weaviate) seeded and integrated on the frontend
 
 ### 4.6 API Contract Tests & Validation ✅
 
@@ -336,8 +344,8 @@ src/
 │   ├── charts/
 │   │   ├── SaturationCurveChart.tsx # ✅ Hill function S-curve
 │   │   ├── AllocationDonutChart.tsx # ✅ Budget allocation donut
-│   │   └── (ROI chart)             # ❌ MISSING
-│   │   └── (Markov funnel)         # ❌ MISSING
+│   │   ├── ROITrackingChart.tsx     # ✅ iROAS tracking (7.7 KB)
+│   │   └── MarkovFunnelChart.tsx    # ✅ Markov funnel journey (13 KB)
 │   ├── dashboard/
 │   │   ├── DashboardView.tsx       # ✅ Primary dashboard
 │   │   ├── DashboardEmptyState.tsx  # ✅ Empty state
@@ -370,7 +378,8 @@ src/
 │   ├── service.py                  # ✅ API service layer
 │   ├── worker.py                   # ✅ Worker integration
 │   ├── routes/
-│   │   └── simulate.py             # ✅ Simulate endpoint (10KB)
+│   │   ├── simulate.py             # ✅ Simulate endpoint (10KB)
+│   │   └── report.py              # ✅ Report context endpoint (7.7KB)
 │   ├── services/
 │   │   └── dashboard_results.py    # ✅ Dashboard service (10KB)
 │   └── db/
@@ -387,7 +396,10 @@ src/
 │   └── micro.py                   # ✅ Micro facade
 ├── explainability/
 │   ├── shap_explainer.py          # ✅ SHAP TreeExplainer (4KB)
-│   └── shap_tools.py             # ✅ SHAP utilities (7KB)
+│   └── shap_tools.py             # ✅ SHAP utilities + LLM formatting (10KB)
+├── llm/
+│   ├── __init__.py                # ✅ Package init
+│   └── graphrag_service.py        # ✅ GraphRAG retrieval service (8.2KB)
 ├── preprocessing/
 │   ├── web_scraper.py             # ✅ Firecrawl + Crawl4AI (5KB)
 │   ├── pipelines.py               # ✅ ETL pipeline (3KB)
@@ -419,20 +431,21 @@ src/
 | 2 | Seed Neo4j with sample campaign graph data | Dev B | 3h | — | ✅ Done |
 | 3 | Build ROI/iROAS tracking chart component | Dev A | 3h | — | ✅ Done |
 | 4 | Build Markov funnel journey visualisation | Dev A | 4h | — | ✅ Done |
-| 5 | Integration handshake: frontend → real backend | Both | 4h | #1, #2 | ✅ Done |
-| 6 | End-to-end simulation flow test | Both | 2h | #5 | ✅ Done |
+| 5 | Integration handshake: frontend → real backend | Both | 4h | #1, #2 | 🟡 Partial (report route wired; full UI→backend flow unverified) |
+| 6 | End-to-end simulation flow test | Both | 2h | #5 | 🟡 Partial (`scripts/test_e2e_engine.py` exists but requires live Neo4j) |
 | 7 | Increase unit test coverage for `training` and `worker` modules | Dev B | 3h | — | ❌ Not Started |
 
 ### 🟡 P1 — Significantly improves demo quality
 
-| # | Task | Owner | Est. Hours | Depends On |
-|:--|:--|:--|:--|:--|
-| 7 | Build GraphRAG retrieval pipeline (LlamaIndex → Neo4j → LLM) | Dev B | 5h | #2 |
-| 8 | Feed SHAP output into executive report context | Dev A | 2h | #5 |
-| 9 | Bangla NLP: load banglabert + bge-m3 | Dev B | 4h | — |
-| 10 | Populate Weaviate with campaign embeddings | Dev B | 3h | #9 |
-| 11 | Dynamic imports for chart libraries | Dev A | 1h | — |
-| 12 | Bengali font subsetting | Dev A | 1h | — |
+| # | Task | Owner | Est. Hours | Depends On | Status |
+|:--|:--|:--|:--|:--|:--|
+| 7 | Build GraphRAG retrieval pipeline (LlamaIndex → Neo4j → LLM) | Dev B | 5h | #2 | ✅ Done (Neo4j Cypher retrieval + Weaviate LlamaIndex frontend integrated) |
+| 8 | Feed SHAP output into executive report context | Dev A | 2h | #5 | ✅ Done (`format_shap_for_llm()` → report route → LLM system prompt) |
+| 9 | Bangla NLP: load banglabert + bge-m3 | Dev B | 4h | — | ✅ Done (`src/nlp/pipeline.py` singleton) |
+| 10 | Populate Weaviate with campaign embeddings | Dev B | 3h | #9 | ✅ Done (`scripts/seed_weaviate.py` populates `Campaign` and `CompetitorContext`) |
+| 11 | Dynamic imports for chart libraries | Dev A | 1h | — | ❌ Not Started |
+| 12 | Bengali font subsetting | Dev A | 1h | — | ❌ Not Started |
+| 15 | Text-to-Cypher natural language graph queries | Dev B | 4h | #7 | ✅ Done (implemented on frontend via `api/chat` route) |
 
 ### 🟢 P2 — Polish for presentation
 

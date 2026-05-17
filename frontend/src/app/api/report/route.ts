@@ -114,7 +114,7 @@ export async function POST(req: Request) {
         graphContext = backendContext.graph_context;
       } else {
         // Graceful fallback: use the existing direct Neo4j retriever
-        graphContext = await retrieveGraphContext(campaignId);
+        graphContext = await retrieveGraphContext(campaignId, userQuery);
       }
     }
 
