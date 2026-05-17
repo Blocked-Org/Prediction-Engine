@@ -30,8 +30,7 @@ describe('useTaskPoller', () => {
       };
     });
 
-    const { result } = renderHook(() => useTaskPoller({
-      taskId: 'test-123',
+    const { result } = renderHook(() => useTaskPoller('test-123', {
       intervalMs: 100, // Speed up polling for test
       onSuccess: mockOnSuccess,
       onError: mockOnError
@@ -53,8 +52,7 @@ describe('useTaskPoller', () => {
 
     (global.fetch as jest.Mock).mockRejectedValue(new Error('Network disconnected'));
 
-    const { result } = renderHook(() => useTaskPoller({
-      taskId: 'error-task',
+    const { result } = renderHook(() => useTaskPoller('error-task', {
       intervalMs: 100,
       onError: mockOnError
     }));

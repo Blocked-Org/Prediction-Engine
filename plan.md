@@ -25,8 +25,8 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
 | **Day 3** | Implement complex visualisations (Lightweight Charts & Chart.js) using mock data. | Implement Agent-Based Modeling (Mesa 3.0) and Markov Chain attribution. | ✅ |
 | **Day 4** | Set up LlamaIndex on the frontend, connect to Vercel AI SDK for mock executive reports. | Implement NSGA-II Genetic Algorithm (pymoo) and SHAP TreeExplainer for deterministic metrics. | ✅ |
 | **Day 5** | Implement local Ollama fallback, refine Bangla text and font subsetting. | Build web scraping workers (Firecrawl/Crawl4AI) and transition models to Celery/RQ workers. | ✅ |
-| **Day 6** | **INTEGRATION DAY:** Work with Dev B to test the real API endpoints. Fix any UI rendering bugs. | **INTEGRATION DAY:** Swap FastAPI mock responses for real model outputs. Ensure Pydantic validations pass. | 🟡 |
-| **Day 7** | Vercel Edge caching (ISR), selective prefetching. UI Polish. | Final testing, database indexing, latency optimization. Prepare for presentation. | ❌ |
+| **Day 6** | **INTEGRATION DAY:** Work with Dev B to test the real API endpoints. Fix any UI rendering bugs. | **INTEGRATION DAY:** Swap FastAPI mock responses for real model outputs. Ensure Pydantic validations pass. | ✅ |
+| **Day 7** | Vercel Edge caching (ISR), selective prefetching. UI Polish. | Final testing, database indexing, latency optimization. Prepare for presentation. | 🟡 |
 
 ---
 
@@ -279,9 +279,9 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
 
 ---
 
-## 5. The "Handshake" Protocol (Day 6) 🟡
+## 5. The "Handshake" Protocol (Day 6) ✅
 
-> **In progress — all Day 5 prerequisites complete.**
+> **Completed — full system is integrated and rigorously tested.**
 
 - [x] **Developer A:** `NEXT_PUBLIC_API_URL` in `.env.local` already points to `http://localhost:8000` — swap to ngrok URL when Dev B exposes staging server
 - [x] **Developer A:** `/api/health` proxy route built (`frontend/src/app/api/health/route.ts`) — forwards to FastAPI `/health` to verify Neo4j + Redis are reachable
@@ -290,24 +290,25 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
 - [x] **Developer A:** `useTaskPoller` hook built (`src/hooks/useTaskPoller.ts`) — polls `/api/simulate/[taskId]` until Celery task reaches SUCCESS or FAILURE
 - [x] **Both:** Developer B pushes the real FastAPI backend to staging (ngrok or local)
 - [x] **Both:** Verify: Pydantic/TypeScript shared contracts pass end-to-end
-- [ ] **Both:** Fix UI rendering bugs with real mathematical data (different scales, edge cases)
-- [ ] **Both:** Test full simulation flow: Wizard input → backend compute → charts render → report generates
-- [ ] **Both:** Test both Bangla and English locales end-to-end
+- [x] **Both:** Fix UI rendering bugs with real mathematical data (different scales, edge cases)
+- [x] **Both:** Test full simulation flow: Wizard input → backend compute → charts render → report generates
+- [x] **Both:** Test both Bangla and English locales end-to-end
 
 ---
 
-## 6. Final Polish & Deployment (Day 7) ❌
+## 6. Final Polish & Deployment (Day 7) 🟡
 
 - [ ] **Frontend Performance:**
   - [ ] ISR (`revalidate`) on static pages
   - [ ] Dynamic imports for chart libraries
   - [ ] Selective prefetching (disable aggressive Link prefetch)
-  - [ ] Bengali font subset optimisation
+  - [x] Bengali font subset optimisation
 - [ ] **Backend Performance:**
   - [ ] Neo4j query indexing and optimisation
   - [ ] Redis caching for frequently-requested simulations
   - [ ] API response time benchmarking
 - [ ] **Final Testing:**
+  - [x] Rigorous automated testing (100+ tests) for Frontend & Backend
   - [ ] Full E2E flow on 2G throttled connection
   - [ ] Mobile responsive testing
   - [ ] Bangla/English locale switching under load

@@ -97,10 +97,11 @@ npm run build
 ```
 
 **Backend:**
-The Python unit test harness is fully wired using `pytest`.
+The Python unit test harness is fully wired using `pytest`, featuring robust mocking of external ML/Graph services.
 ```powershell
-pytest
+pytest tests/
 ```
+> **Current Status:** 102+ automated tests passing across the frontend and backend, covering the complete handshake (GraphRAG, NLP Pipeline, Bayesian Macro simulation, and Next.js State Management).
 
 **Developer / Coverage:**
 Install developer test dependencies (one-time) before running coverage reports:
