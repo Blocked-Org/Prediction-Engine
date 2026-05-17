@@ -129,7 +129,7 @@ def test_scrape_competitor_data_success() -> None:
     """Task should delegate to CompetitorScraper.scrape_and_ingest."""
     from src.api.worker import scrape_competitor_data
 
-    with patch("src.api.worker.CompetitorScraper") as MockScraper:
+    with patch("src.preprocessing.web_scraper.CompetitorScraper") as MockScraper:
         instance = MockScraper.return_value
         instance.scrape_and_ingest.return_value = {
             "status": "ok",
@@ -148,7 +148,7 @@ def test_scrape_competitor_data_propagates_exception() -> None:
     """Task should re-raise scraper exceptions."""
     from src.api.worker import scrape_competitor_data
 
-    with patch("src.api.worker.CompetitorScraper") as MockScraper:
+    with patch("src.preprocessing.web_scraper.CompetitorScraper") as MockScraper:
         instance = MockScraper.return_value
         instance.scrape_and_ingest.side_effect = ConnectionError("Firecrawl timeout")
 

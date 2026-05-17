@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { ExecutiveReport } from '../ExecutiveReport'
 
 // Mock next-intl hook
@@ -75,7 +75,9 @@ describe('ExecutiveReport Component', () => {
     render(<ExecutiveReport simulationData={mockSimulationData} />)
     
     const generateBtn = screen.getByText('Generate Executive Summary')
-    fireEvent.click(generateBtn)
+    await act(async () => {
+      fireEvent.click(generateBtn)
+    })
 
     await waitFor(() => {
       expect(mockComplete).toHaveBeenCalledWith('Please generate the Executive Summary.')

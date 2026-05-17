@@ -20,6 +20,7 @@ from src.training.tune_train import (
 @pytest.fixture
 def mock_dataset_config() -> DatasetConfig:
     return DatasetConfig(
+        raw_glob="data/*.csv",
         target_column="sales",
         numeric_features=["budget", "cpc", "base_price", "discount_rate"],
         categorical_features=["primary_channel", "region"],
