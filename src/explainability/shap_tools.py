@@ -182,3 +182,75 @@ def save_waterfall_plot(
     plt.tight_layout()
     plt.savefig(out_path, dpi=140, bbox_inches="tight")
     plt.close()
+
+
+# ---------------------------------------------------------------------------
+# LLM-oriented formatting
+# ---------------------------------------------------------------------------
+
+
+def format_shap_for_llm(shap_values_dict: dict[str, Any]) -> str:
+    """Convert the output of ``ShapExplanationEngine.explain()`` into strict
+    markdown suitable for injection into an LLM system prompt.
+
+    The returned string contains:
+    * Model prediction and base value
+    * Top positive drivers with absolute SHAP units and percentage of total
+      variance explained
+    * Top negative suppressors in the same format
+
+    Parameters
+    ----------
+    shap_values_dict:
+        Dict with keys ``prediction``, ``base_value``, ``shap_values``,
+        ``top_positive_contributions``, and ``top_negative_contributions``
+        as produced by :meth:`ShapExplanationEngine.explain`.
+
+    Returns
+    -------
+    str
+        Markdown-formatted SHAP attribution block.
+    """
+    prediction = shap_values_dict.get("prediction", 0.0)
+    base_value = shap_values_dict.get("base_value", 0.0)
+    all_shap: dict[str, float] = shap_values_dict.get("shap_values", {})
+
+    total_abs = sum(abs(v) for v in all_shap.values()) or 1.0  # avoid div-by-zero
+
+    top_pos: list[tuple[str, float] | list[Any]] = shap_values_dict.get(
+        "top_positive_contributions", []
+    )
+    top_neg: list[tuple[str, float] | list[Any]] = shap_values_dict.get(
+        "top_negative_contributions", []
+    )
+
+    lines: list[str] = [
+        "### SHAP Feature Attribution (Grounding Data)",
+        f"**Model Prediction**: {prediction:,.4f}",
+        f"**Base Value (population avg)**: {base_value:,.4f}",
+        "",
+    ]
+
+    # Positive drivers
+    if top_pos:
+        lines.append("#### Top Positive Drivers")
+        for item in top_pos:
+            name, val = (item[0], item[1]) if isinstance(item, (list, tuple)) else ("?", 0.0)
+            pct = abs(float(val)) / total_abs * 100
+            lines.append(
+                f"- **{name}**: +{pct:.1f}% of variance (+{float(val):,.4f} SHAP units)"
+            )
+        lines.append("")
+
+    # Negative suppressors
+    if top_neg:
+        lines.append("#### Top Negative Suppressors")
+        for item in top_neg:
+            name, val = (item[0], item[1]) if isinstance(item, (list, tuple)) else ("?", 0.0)
+            pct = abs(float(val)) / total_abs * 100
+            lines.append(
+                f"- **{name}**: -{pct:.1f}% of variance ({float(val):,.4f} SHAP units)"
+            )
+        lines.append("")
+
+    return "\n".join(lines)

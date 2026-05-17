@@ -31,6 +31,7 @@ from src.api.schemas import (
     ForecastResponse
 )
 from src.api.routes.simulate import router as simulate_router
+from src.api.routes.report import router as report_router
 from src.api.service import FastApiPredictionFacade
 
 # Configure structured logging
@@ -62,6 +63,8 @@ app.add_middleware(
 app.add_middleware(GZipMiddleware, minimum_size=500)
 
 app.include_router(simulate_router)
+app.include_router(report_router)
+
 
 
 def build_facade() -> FastApiPredictionFacade:
