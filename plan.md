@@ -1,6 +1,6 @@
 # 1-Week Hackathon Project Plan: Brand Simulation Engine
 
-> **Last Audited:** May 17, 2026 · **Current Stage:** Day 4–5 boundary  
+> **Last Audited:** May 17, 2026 · **Current Stage:** Day 5–6 boundary  
 > **Legend:** ✅ Done · 🟡 Partial / In Progress · ❌ Not Started
 
 ---
@@ -24,7 +24,7 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
 | **Day 2** | Dashboard UI scaffolding (shadcn/ui), DataTables for mock transaction logs. | Implement core Bayesian MMM (Adstock & Hill functions) using PyMC-Marketing. | ✅ |
 | **Day 3** | Implement complex visualisations (Lightweight Charts & Chart.js) using mock data. | Implement Agent-Based Modeling (Mesa 3.0) and Markov Chain attribution. | ✅ |
 | **Day 4** | Set up LlamaIndex on the frontend, connect to Vercel AI SDK for mock executive reports. | Implement NSGA-II Genetic Algorithm (pymoo) and SHAP TreeExplainer for deterministic metrics. | ✅ |
-| **Day 5** | Implement local Ollama fallback, refine Bangla text and font subsetting. | Build web scraping workers (Firecrawl/Crawl4AI) and transition models to Celery/RQ workers. | 🟡 |
+| **Day 5** | Implement local Ollama fallback, refine Bangla text and font subsetting. | Build web scraping workers (Firecrawl/Crawl4AI) and transition models to Celery/RQ workers. | ✅ |
 | **Day 6** | **INTEGRATION DAY:** Work with Dev B to test the real API endpoints. Fix any UI rendering bugs. | **INTEGRATION DAY:** Swap FastAPI mock responses for real model outputs. Ensure Pydantic validations pass. | ❌ |
 | **Day 7** | Vercel Edge caching (ISR), selective prefetching. UI Polish. | Final testing, database indexing, latency optimization. Prepare for presentation. | ❌ |
 
@@ -127,18 +127,18 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
   - ✅ `frontend/src/app/api/report/route.ts` — injects `shapContext` + `graphContext` into system prompt
   - ✅ System prompt includes "STRICT DIRECTIVE" to mathematically ground recommendations
 
-### 3.5 Offline / Local LLM Fallback (Day 5) 🟡
+### 3.5 Offline / Local LLM Fallback (Day 5) ✅
 
 - [x] Install `@ai-sdk/openai-compatible` for Ollama integration
 - [x] Configure local model provider (Ollama base URL)
 - [x] Build Cloud AI ↔ Offline AI toggle in the UI
-- [ ] **Bengali font subsetting optimisation** — NOT DONE
+- [x] **Bengali font subsetting optimisation** — DONE
   - Configure `next/font` with `subsets` and `unicodeRange` for Bangla glyphs only
-- [ ] **Bangla NLP pipeline** — NOT BUILT
-  - [ ] Load `csebuetnlp/banglabert` for Bangla sentiment analysis of ad copy
-  - [ ] Load `BAAI/bge-m3` for multilingual embeddings (dense + sparse retrieval)
-  - [ ] Handle Banglish code-mixed text preprocessing
-- [ ] **Refine Bangla executive report quality**
+- [x] **Bangla NLP pipeline** — DONE (Handled by Dev B)
+  - [x] Load `csebuetnlp/banglabert` for Bangla sentiment analysis of ad copy
+  - [x] Load `BAAI/bge-m3` for multilingual embeddings (dense + sparse retrieval)
+  - [x] Handle Banglish code-mixed text preprocessing
+- [x] **Refine Bangla executive report quality** — DONE
   - Test report generation in both `bn` and `en` locales
   - Ensure Bangla output reads naturally for SME marketers
 

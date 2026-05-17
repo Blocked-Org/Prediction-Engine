@@ -49,20 +49,34 @@ function buildFallbackReport(simulationData: any, locale: string) {
   const forecast = optimization?.expected_forecast;
   const allocations = optimization?.optimized_allocations ?? [];
   const recommendations = optimization?.recommendations ?? [];
-  const currency = locale === 'bn' ? 'ডলার' : 'USD';
+  const isBengali = locale === 'bn';
+  const currency = isBengali ? 'ডলার' : 'USD';
 
   const allocationLines = allocations.length > 0
     ? allocations.map((allocation: any) => `- ${allocation.channel_name}: ${allocation.spend.toLocaleString()} ${currency}`).join('\n')
-    : '- No optimized allocations were provided.';
+    : isBengali ? '- কোনো অপ্টিমাইজড অ্যালোকেশন প্রদান করা হয়নি।' : '- No optimized allocations were provided.';
 
   const recommendationLines = recommendations.length > 0
     ? recommendations.map((recommendation: any) => `- ${recommendation.action}: ${recommendation.recommendation_reasoning}`).join('\n')
-    : '- No recommendations were provided.';
+    : isBengali ? '- কোনো সুপারিশ প্রদান করা হয়নি।' : '- No recommendations were provided.';
 
   const estimatedRevenue = forecast?.estimated_revenue;
   const revenueLine = typeof estimatedRevenue === 'number'
     ? `${estimatedRevenue.toLocaleString()} ${currency}`
-    : 'unavailable';
+    : isBengali ? 'অপ্রাপ্য' : 'unavailable';
+
+  if (isBengali) {
+    return [
+      '**নির্বাহী সারাংশ (Executive Summary)**',
+      `- প্রত্যাশিত আয় (Expected Revenue): ${revenueLine}`,
+      '- অপ্টিমাইজড বাজেট অ্যালোকেশন:',
+      allocationLines,
+      '- সুপারিশসমূহ (Recommendations):',
+      recommendationLines,
+      '',
+      'লোকাল মডেল কোনো স্ট্রিম করা সারাংশ প্রদান করেনি, তাই এই ফলব্যাক রিপোর্টটি সরাসরি সিমুলেশন ডেটা থেকে তৈরি করা হয়েছে।'
+    ].join('\n');
+  }
 
   return [
     '**Executive Summary**',
@@ -98,7 +112,11 @@ export async function POST(req: Request) {
     // or rely on the initial payload. If `messages` is present, it's a chat sequence.
     const messages = body.messages;
 
-    const language = locale === 'bn' ? 'Bengali (বাংলা)' : 'English';
+    const isBengali = locale === 'bn';
+    const languageInfo = isBengali
+      ? 'Bengali (বাংলা). Use natural, modern business Bengali suitable for SME marketers. Keep technical marketing terms (like ROI, ROAS, SHAP, Budget) in English or common transliteration if it reads more naturally. Avoid overly archaic formal terms.'
+      : 'English';
+
     const campaignId = simulationData?.simulation_scenario?.campaign_input?.campaign_id;
 
     // --- Enriched context: SHAP + GraphRAG from Python backend ---
@@ -118,16 +136,17 @@ export async function POST(req: Request) {
       }
     }
 
-    const systemPrompt = `You are an expert Marketing Data Analyst. 
-Your goal is to write a brief, professional Executive Summary for a CMO based on the provided Simulation Engine results, SHAP attribution data, and Knowledge Graph context.
+    const systemPrompt = `You are an expert Marketing Data Analyst and Consultant. 
+Your goal is to write a brief, professional Executive Summary for an SME (Small/Medium Enterprise) Marketer or CMO based on the provided Simulation Engine results, SHAP attribution data, and Knowledge Graph context.
 
 Rules:
-1. You MUST respond exclusively in the following language: ${language}.
+1. You MUST respond exclusively in the following language: ${languageInfo}.
 2. Summarize the Pareto-optimal budget allocations and the expected revenue.
 3. Highlight the AI recommendations provided in the data.
 4. Integrate any relevant insights from the Neo4j Knowledge Graph Context.
 5. Keep the report under 3 paragraphs and use professional formatting (bullet points, bold text).
-6. Do not invent any data not present in the context.
+6. Adopt a consultative, supportive tone tailored to SME marketers. Ensure your language is practical, actionable, and easy to understand.
+7. Do not invent any data not present in the context.
 
 ${shapContext ? `${shapContext}\n` : ''}
 ${graphContext ? `${graphContext}\n` : ''}

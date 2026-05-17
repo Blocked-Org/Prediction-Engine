@@ -23,6 +23,9 @@ const notoSansBengali = Noto_Sans_Bengali({
   weight: ['400', '600'],
   display: 'swap',
   preload: false,
+  declarations: [
+    { prop: 'unicode-range', value: 'U+0980-09FF, U+200C, U+200D' }
+  ]
 })
 
 export const metadata: Metadata = {
