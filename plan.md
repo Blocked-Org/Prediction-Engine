@@ -133,14 +133,14 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
 - [x] Configure local model provider (Ollama base URL)
 - [x] Build Cloud AI ↔ Offline AI toggle in the UI
 - [x] **Bengali font subsetting optimisation** — DONE
-  - Configure `next/font` with `subsets` and `unicodeRange` for Bangla glyphs only
+  - [x] Configure `next/font` with `subsets` and `unicodeRange` for Bangla glyphs only
 - [x] **Bangla NLP pipeline** — DONE
   - [x] Load `csebuetnlp/banglabert` for Bangla sentiment analysis of ad copy
   - [x] Load `BAAI/bge-m3` for multilingual embeddings (dense + sparse retrieval)
   - [x] Handle Banglish code-mixed text preprocessing
 - [x] **Refine Bangla executive report quality** — DONE
-  - Test report generation in both `bn` and `en` locales
-  - Ensure Bangla output reads naturally for SME marketers
+  - [x] Test report generation in both `bn` and `en` locales
+  - [x] Ensure Bangla output reads naturally for SME marketers
 
 ### 3.6 Edge Optimisation & Polish (Day 7) ❌
 
@@ -231,7 +231,7 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
   - Aggregates outputs into unified simulation response
 - [x] Write orchestrator tests (`tests/test_simulate_init.py` — 6.3 KB)
 
-### 4.5 Ingestion, Scraping & Background Workers (Day 5) 🟡
+### 4.5 Ingestion, Scraping & Background Workers (Day 5) ✅
 
 - [x] Implement `src/preprocessing/web_scraper.py` (4.6 KB)
   - Firecrawl integration for complex protected domains
