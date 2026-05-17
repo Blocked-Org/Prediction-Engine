@@ -25,7 +25,7 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
 | **Day 3** | Implement complex visualisations (Lightweight Charts & Chart.js) using mock data. | Implement Agent-Based Modeling (Mesa 3.0) and Markov Chain attribution. | ✅ |
 | **Day 4** | Set up LlamaIndex on the frontend, connect to Vercel AI SDK for mock executive reports. | Implement NSGA-II Genetic Algorithm (pymoo) and SHAP TreeExplainer for deterministic metrics. | ✅ |
 | **Day 5** | Implement local Ollama fallback, refine Bangla text and font subsetting. | Build web scraping workers (Firecrawl/Crawl4AI) and transition models to Celery/RQ workers. | ✅ |
-| **Day 6** | **INTEGRATION DAY:** Work with Dev B to test the real API endpoints. Fix any UI rendering bugs. | **INTEGRATION DAY:** Swap FastAPI mock responses for real model outputs. Ensure Pydantic validations pass. | ❌ |
+| **Day 6** | **INTEGRATION DAY:** Work with Dev B to test the real API endpoints. Fix any UI rendering bugs. | **INTEGRATION DAY:** Swap FastAPI mock responses for real model outputs. Ensure Pydantic validations pass. | 🟡 |
 | **Day 7** | Vercel Edge caching (ISR), selective prefetching. UI Polish. | Final testing, database indexing, latency optimization. Prepare for presentation. | ❌ |
 
 ---
@@ -49,7 +49,7 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
   - `src/app/[locale]/sign-up/` route
 - [x] Build base layout with sidebar navigation (`app-sidebar.tsx`)
 - [x] Build `LanguageSwitcher.tsx` component for bn/en toggle
-- [ ] Implement font subsetting via `next/font` for Bengali Unicode ranges
+- [x] Implement font subsetting via `next/font` for Bengali Unicode ranges
   - Goal: reduce font payloads from ~600 KB to <50 KB
   - Currently: `next/font` is available but Bengali-specific subsetting not configured
 
@@ -279,17 +279,20 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
 
 ---
 
-## 5. The "Handshake" Protocol (Day 6) ❌
+## 5. The "Handshake" Protocol (Day 6) 🟡
 
-> **Not yet reached — prerequisite: Days 3–5 completion.**
+> **In progress — all Day 5 prerequisites complete.**
 
-- [ ] Developer B pushes the "real" FastAPI backend to a staging server (or local network via ngrok)
-- [ ] Developer A points the Next.js frontend `.env` variables from the "mock server" to the "staging server"
-- [ ] Verify: Pydantic/TypeScript shared contracts pass end-to-end
-- [ ] Fix UI rendering bugs with real mathematical data (different scales, edge cases)
-- [ ] Fix typing mismatches and latency issues
-- [ ] Test full simulation flow: Wizard input → backend compute → charts render → report generates
-- [ ] Test both Bangla and English locales end-to-end
+- [x] **Developer A:** `NEXT_PUBLIC_API_URL` in `.env.local` already points to `http://localhost:8000` — swap to ngrok URL when Dev B exposes staging server
+- [x] **Developer A:** `/api/health` proxy route built (`frontend/src/app/api/health/route.ts`) — forwards to FastAPI `/health` to verify Neo4j + Redis are reachable
+- [x] **Developer A:** `useBackendHealth` hook built (`src/hooks/useBackendHealth.ts`) — polls `/api/health` and returns per-service status
+- [x] **Developer A:** `BackendHealthBanner` component built (`src/components/dashboard/BackendHealthBanner.tsx`) — surfaces degraded services in the dashboard UI with a dismiss + retry button
+- [x] **Developer A:** `useTaskPoller` hook built (`src/hooks/useTaskPoller.ts`) — polls `/api/simulate/[taskId]` until Celery task reaches SUCCESS or FAILURE
+- [ ] **Both:** Developer B pushes the real FastAPI backend to staging (ngrok or local)
+- [ ] **Both:** Verify: Pydantic/TypeScript shared contracts pass end-to-end
+- [ ] **Both:** Fix UI rendering bugs with real mathematical data (different scales, edge cases)
+- [ ] **Both:** Test full simulation flow: Wizard input → backend compute → charts render → report generates
+- [ ] **Both:** Test both Bangla and English locales end-to-end
 
 ---
 

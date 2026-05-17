@@ -2,6 +2,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import LanguageSwitcher from "@/components/LanguageSwitcher"
 import { useTranslations } from "next-intl"
+import { BackendHealthBanner } from "@/components/dashboard/BackendHealthBanner"
 
 export default function DashboardLayout({
   children,
@@ -22,6 +23,10 @@ export default function DashboardLayout({
           <LanguageSwitcher />
         </header>
         <div className="flex-1 overflow-auto bg-muted/20 p-4 md:p-8">
+          {/* Day 6: surface backend degradation during integration testing */}
+          <div className="mb-4">
+            <BackendHealthBanner />
+          </div>
           {children}
         </div>
       </main>
