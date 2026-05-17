@@ -134,7 +134,7 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
 - [x] Build Cloud AI ↔ Offline AI toggle in the UI
 - [x] **Bengali font subsetting optimisation** — DONE
   - Configure `next/font` with `subsets` and `unicodeRange` for Bangla glyphs only
-- [x] **Bangla NLP pipeline** — DONE (Handled by Dev B)
+- [x] **Bangla NLP pipeline** — DONE
   - [x] Load `csebuetnlp/banglabert` for Bangla sentiment analysis of ad copy
   - [x] Load `BAAI/bge-m3` for multilingual embeddings (dense + sparse retrieval)
   - [x] Handle Banglish code-mixed text preprocessing
@@ -400,6 +400,8 @@ src/
 ├── llm/
 │   ├── __init__.py                # ✅ Package init
 │   └── graphrag_service.py        # ✅ GraphRAG retrieval service (8.2KB)
+├── nlp/
+│   └── pipeline.py                # ✅ NLP models & Banglish preprocessing
 ├── preprocessing/
 │   ├── web_scraper.py             # ✅ Firecrawl + Crawl4AI (5KB)
 │   ├── pipelines.py               # ✅ ETL pipeline (3KB)
