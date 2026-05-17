@@ -444,7 +444,7 @@ src/
 | 9 | Bangla NLP: load banglabert + bge-m3 | Dev B | 4h | — | ✅ Done (`src/nlp/pipeline.py` singleton) |
 | 10 | Populate Weaviate with campaign embeddings | Dev B | 3h | #9 | ✅ Done (`scripts/seed_weaviate.py` populates `Campaign` and `CompetitorContext`) |
 | 11 | Dynamic imports for chart libraries | Dev A | 1h | — | ❌ Not Started |
-| 12 | Bengali font subsetting | Dev A | 1h | — | ❌ Not Started |
+| 12 | Bengali font subsetting | Dev A | 1h | — | ✅ Done |
 | 15 | Text-to-Cypher natural language graph queries | Dev B | 4h | #7 | ✅ Done (implemented on frontend via `api/chat` route) |
 
 ### 🟢 P2 — Polish for presentation
