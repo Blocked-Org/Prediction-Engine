@@ -68,9 +68,13 @@ export interface OptimizationResult {
 // === NEW: Real Backend API Contracts (Day 6) ===
 
 export interface SimulationRequest {
-  campaign_timeframe: [string, string]    // ["2024-01-01", "2024-06-30"]
-  target_demographics: Record<string, string | number>
-  budget_allocation: Record<string, number>  // {"Meta": 5000, "Google": 3000}
+  Impressions: number;
+  Clicks: number;
+  Spent: number;
+  Total_Conversion: number;
+  age: string;
+  gender: string;
+  interest: string;
 }
 
 export interface SimulationResponse {
@@ -100,5 +104,5 @@ export interface ForecastRequest {
 export interface ForecastResponse {
   baseline_sales: number
   incremental_sales: number
-  confidence_interval: [number, number]   // [lower_5th, upper_95th] — REAL PyMC quantiles
+  confidence_interval: [number, number]   // [lower_5th, upper_95th] â€” REAL PyMC quantiles
 }

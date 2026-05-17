@@ -71,18 +71,20 @@ def _as_str_list(value: Any, default: list[str]) -> list[str]:
 
 
 def _build_simulation_request(campaign: dict[str, Any]) -> SimulationRequest:
-    channels = _as_str_list(campaign.get("primary_channels"), ["Meta"])
     budget = _as_float(campaign.get("budget"), 10_000.0)
-    per_channel = round(budget / max(len(channels), 1), 2)
-    end = date.today()
-    start = end - timedelta(days=90)
+    cpc = _as_float(campaign.get("cpc"), 1.5)
+    # Derive proxy ad metrics from stored campaign budget and CPC
+    clicks = max(1, int(budget / max(cpc, 0.01)))
+    impressions = max(clicks, int(clicks / 0.025))
+    conversions = max(1, int(clicks * 0.02))
     return SimulationRequest(
-        campaign_timeframe=(start, end),
-        target_demographics={
-            "age_range": str(campaign.get("target_age_range") or "25-34"),
-            "regions": ",".join(_as_str_list(campaign.get("regions"), ["Dhaka"])),
-        },
-        budget_allocation={ch: per_channel for ch in channels},
+        Impressions=float(impressions),
+        Clicks=clicks,
+        Spent=budget,
+        Total_Conversion=conversions,
+        age=str(campaign.get("target_age_range") or "25-29"),
+        gender="M",  # Default when not stored in graph
+        interest="Travel",  # Default when not stored in graph
     )
 
 

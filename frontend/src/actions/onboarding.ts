@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 
 import {
   simulationWizardSchema,
-  withExogenousDefaults,
   type SimulationWizardInput,
 } from "@/schemas/simulation";
 
@@ -32,7 +31,7 @@ export async function completeOnboarding(
     };
   }
 
-  const payload = withExogenousDefaults(parsed.data);
+  const payload = parsed.data;
 
   try {
     const response = await fetch(`${API_URL}/api/v1/simulate/init`, {

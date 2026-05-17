@@ -9,11 +9,10 @@ import { Loader2, Sparkles } from "lucide-react"
 import { completeOnboarding } from "@/actions/onboarding"
 import {
   AGE_RANGES,
-  DEFAULT_EXOGENOUS,
-  PRIMARY_CHANNELS,
+  GENDERS,
+  INTERESTS,
   simulationInitDemoPreset,
   simulationWizardSchema,
-  type PrimaryChannel,
   type SimulationWizardInput,
 } from "@/schemas/simulation"
 import { Button } from "@/components/ui/button"
@@ -25,7 +24,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   Form,
   FormControl,
@@ -36,47 +34,25 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const STEPS = [
   {
-    key: "endogenous" as const,
-    title: "Controllable Inputs",
-    subtitle: "Monthly ad spend, paid channels, and base pricing.",
+    title: "Ad Metrics",
+    subtitle: "Historical performance metrics to run simulation.",
   },
   {
-    key: "transactional" as const,
-    title: "Financial Baselines",
-    subtitle: "Average order value and customer acquisition cost.",
-  },
-  {
-    key: "audience" as const,
-    title: "Target Demographics",
-    subtitle: "Geographic regions and primary age band for clustering.",
-  },
-  {
-    key: "exogenous" as const,
-    title: "Market & Competitors",
-    subtitle: "Optional — skip to use baseline competitor and macro proxies.",
+    title: "Demographics",
+    subtitle: "Target audience constraints.",
   },
 ]
 
-const EMPTY_DEFAULTS: SimulationWizardInput = {
-  endogenous: { budget: 0, primary_channels: [], base_price: 0 },
-  transactional: { aov: 0, cac: 0 },
-  audience: { regions: [], target_age_range: "25-34" },
-  exogenous: {
-    competitors: [...DEFAULT_EXOGENOUS.competitors],
-    macroeconomic_flags: [...DEFAULT_EXOGENOUS.macroeconomic_flags],
-  },
-}
-
-function parseListInput(raw: string): string[] {
-  return raw
-    .split(/[,\n]/)
-    .map((s) => s.trim())
-    .filter(Boolean)
+const EMPTY_DEFAULTS: Partial<SimulationWizardInput> = {
+  Impressions: 0,
+  Clicks: 0,
+  Spent: 0,
+  Total_Conversion: 0,
 }
 
 function NumberField({
@@ -124,56 +100,15 @@ function NumberField({
   )
 }
 
-function ListField({
-  control,
-  name,
-  label,
-  description,
-  placeholder,
-}: {
-  control: ReturnType<typeof useForm<SimulationWizardInput>>["control"]
-  name: "audience.regions" | "exogenous.competitors" | "exogenous.macroeconomic_flags"
-  label: string
-  description?: string
-  placeholder: string
-}) {
-  return (
-    <FormField
-      control={control}
-      name={name}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>{label}</FormLabel>
-          <FormControl>
-            <textarea
-              data-slot="textarea"
-              rows={3}
-              placeholder={placeholder}
-              className="flex min-h-[80px] w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
-              value={(field.value as string[]).join(", ")}
-              onChange={(e) => field.onChange(parseListInput(e.target.value))}
-            />
-          </FormControl>
-          {description ? (
-            <FormDescription>{description}</FormDescription>
-          ) : null}
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  )
-}
-
 export function SimulationWizard({ locale }: { locale: string }) {
   const { userId, isLoaded } = useAuth()
   const [step, setStep] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
-  const [skipExogenous, setSkipExogenous] = useState(false)
 
   const form = useForm<SimulationWizardInput>({
     resolver: zodResolver(simulationWizardSchema),
-    defaultValues: EMPTY_DEFAULTS,
+    defaultValues: EMPTY_DEFAULTS as SimulationWizardInput,
     mode: "onTouched",
   })
 
@@ -182,7 +117,13 @@ export function SimulationWizard({ locale }: { locale: string }) {
   const isLastStep = step === STEPS.length - 1
 
   async function handleNext() {
-    const valid = await form.trigger(currentStep.key)
+    let fieldsToValidate: FieldPath<SimulationWizardInput>[] = []
+    if (step === 0) {
+      fieldsToValidate = ["Impressions", "Clicks", "Spent", "Total_Conversion"]
+    } else if (step === 1) {
+      fieldsToValidate = ["age", "gender", "interest"]
+    }
+    const valid = await form.trigger(fieldsToValidate)
     if (valid) {
       setStep((s) => Math.min(s + 1, STEPS.length - 1))
     }
@@ -194,16 +135,6 @@ export function SimulationWizard({ locale }: { locale: string }) {
 
   function loadDemoPreset() {
     form.reset(simulationInitDemoPreset)
-    setSkipExogenous(false)
-    setSubmitError(null)
-  }
-
-  function applyExogenousDefaults() {
-    form.setValue("exogenous", {
-      competitors: [...DEFAULT_EXOGENOUS.competitors],
-      macroeconomic_flags: [...DEFAULT_EXOGENOUS.macroeconomic_flags],
-    })
-    setSkipExogenous(true)
     setSubmitError(null)
   }
 
@@ -220,15 +151,7 @@ export function SimulationWizard({ locale }: { locale: string }) {
     setIsSubmitting(true)
     setSubmitError(null)
 
-    const payload: SimulationWizardInput = skipExogenous
-      ? {
-          endogenous: values.endogenous,
-          transactional: values.transactional,
-          audience: values.audience,
-        }
-      : values
-
-    const result = await completeOnboarding(locale, payload)
+    const result = await completeOnboarding(locale, values)
     if (!result.success) {
       setSubmitError(result.error)
       setIsSubmitting(false)
@@ -261,134 +184,107 @@ export function SimulationWizard({ locale }: { locale: string }) {
               <div className="grid gap-4 sm:grid-cols-2">
                 <NumberField
                   control={form.control}
-                  name="endogenous.budget"
-                  label="Monthly ad spend"
-                  description="Total paid media budget per month."
+                  name="Impressions"
+                  label="Impressions"
+                  description="Number of ad impressions."
                 />
                 <NumberField
                   control={form.control}
-                  name="endogenous.base_price"
-                  label="Base price"
-                  step="0.01"
+                  name="Clicks"
+                  label="Clicks"
+                  description="Number of ad clicks."
+                  step="1"
                 />
-                <FormField
+                <NumberField
                   control={form.control}
-                  name="endogenous.primary_channels"
-                  render={() => (
-                    <FormItem className="sm:col-span-2">
-                      <FormLabel>Primary channels</FormLabel>
-                      <FormDescription>
-                        Select all paid platforms you actively run.
-                      </FormDescription>
-                      <div className="mt-2 flex flex-wrap gap-4">
-                        {PRIMARY_CHANNELS.map((channel) => (
-                          <ChannelCheckbox
-                            key={channel}
-                            channel={channel}
-                            control={form.control}
-                          />
-                        ))}
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  name="Spent"
+                  label="Spent"
+                  description="Amount of money spent on the ad."
+                />
+                <NumberField
+                  control={form.control}
+                  name="Total_Conversion"
+                  label="Total Conversion"
+                  description="Total number of conversions."
+                  step="1"
                 />
               </div>
             )}
 
             {step === 1 && (
               <div className="grid gap-4 sm:grid-cols-2">
-                <NumberField
-                  control={form.control}
-                  name="transactional.aov"
-                  label="Average order value (AOV)"
-                  step="0.01"
-                />
-                <NumberField
-                  control={form.control}
-                  name="transactional.cac"
-                  label="Customer acquisition cost (CAC)"
-                  step="0.01"
-                />
-              </div>
-            )}
-
-            {step === 2 && (
-              <div className="space-y-4">
-                <ListField
-                  control={form.control}
-                  name="audience.regions"
-                  label="Target locations"
-                  description="Comma- or newline-separated cities or divisions."
-                  placeholder="Dhaka, Chittagong, Sylhet"
-                />
                 <FormField
                   control={form.control}
-                  name="audience.target_age_range"
+                  name="age"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Primary age range</FormLabel>
-                      <FormDescription>
-                        Structured band used for agent clustering in the graph.
-                      </FormDescription>
-                      <FormControl>
-                        <select
-                          className="flex h-9 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
-                          value={field.value}
-                          onChange={(e) => field.onChange(e.target.value)}
-                        >
+                      <FormLabel>Age Range</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select an age range" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
                           {AGE_RANGES.map((range) => (
-                            <option key={range} value={range}>
+                            <SelectItem key={range} value={range}>
                               {range}
-                            </option>
+                            </SelectItem>
                           ))}
-                        </select>
-                      </FormControl>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
-            )}
-
-            {step === 3 && (
-              <div className="space-y-4">
-                <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/40 px-3 py-2">
-                  <p className="text-sm text-muted-foreground">
-                    Skip this step to use baseline competitor and macro proxies.
-                  </p>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={applyExogenousDefaults}
-                  >
-                    Use baseline defaults
-                  </Button>
-                </div>
-                {!skipExogenous ? (
-                  <>
-                    <ListField
-                      control={form.control}
-                      name="exogenous.competitors"
-                      label="Competitors"
-                      description="Named brands in your category."
-                      placeholder="Unilever Bangladesh, Square Toiletries"
-                    />
-                    <ListField
-                      control={form.control}
-                      name="exogenous.macroeconomic_flags"
-                      label="Macroeconomic flags"
-                      description="Optional signals (inflation, FX, seasonality)."
-                      placeholder="inflation_elevated, ramadan_season"
-                    />
-                  </>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    Using defaults: {DEFAULT_EXOGENOUS.competitors.join(", ")} ·{" "}
-                    {DEFAULT_EXOGENOUS.macroeconomic_flags.join(", ")}
-                  </p>
-                )}
+                <FormField
+                  control={form.control}
+                  name="gender"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Gender</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select gender" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {GENDERS.map((gender) => (
+                            <SelectItem key={gender} value={gender}>
+                              {gender === "M" ? "Male" : "Female"}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="interest"
+                  render={({ field }) => (
+                    <FormItem className="sm:col-span-2">
+                      <FormLabel>Interest</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select an interest" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {INTERESTS.map((interest) => (
+                            <SelectItem key={interest} value={interest}>
+                              {interest}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             )}
 
@@ -399,7 +295,7 @@ export function SimulationWizard({ locale }: { locale: string }) {
             ) : null}
           </CardContent>
 
-          <CardFooter className="flex justify-between gap-2 border-t">
+          <CardFooter className="flex justify-between gap-2 border-t mt-4 pt-4">
             <Button
               type="button"
               variant="outline"
@@ -421,8 +317,8 @@ export function SimulationWizard({ locale }: { locale: string }) {
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="size-4 animate-spin" />
-                      Saving to graph…
+                      <Loader2 className="size-4 mr-2 animate-spin" />
+                      Running Simulation…
                     </>
                   ) : (
                     "Complete onboarding"
@@ -434,42 +330,5 @@ export function SimulationWizard({ locale }: { locale: string }) {
         </form>
       </Form>
     </Card>
-  )
-}
-
-function ChannelCheckbox({
-  channel,
-  control,
-}: {
-  channel: PrimaryChannel
-  control: ReturnType<typeof useForm<SimulationWizardInput>>["control"]
-}) {
-  return (
-    <FormField
-      control={control}
-      name="endogenous.primary_channels"
-      render={({ field }) => {
-        const selected = (field.value as PrimaryChannel[]) ?? []
-        const checked = selected.includes(channel)
-        return (
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id={`channel-${channel}`}
-              checked={checked}
-              onCheckedChange={(value) => {
-                const next =
-                  value === true
-                    ? [...selected, channel]
-                    : selected.filter((c) => c !== channel)
-                field.onChange(next)
-              }}
-            />
-            <Label htmlFor={`channel-${channel}`} className="font-normal">
-              {channel}
-            </Label>
-          </div>
-        )
-      }}
-    />
   )
 }

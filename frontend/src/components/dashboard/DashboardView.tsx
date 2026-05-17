@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import type { ComponentType } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { DashboardSimulationData } from "@/lib/dashboard";
 import type { ChannelAllocation } from "@/lib/types/contracts";
 
@@ -19,8 +20,12 @@ const DynamicDataTable = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-48 items-center justify-center text-muted-foreground animate-pulse">
-        Loading table...
+      <div className="flex flex-col gap-3 p-4">
+        <Skeleton className="h-10 w-full rounded-md" />
+        <Skeleton className="h-8 w-full rounded-md" />
+        <Skeleton className="h-8 w-full rounded-md" />
+        <Skeleton className="h-8 w-full rounded-md" />
+        <Skeleton className="h-8 w-3/4 rounded-md" />
       </div>
     ),
   }

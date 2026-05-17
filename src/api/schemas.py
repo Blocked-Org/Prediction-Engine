@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from pydantic import BaseModel, Field, ConfigDict
-from typing import Any, Annotated
+from typing import Any
 import datetime
 
 class ShapContribution(BaseModel):
@@ -49,19 +49,18 @@ class ApiHealth(BaseModel):
 
 class SimulationRequest(BaseModel):
     """
-    Request payload for a marketing simulation, defining timeframe, audience, and budgets.
+    Request payload matching the 7 features of the trained XGBoost pipeline.
+    Field names must match the model's expected columns exactly.
     """
     model_config = ConfigDict(extra="forbid")
 
-    campaign_timeframe: tuple[datetime.date, datetime.date] = Field(
-        ..., description="Tuple of start and end dates for the campaign timeframe."
-    )
-    target_demographics: dict[str, str | int | float] = Field(
-        ..., description="Key-value pairs defining target demographics."
-    )
-    budget_allocation: dict[str, Annotated[float, Field(ge=0.0)]] = Field(
-        ..., description="Budget allocated per channel, e.g., {'meta_ads': 1500.0}. Must be >= 0."
-    )
+    Impressions: float = Field(..., ge=0, description="Number of ad impressions.")
+    Clicks: int = Field(..., ge=0, description="Number of ad clicks.")
+    Spent: float = Field(..., ge=0, description="Amount of money spent on the ad.")
+    Total_Conversion: int = Field(..., ge=0, description="Total number of conversions.")
+    age: str = Field(..., description="Age range, e.g. '25-29'.")
+    gender: str = Field(..., description="Gender: 'M' or 'F'.")
+    interest: str = Field(..., description="User interest category, e.g. 'Travel', 'Sports', 'Tech'.")
 
 
 class SimulationResponse(BaseModel):

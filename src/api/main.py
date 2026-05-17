@@ -204,9 +204,8 @@ def simulate(payload: SimulationRequest) -> dict[str, str]:
     """
     try:
         logger.info(
-            "Enqueuing simulation request for timeframe: %s to %s", 
-            payload.campaign_timeframe[0], 
-            payload.campaign_timeframe[1]
+            "Enqueuing simulation request: Impressions=%s, Spent=%s, age=%s, gender=%s, interest=%s",
+            payload.Impressions, payload.Spent, payload.age, payload.gender, payload.interest
         )
         
         # Enqueue the Celery task — does NOT block the ASGI thread

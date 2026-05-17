@@ -8,13 +8,19 @@
 
 import dynamic from 'next/dynamic'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useTranslations } from 'next-intl'
 
 const AllocationDonutChart = dynamic(
   () => import('@/components/charts/AllocationDonutChart').then((mod) => mod.AllocationDonutChart),
   {
     ssr: false,
-    loading: () => <div className="h-[300px] flex items-center justify-center text-muted-foreground animate-pulse">Loading chart...</div>
+    loading: () => (
+      <div className="flex h-[300px] flex-col items-center justify-center gap-3">
+        <Skeleton className="h-[250px] w-full rounded-xl" />
+        <Skeleton className="h-4 w-1/3" />
+      </div>
+    )
   }
 )
 
@@ -22,7 +28,12 @@ const SaturationCurveChart = dynamic(
   () => import('@/components/charts/SaturationCurveChart').then((mod) => mod.SaturationCurveChart),
   {
     ssr: false,
-    loading: () => <div className="h-[300px] flex items-center justify-center text-muted-foreground animate-pulse">Loading chart...</div>
+    loading: () => (
+      <div className="flex h-[300px] flex-col items-center justify-center gap-3">
+        <Skeleton className="h-[250px] w-full rounded-xl" />
+        <Skeleton className="h-4 w-1/3" />
+      </div>
+    )
   }
 )
 

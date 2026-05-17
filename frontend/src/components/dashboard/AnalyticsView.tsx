@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
 import { ExecutiveReport } from "@/components/ExecutiveReport";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Card,
   CardContent,
@@ -33,8 +34,9 @@ const AllocationDonutChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-[300px] items-center justify-center text-muted-foreground animate-pulse">
-        Loading chart...
+      <div className="flex h-[300px] flex-col items-center justify-center gap-3">
+        <Skeleton className="h-[250px] w-full rounded-xl" />
+        <Skeleton className="h-4 w-1/3" />
       </div>
     ),
   }
@@ -48,8 +50,9 @@ const SaturationCurveChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-[300px] items-center justify-center text-muted-foreground animate-pulse">
-        Loading chart...
+      <div className="flex h-[300px] flex-col items-center justify-center gap-3">
+        <Skeleton className="h-[250px] w-full rounded-xl" />
+        <Skeleton className="h-4 w-1/3" />
       </div>
     ),
   }
@@ -63,8 +66,9 @@ const ROITrackingChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-[320px] items-center justify-center text-muted-foreground animate-pulse">
-        Loading chart...
+      <div className="flex h-[320px] flex-col items-center justify-center gap-3">
+        <Skeleton className="h-[270px] w-full rounded-xl" />
+        <Skeleton className="h-4 w-1/4" />
       </div>
     ),
   }
@@ -78,8 +82,9 @@ const MarkovFunnelChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-[340px] items-center justify-center text-muted-foreground animate-pulse">
-        Loading chart...
+      <div className="flex h-[340px] flex-col items-center justify-center gap-3">
+        <Skeleton className="h-[290px] w-full rounded-xl" />
+        <Skeleton className="h-4 w-1/3" />
       </div>
     ),
   }

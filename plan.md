@@ -142,17 +142,22 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
   - [x] Test report generation in both `bn` and `en` locales
   - [x] Ensure Bangla output reads naturally for SME marketers
 
-### 3.6 Edge Optimisation & Polish (Day 7) ❌
+### 3.6 Edge Optimisation & Polish (Day 7) 🔄
 
-- [ ] **Incremental Static Regeneration (ISR)**
-  - Add `revalidate` export to static dashboard/reporting pages
-  - Pre-compute standard Pareto frontiers and historical reports
-- [ ] **Selective prefetching**
-  - Disable default aggressive `<Link>` prefetching
-  - Bind prefetch triggers to explicit hover/touch intent
-- [ ] **Dynamic imports**
-  - Wrap `lightweight-charts` and `chart.js` with `next/dynamic` + `ssr: false`
-  - Reduce initial Time to Interactive (TTI) on low-end devices
+- [x] **Incremental Static Regeneration (ISR)** — DONE
+  - [x] Added `export const revalidate = 3600` to `dashboard/page.tsx` (already present)
+  - [x] Replaced `force-dynamic` with `revalidate = 3600` on `dashboard/analytics/page.tsx`
+  - [x] Replaced `force-dynamic` with `revalidate = 3600` on `dashboard/reporting/page.tsx`
+  - `auth()` still makes pages dynamic per-user; ISR acts as edge caching hint
+- [x] **Selective prefetching** — DONE
+  - [x] All `<Link>` tags across app confirmed `prefetch={false}` (sidebar, landing, LanguageSwitcher)
+  - [x] Intent-based prefetching added to sidebar nav via `onMouseEnter`/`onTouchStart` → `router.prefetch()`
+  - [x] Locale-aware prefetch paths (`/${locale}${url}`) via `useLocale()` + `useRouter()`
+- [x] **Dynamic imports** — DONE
+  - [x] `AnalyticsView.tsx`: All 4 charts (`AllocationDonutChart`, `SaturationCurveChart`, `ROITrackingChart`, `MarkovFunnelChart`) use `next/dynamic` with `ssr: false`
+  - [x] `ReportingCharts.tsx`: Both charts use `next/dynamic` with `ssr: false`
+  - [x] `DashboardView.tsx`: `DataTable` uses `next/dynamic` with `ssr: false`
+  - [x] All loading fallbacks upgraded from plain `<div>` to shadcn `<Skeleton>` components
 - [ ] **UI polish pass**
   - Mobile responsive testing (sidebar → Sheet drawer on small screens)
   - Loading states, error boundaries, skeleton screens

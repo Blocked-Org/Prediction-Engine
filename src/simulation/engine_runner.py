@@ -80,20 +80,15 @@ def run_micro_simulation(params: Union[SimulationRequest, Dict[str, Any]]) -> Si
     try:
         # 1. Parse params and run MarketingEnvironment Mesa model for 10 steps
         ad_exposure = 0.1
-        channels = ['Meta', 'Google', 'TikTok', 'Email']
+        channels = ['Meta', 'Google', 'TikTok']
         total_budget = 0.0
         
         if isinstance(params, SimulationRequest):
-            total_budget = sum(params.budget_allocation.values())
+            total_budget = params.Spent
             ad_exposure = min(1.0, max(0.01, total_budget / 100000.0))
-            if params.budget_allocation:
-                channels = list(params.budget_allocation.keys())
         elif isinstance(params, dict):
-            budget = params.get('budget_allocation', {})
-            total_budget = sum(budget.values()) if budget else 0.0
+            total_budget = float(params.get('Spent', 0.0))
             ad_exposure = min(1.0, max(0.01, total_budget / 100000.0))
-            if budget:
-                channels = list(budget.keys())
 
         logger.info(f"Starting micro-simulation with ad_exposure: {ad_exposure}")
         env = MarketingEnvironment(num_agents=1000, ad_exposure=ad_exposure)
@@ -135,7 +130,8 @@ def run_micro_simulation(params: Union[SimulationRequest, Dict[str, Any]]) -> Si
         # Feed competitor proxy into Bayesian engine as an exogenous control
         from src.simulation.bayesian_mmm import BayesianSimulationEngine
         bayesian_engine = BayesianSimulationEngine()
-        spend_values = [total_budget / max(len(channels), 1)] * len(channels)
+        channels = ['Meta', 'Google', 'TikTok']
+        spend_values = [total_budget * 0.5, total_budget * 0.3, total_budget * 0.2]
         data_matrix: Dict[str, Any] = {
             ch: [spend] for ch, spend in zip(channels, spend_values)
         }
