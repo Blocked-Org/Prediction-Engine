@@ -68,13 +68,20 @@ export interface OptimizationResult {
 // === NEW: Real Backend API Contracts (Day 6) ===
 
 export interface SimulationRequest {
-  Impressions: number;
-  Clicks: number;
-  Spent: number;
-  Total_Conversion: number;
-  age: string;
-  gender: string;
-  interest: string;
+  clerk_user_id: string;
+  endogenous: {
+    Impressions: number;
+    Clicks: number;
+    Spent: number;
+  };
+  transactional: {
+    Total_Conversion: number;
+  };
+  audience: {
+    age: string;
+    gender: string;
+    interest: string;
+  };
 }
 
 export interface SimulationResponse {

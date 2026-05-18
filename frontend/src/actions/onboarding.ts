@@ -3,10 +3,7 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
-import {
-  simulationWizardSchema,
-  type SimulationWizardInput,
-} from "@/schemas/simulation";
+import type { SimulationRequest } from "@/lib/types/contracts";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -16,31 +13,18 @@ export type OnboardingActionResult =
 
 export async function completeOnboarding(
   locale: string,
-  input: SimulationWizardInput
+  payload: SimulationRequest
 ): Promise<OnboardingActionResult> {
   const { userId } = await auth();
   if (!userId) {
     return { success: false, error: "You must be signed in to complete onboarding." };
   }
 
-  const parsed = simulationWizardSchema.safeParse(input);
-  if (!parsed.success) {
-    return {
-      success: false,
-      error: parsed.error.issues.map((i) => i.message).join("; "),
-    };
-  }
-
-  const payload = parsed.data;
-
   try {
     const response = await fetch(`${API_URL}/api/v1/simulate/init`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...payload,
-        clerk_user_id: userId,
-      }),
+      body: JSON.stringify(payload),
       cache: "no-store",
     });
 

@@ -17,69 +17,29 @@ DEFAULT_INTENT_CLUSTERS: list[str] = ["general_intent"]
 class EndogenousMatrix(BaseModel):
     """Controllable campaign inputs (endogenous matrix)."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
-    budget: float = Field(..., gt=0, description="Monthly ad spend.")
-    primary_channels: list[PrimaryChannel] = Field(
-        ...,
-        min_length=1,
-        description="Paid media channels (Meta, Google, TikTok).",
-    )
-    base_price: float = Field(..., gt=0, description="Base product price.")
-    cpc: float = Field(default=1.5, gt=0, description="Cost per click (default if omitted).")
-    discount_rate: float = Field(
-        default=0.0,
-        ge=0,
-        le=1,
-        description="Promotional discount rate (0–1).",
-    )
+    Impressions: float = Field(..., ge=0, description="Number of ad impressions.")
+    Clicks: int = Field(..., ge=0, description="Number of ad clicks.")
+    Spent: float = Field(..., ge=0, description="Amount of money spent on the ad.")
 
 
 class TransactionalMatrix(BaseModel):
     """Financial baselines (transactional matrix)."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
-    aov: float = Field(..., gt=0, description="Average order value.")
-    cac: float = Field(..., ge=0, description="Customer acquisition cost.")
-    historical_revenue: float | None = Field(
-        default=None,
-        ge=0,
-        description="Historical revenue baseline (derived from AOV if omitted).",
-    )
-    ltv: float | None = Field(
-        default=None,
-        gt=0,
-        description="Customer lifetime value (derived from AOV if omitted).",
-    )
-
-    @model_validator(mode="after")
-    def derive_financial_defaults(self) -> TransactionalMatrix:
-        if self.historical_revenue is None:
-            self.historical_revenue = self.aov * 1000.0
-        if self.ltv is None:
-            self.ltv = self.aov * 3.0
-        return self
+    Total_Conversion: int = Field(..., ge=0, description="Total number of conversions.")
 
 
 class AudienceMatrix(BaseModel):
     """Target demographics (audience matrix)."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
-    regions: list[str] = Field(
-        ...,
-        min_length=1,
-        description="Geographic regions to target.",
-    )
-    target_age_range: AgeRange = Field(
-        ...,
-        description="Primary target age band for agent clustering.",
-    )
-    intent_clusters: list[str] = Field(
-        default_factory=lambda: list(DEFAULT_INTENT_CLUSTERS),
-        description="Behavioral intent clusters.",
-    )
+    age: str = Field(..., description="Target age range.")
+    gender: str = Field(..., description="Target gender.")
+    interest: str = Field(..., description="Target interest.")
 
 
 class ExogenousMatrix(BaseModel):

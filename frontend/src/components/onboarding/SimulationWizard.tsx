@@ -15,6 +15,7 @@ import {
   simulationWizardSchema,
   type SimulationWizardInput,
 } from "@/schemas/simulation"
+import type { SimulationRequest } from "@/lib/types/contracts"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -151,7 +152,24 @@ export function SimulationWizard({ locale }: { locale: string }) {
     setIsSubmitting(true)
     setSubmitError(null)
 
-    const result = await completeOnboarding(locale, values)
+    const payload: SimulationRequest = {
+      clerk_user_id: userId,
+      endogenous: {
+        Impressions: values.Impressions,
+        Clicks: values.Clicks,
+        Spent: values.Spent,
+      },
+      transactional: {
+        Total_Conversion: values.Total_Conversion,
+      },
+      audience: {
+        age: values.age,
+        gender: values.gender,
+        interest: values.interest,
+      },
+    }
+
+    const result = await completeOnboarding(locale, payload)
     if (!result.success) {
       setSubmitError(result.error)
       setIsSubmitting(false)
