@@ -176,12 +176,16 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
 
 ### 4.1 Database & Infrastructure Provisioning (Day 1) ✅
 
-- [x] Create `docker-compose.yml` with all three services:
+- [x] Create `docker-compose.yml` with all core services:
+  - PostgreSQL + TimescaleDB (port 5432, persistent volume, multi-tenant RLS)
   - Neo4j 5.18.0 (ports 7474/7687, persistent volume)
   - Weaviate 1.24.1 (ports 8080/50051, persistent volume)
   - Redis 7-alpine (port 6379, AOF persistence, password-protected)
 - [x] Write Neo4j client wrapper (`src/api/db/neo4j_client.py`)
 - [x] Write Weaviate client wrapper (`src/api/db/weaviate_client.py`)
+- [x] Write PostgreSQL schema migrations with RLS (`src/api/db/01_init.sql`)
+- [x] Implement thread-safe SQLAlchemy ContextVar for RLS (`src/api/db/database.py`)
+- [x] Write synthetic time-series data seeder (`src/api/db/seed_cold_start.py`)
 - [x] Write Neo4j index creation script (`scripts/create_neo4j_indexes.py` — 8.6 KB)
 - [x] Write infrastructure test script (`scripts/test_infrastructure.py` — 4.2 KB)
 - [x] Scaffold FastAPI application (`src/api/main.py` — 10.4 KB)
@@ -220,6 +224,7 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
   - Transition probability matrix construction from journey logs
   - **Removal Effect** calculation: baseline vs. channel-removed conversion delta
   - Channel-level causal contribution quantification
+- [x] Implement `src/api/services/attribution_sync.py` (Markov transition sync from Postgres to Neo4j)
 - [x] Write Markov attribution tests (`tests/test_markov_attribution.py` — 2.9 KB)
 
 ### 4.4 Optimisation & Explainability (Day 4) ✅ _(Ahead of Schedule)_

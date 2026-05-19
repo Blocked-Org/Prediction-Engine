@@ -8,7 +8,7 @@ The system is organized as a 6-layer stack:
 
 1. Data sources: endogenous ad data, exogenous web intelligence, and transactional logs.
 2. Ingestion and processing: ETL plus queue-based jobs.
-3. Storage and knowledge layer: Neo4j graph, vector storage, and analytics-ready datasets.
+3. Storage and knowledge layer: PostgreSQL + TimescaleDB for time-series, Neo4j graph, vector storage, and analytics-ready datasets.
 4. Simulation engine: Bayesian MMM, agent-based simulation, attribution, optimization, and explainability.
 5. LLM orchestration: report generation over structured simulation outputs.
 6. Application layer: Next.js bilingual dashboard and API routes.

@@ -1,58 +1,40 @@
+version: '3.8'
+
 services:
-  neo4j:
-    image: neo4j:5.18.0
-    container_name: predictionengine-neo4j
-    restart: unless-stopped
+  postgres:
+    image: timescale/timescaledb:latest-pg15
+    container_name: prediction_engine_postgres
     environment:
-      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-please_change_this_password}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: super_secure_password
+      POSTGRES_DB: prediction_engine
     ports:
-      - "${NEO4J_HTTP_PORT:-7474}:7474"
-      - "${NEO4J_BOLT_PORT:-7687}:7687"
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  neo4j:
+    image: neo4j:5.12.0
+    container_name: prediction_engine_neo4j
+    environment:
+      NEO4J_AUTH: neo4j/secure_password_here
+      # Enable APOC plugin for advanced graph algorithms
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_dbms_security_procedures_unrestricted: apoc.*
+    ports:
+      - "7474:7474" # HTTP Dashboard
+      - "7687:7687" # Bolt Protocol
     volumes:
       - neo4j_data:/data
-
-  weaviate:
-    image: cr.weaviate.io/semitechnologies/weaviate:1.24.1
-    container_name: predictionengine-weaviate
+      - neo4j_logs:/logs
+      - neo4j_import:/var/lib/neo4j/import
+      - neo4j_plugins:/plugins
     restart: unless-stopped
-    ports:
-      - "${WEAVIATE_PORT:-8080}:8080"
-      - "${WEAVIATE_GRPC_PORT:-50051}:50051"
-    environment:
-      QUERY_DEFAULTS_LIMIT: 25
-      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
-      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
-      DEFAULT_VECTORIZER_MODULE: 'none'
-      ENABLE_MODULES: ''
-      CLUSTER_HOSTNAME: 'node1'
-    volumes:
-      - weaviate_data:/var/lib/weaviate
-
-  redis:
-    image: redis:7-alpine
-    container_name: predictionengine-redis
-    restart: unless-stopped
-    command: >
-      redis-server
-      --appendonly yes
-      --appendfsync everysec
-      --dir /data
-      --requirepass "${REDIS_PASSWORD:-please_change_this_redis_password}"
-    ports:
-      - "${REDIS_PORT:-6379}:6379"
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-please_change_this_redis_password}", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-      start_period: 10s
 
 volumes:
+  pg_data:
   neo4j_data:
-    name: predictionengine_neo4j_data
-  weaviate_data:
-    name: predictionengine_weaviate_data
-  redis_data:
-    name: predictionengine_redis_data
+  neo4j_logs:
+  neo4j_import:
+  neo4j_plugins:
