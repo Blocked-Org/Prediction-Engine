@@ -52,7 +52,7 @@ class SimulationRequest(BaseModel):
     Request payload matching the 7 features of the trained XGBoost pipeline.
     Field names must match the model's expected columns exactly.
     """
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
     Impressions: float = Field(..., ge=0, description="Number of ad impressions.")
     Clicks: int = Field(..., ge=0, description="Number of ad clicks.")
@@ -61,6 +61,7 @@ class SimulationRequest(BaseModel):
     age: str = Field(..., description="Age range, e.g. '25-29'.")
     gender: str = Field(..., description="Gender: 'M' or 'F'.")
     interest: str = Field(..., description="User interest category, e.g. 'Travel', 'Sports', 'Tech'.")
+    budget_overrides: dict[str, float] | None = Field(default=None, description="Optional overrides for specific channels.")
 
 
 class SimulationResponse(BaseModel):

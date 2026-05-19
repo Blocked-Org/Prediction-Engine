@@ -80,7 +80,7 @@ ollama run gemma4:26b
 ## API Endpoints (Fully Integrated)
 
 - `GET /health` : System health check
-- `POST /api/v1/simulate` : Triggers the Triple-Engine (Macro MMM, Micro ABM, Optimization) via Celery.
+- `POST /api/v1/simulate` : Triggers the Triple-Engine (Macro MMM, Micro ABM, Optimization) via Celery. Supports dynamic `budget_overrides` from the interactive sandbox.
 - `POST /api/v1/forecast` : Triggers predictive forecasting via Celery.
 
 Frontend route handlers (Next.js):
@@ -149,4 +149,5 @@ Common variables used by the current code paths:
 
 - Bilingual UX is implemented with `next-intl` locale segments.
 - Executive report generation supports cloud/offline selection in the UI with streaming text generation.
+- Interactive Simulation Sandbox allows real-time slider reactivity and client-side Hill function visualization.
 - The pipeline is fully integrated end-to-end: from Neo4j Graph Retrieval -> PyMC/Mesa Engines -> Next.js Streaming Dashboard.

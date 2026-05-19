@@ -2,7 +2,8 @@
 
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
 
 import { ExecutiveReport } from "@/components/ExecutiveReport";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,6 +24,11 @@ import {
   generateMockMarkovData,
   type MarkovFunnelData,
 } from "@/components/charts/MarkovFunnelChart";
+import {
+  SimulationControls,
+  type ChannelBudgets,
+} from "@/components/dashboard/SimulationControls";
+import { useTaskPoller, type TaskState } from "@/hooks/useTaskPoller";
 
 // ── Dynamic imports (SSR-safe, lazy-loaded) ──────────────────────────────────
 
@@ -96,9 +102,136 @@ type AnalyticsViewProps = {
   data: DashboardSimulationData;
 };
 
-export function AnalyticsView({ data }: AnalyticsViewProps) {
+export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
   const t = useTranslations("Dashboard");
-  const { optimization_result, simulation_scenario } = data;
+  const { userId } = useAuth();
+
+  // ── Lifted simulation data state (can be updated by what-if runs) ───────
+  const [simulationData, setSimulationData] =
+    useState<DashboardSimulationData>(initialData);
+
+  // ── Task poller state for what-if simulation ────────────────────────────
+  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+  const [simulationError, setSimulationError] = useState<string | null>(null);
+
+  const { status: taskStatus } = useTaskPoller(activeTaskId, {
+    onSuccess: (result) => {
+      // Merge the what-if result back into simulation data.
+      // The backend returns optimized_allocations / forecast — overlay them.
+      if (result && typeof result === "object") {
+        setSimulationData((prev) => ({
+          ...prev,
+          optimization_result: {
+            ...prev.optimization_result,
+            ...(result as Record<string, unknown>),
+          },
+        }));
+      }
+      setActiveTaskId(null);
+      setSimulationError(null);
+    },
+    onError: (errMsg) => {
+      setSimulationError(errMsg);
+      setActiveTaskId(null);
+    },
+  });
+
+  const isSimulating =
+    taskStatus === "PENDING" || taskStatus === "PROCESSING";
+
+  // ── Live slider budgets for instant chart preview ───────────────────────
+  const [liveBudgets, setLiveBudgets] = useState<ChannelBudgets | null>(null);
+
+  const handleBudgetsChange = useCallback((budgets: ChannelBudgets) => {
+    setLiveBudgets(budgets);
+  }, []);
+
+  // Derive override spend total from live slider values
+  const liveOverrideSpend = liveBudgets
+    ? liveBudgets.Meta + liveBudgets.Google + liveBudgets.TikTok
+    : undefined;
+
+  // ── Kick off a what-if simulation ───────────────────────────────────────
+  const handleRunSimulation = useCallback(
+    async (budgets: ChannelBudgets) => {
+      setSimulationError(null);
+
+      const payload = {
+        clerk_user_id: userId ?? "",
+        endogenous: {
+          Impressions:
+            simulationData.optimization_result.optimized_allocations.reduce(
+              (sum: number, a: ChannelAllocation) =>
+                sum + (a.impressions ?? 0),
+              0
+            ),
+          Clicks:
+            simulationData.optimization_result.optimized_allocations.reduce(
+              (sum: number, a: ChannelAllocation) => sum + (a.clicks ?? 0),
+              0
+            ),
+          Spent: budgets.Meta + budgets.Google + budgets.TikTok,
+        },
+        transactional: {
+          Total_Conversion:
+            simulationData.optimization_result.optimized_allocations.reduce(
+              (sum: number, a: ChannelAllocation) =>
+                sum + (a.conversions ?? 0),
+              0
+            ),
+        },
+        audience: {
+          age: "25-34",
+          gender: "M",
+          interest: "Tech",
+        },
+        // Pass budget breakdown so the backend can decompose per-channel
+        budget_overrides: {
+          Meta: budgets.Meta,
+          Google: budgets.Google,
+          TikTok: budgets.TikTok,
+        },
+      };
+
+      try {
+        const res = await fetch("/api/simulate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          const errorText = await res.text();
+          setSimulationError(`Simulation request failed: ${errorText}`);
+          return;
+        }
+
+        const data = await res.json();
+
+        if (data.task_id) {
+          // Backend returned a Celery task — poll for result
+          setActiveTaskId(data.task_id);
+        } else if (data.optimization_result || data.optimized_allocations) {
+          // Synchronous result — merge immediately
+          setSimulationData((prev) => ({
+            ...prev,
+            optimization_result: {
+              ...prev.optimization_result,
+              ...data,
+            },
+          }));
+        }
+      } catch (err) {
+        setSimulationError(
+          err instanceof Error ? err.message : "Network error"
+        );
+      }
+    },
+    [userId, simulationData]
+  );
+
+  // ── Derived values from (possibly updated) simulation data ──────────────
+  const { optimization_result } = simulationData;
   const optimizedAllocations = optimization_result.optimized_allocations;
 
   const totalSpend = optimizedAllocations.reduce(
@@ -147,6 +280,28 @@ export function AnalyticsView({ data }: AnalyticsViewProps) {
         </h1>
       </div>
 
+      {/* ── Simulation Controls (What-If Sandbox) ─────────────────────── */}
+      <SimulationControls
+        onRunSimulation={handleRunSimulation}
+        onBudgetsChange={handleBudgetsChange}
+        isLoading={isSimulating}
+        totalSpend={totalSpend}
+      />
+
+      {/* ── Simulation status feedback ────────────────────────────────── */}
+      {simulationError && (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {simulationError}
+        </div>
+      )}
+
+      {isSimulating && (
+        <div className="rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-700">
+          ⏳ Simulation is running… Charts will update automatically when
+          results are ready.
+        </div>
+      )}
+
       {/* ── Row 1: Allocation + Saturation (existing) ───────────────────── */}
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
@@ -176,6 +331,7 @@ export function AnalyticsView({ data }: AnalyticsViewProps) {
             <SaturationCurveChart
               maxSpend={totalSpend}
               estimatedRevenue={estimatedRevenue}
+              overrideSpend={liveOverrideSpend}
             />
           </CardContent>
         </Card>
@@ -225,7 +381,7 @@ export function AnalyticsView({ data }: AnalyticsViewProps) {
       </Card>
 
       {/* ── Executive Report ─────────────────────────────────────────────── */}
-      <ExecutiveReport simulationData={data} />
+      <ExecutiveReport simulationData={simulationData} />
     </div>
   );
 }

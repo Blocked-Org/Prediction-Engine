@@ -1,28 +1,133 @@
 "use client"
 
-import React, { useEffect, useRef } from 'react';
-import { createChart, ColorType, LineSeries } from 'lightweight-charts';
+import React, { useEffect, useRef, useMemo } from 'react';
+import { createChart, ColorType, LineSeries, AreaSeries, type ISeriesApi, type IChartApi } from 'lightweight-charts';
+
+// ── Hill Function Utility ─────────────────────────────────────────────────────
+
+/**
+ * Computes the Hill (sigmoidal) saturation response.
+ *
+ * Formula:  response = maxRevenue × (spend^S) / (K^S + spend^S)
+ *
+ * @param spend     - Input spend value
+ * @param S         - Shape parameter (steepness). Higher = sharper transition.
+ * @param K         - Half-saturation constant (spend at which response = 50%).
+ * @param maxRevenue - Asymptotic maximum revenue (ceiling of the S-curve).
+ * @returns           Predicted revenue for the given spend level.
+ */
+function hillResponse(
+  spend: number,
+  S: number,
+  K: number,
+  maxRevenue: number
+): number {
+  if (spend <= 0) return 0;
+  const spendPowS = Math.pow(spend, S);
+  const kPowS = Math.pow(K, S);
+  return maxRevenue * (spendPowS / (kPowS + spendPowS));
+}
+
+/**
+ * Generates an array of { time, value } data points along the Hill curve.
+ * Uses synthetic dates as the x-axis (lightweight-charts requires time).
+ */
+function generateHillCurveData(
+  maxSpend: number,
+  estimatedRevenue: number,
+  S: number,
+  K: number,
+  pointsCount: number = 120
+): { time: string; value: number }[] {
+  const maxRevenue = estimatedRevenue * 1.2; // Asymptotic ceiling
+  const plotMax = maxSpend * 1.5; // Show saturation tail beyond current spend
+  const startDate = new Date('2024-01-01').getTime();
+
+  const data: { time: string; value: number }[] = [];
+
+  for (let i = 0; i <= pointsCount; i++) {
+    const spend = (i / pointsCount) * plotMax;
+    const revenue = hillResponse(spend, S, K, maxRevenue);
+    const d = new Date(startDate + i * 86400000);
+    data.push({
+      time: d.toISOString().split('T')[0],
+      value: revenue,
+    });
+  }
+
+  return data;
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
 
 interface SaturationCurveChartProps {
   maxSpend: number;
   estimatedRevenue: number;
+  /**
+   * When provided (e.g. from the SimulationControls slider total),
+   * the chart instantly re-computes the Hill curve client-side
+   * and draws a second "override" series showing the projected shift.
+   */
+  overrideSpend?: number;
+  /**
+   * Hill shape parameter from the backend. Controls steepness.
+   * Falls back to 2.0 (moderate S-curve) if not provided.
+   */
+  hillS?: number;
+  /**
+   * Hill half-saturation constant from the backend.
+   * Falls back to 40% of maxSpend if not provided.
+   */
+  hillK?: number;
 }
 
-export function SaturationCurveChart({ maxSpend, estimatedRevenue }: SaturationCurveChartProps) {
+export function SaturationCurveChart({
+  maxSpend,
+  estimatedRevenue,
+  overrideSpend,
+  hillS,
+  hillK,
+}: SaturationCurveChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
 
+  // Refs to hold chart + series instances so we can update without re-creating
+  const chartRef = useRef<IChartApi | null>(null);
+  const baselineSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
+  const overrideSeriesRef = useRef<ISeriesApi<'Area'> | null>(null);
+  const overrideMarkerRef = useRef<ISeriesApi<'Line'> | null>(null);
+
+  // Resolve Hill parameters with sensible fallbacks
+  const S = hillS ?? 2.0;
+  const K = hillK ?? maxSpend * 0.4;
+
+  // ── Baseline curve (memoised — only changes when maxSpend / revenue / params change)
+  const baselineData = useMemo(
+    () => generateHillCurveData(maxSpend, estimatedRevenue, S, K),
+    [maxSpend, estimatedRevenue, S, K]
+  );
+
+  // ── Override curve (re-computed on every slider drag — pure client-side)
+  const overrideData = useMemo(() => {
+    if (overrideSpend == null) return null;
+    return generateHillCurveData(overrideSpend, estimatedRevenue, S, K);
+  }, [overrideSpend, estimatedRevenue, S, K]);
+
+  // ── Create the chart once ───────────────────────────────────────────────
   useEffect(() => {
     if (!chartContainerRef.current) return;
 
     const handleResize = () => {
-      chart.applyOptions({ width: chartContainerRef.current?.clientWidth });
+      chartRef.current?.applyOptions({
+        width: chartContainerRef.current?.clientWidth,
+      });
     };
 
     const chart = createChart(chartContainerRef.current, {
       layout: {
         background: { type: ColorType.Solid, color: 'transparent' },
         textColor: '#333',
-        fontFamily: 'var(--font-noto-bengali), ui-sans-serif, system-ui, sans-serif',
+        fontFamily:
+          'var(--font-noto-bengali), ui-sans-serif, system-ui, sans-serif',
       },
       width: chartContainerRef.current.clientWidth,
       height: 300,
@@ -39,7 +144,8 @@ export function SaturationCurveChart({ maxSpend, estimatedRevenue }: SaturationC
       },
     });
 
-    const lineSeries = chart.addSeries(LineSeries, {
+    // ── Baseline series (blue solid line) ──────────────────────────────
+    const baselineSeries = chart.addSeries(LineSeries, {
       color: '#2563eb', // blue-600
       lineWidth: 3,
       crosshairMarkerVisible: true,
@@ -47,45 +153,62 @@ export function SaturationCurveChart({ maxSpend, estimatedRevenue }: SaturationC
       priceLineVisible: false,
     });
 
-    const dataPoints = [];
-    const pointsCount = 100;
-    
-    // Mathematical simulation of diminishing returns S-Curve (Logistic function)
-    for (let i = 0; i <= pointsCount; i++) {
-      const spend = (i / pointsCount) * maxSpend * 1.5; // plot up to 150% of max spend to show saturation
-      
-      const L = estimatedRevenue * 1.2; // Max possible revenue limit
-      const k = 0.00005; // Steepness
-      const x0 = maxSpend * 0.4; // Midpoint
-      
-      let revenue = L / (1 + Math.exp(-k * (spend - x0)));
-      
-      // Zero out the start mathematically
-      if(i === 0) revenue = 0;
-
-      dataPoints.push({
-        value: revenue,
-      });
-    }
-
-    const startDate = new Date('2024-01-01').getTime();
-    const formattedData = dataPoints.map((dp, index) => {
-      const d = new Date(startDate + index * 86400000);
-      return {
-        time: d.toISOString().split('T')[0],
-        value: dp.value
-      };
+    // ── Override area series (violet translucent fill) ─────────────────
+    const overrideSeries = chart.addSeries(AreaSeries, {
+      topColor: 'rgba(139, 92, 246, 0.35)',    // violet-500 @ 35%
+      bottomColor: 'rgba(139, 92, 246, 0.05)', // violet-500 @ 5%
+      lineColor: '#8b5cf6',                     // violet-500
+      lineWidth: 2,
+      crosshairMarkerVisible: false,
+      lastValueVisible: false,
+      priceLineVisible: false,
     });
 
-    lineSeries.setData(formattedData);
+    // ── Override marker line (dashed-feel thin accent) ─────────────────
+    const overrideMarker = chart.addSeries(LineSeries, {
+      color: '#8b5cf6',
+      lineWidth: 1,
+      lineStyle: 2, // dashed
+      crosshairMarkerVisible: false,
+      lastValueVisible: false,
+      priceLineVisible: false,
+    });
+
+    chartRef.current = chart;
+    baselineSeriesRef.current = baselineSeries;
+    overrideSeriesRef.current = overrideSeries;
+    overrideMarkerRef.current = overrideMarker;
 
     window.addEventListener('resize', handleResize);
 
     return () => {
       window.removeEventListener('resize', handleResize);
       chart.remove();
+      chartRef.current = null;
+      baselineSeriesRef.current = null;
+      overrideSeriesRef.current = null;
+      overrideMarkerRef.current = null;
     };
-  }, [maxSpend, estimatedRevenue]);
+    // Chart is created once — data updates go through the refs below
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Update baseline data when source props change ───────────────────────
+  useEffect(() => {
+    baselineSeriesRef.current?.setData(baselineData);
+  }, [baselineData]);
+
+  // ── Update override data in real-time (slider drag) ─────────────────────
+  useEffect(() => {
+    if (overrideData) {
+      overrideSeriesRef.current?.setData(overrideData);
+      overrideMarkerRef.current?.setData(overrideData);
+    } else {
+      // Clear override series when no override is active
+      overrideSeriesRef.current?.setData([]);
+      overrideMarkerRef.current?.setData([]);
+    }
+  }, [overrideData]);
 
   return <div ref={chartContainerRef} style={{ width: '100%' }} />;
 }

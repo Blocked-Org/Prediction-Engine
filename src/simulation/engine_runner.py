@@ -83,14 +83,21 @@ def run_micro_simulation(params: Union[SimulationRequest, Dict[str, Any]]) -> Si
         channels = ['Meta', 'Google', 'TikTok']
         total_budget = 0.0
         
+        budget_overrides = None
         if isinstance(params, SimulationRequest):
             total_budget = params.Spent
+            budget_overrides = getattr(params, "budget_overrides", None)
             ad_exposure = min(1.0, max(0.01, total_budget / 100000.0))
         elif isinstance(params, dict):
             total_budget = float(params.get('Spent', 0.0))
+            budget_overrides = params.get('budget_overrides')
             ad_exposure = min(1.0, max(0.01, total_budget / 100000.0))
 
-        logger.info(f"Starting micro-simulation with ad_exposure: {ad_exposure}")
+        if budget_overrides:
+            total_budget = sum(budget_overrides.values())
+            ad_exposure = min(1.0, max(0.01, total_budget / 100000.0))
+
+        logger.info(f"Starting micro-simulation with ad_exposure: {ad_exposure}, total_budget: {total_budget}")
         env = MarketingEnvironment(num_agents=1000, ad_exposure=ad_exposure)
         
         # Step the ABM simulation 10 times
@@ -131,7 +138,10 @@ def run_micro_simulation(params: Union[SimulationRequest, Dict[str, Any]]) -> Si
         from src.simulation.bayesian_mmm import BayesianSimulationEngine
         bayesian_engine = BayesianSimulationEngine()
         channels = ['Meta', 'Google', 'TikTok']
-        spend_values = [total_budget * 0.5, total_budget * 0.3, total_budget * 0.2]
+        if budget_overrides:
+            spend_values = [float(budget_overrides.get(ch, total_budget / 3)) for ch in channels]
+        else:
+            spend_values = [total_budget * 0.5, total_budget * 0.3, total_budget * 0.2]
         data_matrix: Dict[str, Any] = {
             ch: [spend] for ch, spend in zip(channels, spend_values)
         }

@@ -160,9 +160,11 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
   - [x] `ReportingCharts.tsx`: Both charts use `next/dynamic` with `ssr: false`
   - [x] `DashboardView.tsx`: `DataTable` uses `next/dynamic` with `ssr: false`
   - [x] All loading fallbacks upgraded from plain `<div>` to shadcn `<Skeleton>` components
-- [ ] **UI polish pass**
+- [x] **UI polish pass**
   - Mobile responsive testing (sidebar → Sheet drawer on small screens)
   - Loading states, error boundaries, skeleton screens
+  - Interactive Simulation Sandbox (real-time slider reactivity with client-side Hill function)
+  - Backend integration for explicit budget_overrides piped to PyMC/Mesa engines
   - Micro-animations and hover effects for premium feel
 - [ ] **Landing page** (`src/app/[locale]/page.tsx` — 5.7 KB exists but may need polish)
 
@@ -485,5 +487,5 @@ src/
 | 14  | Selective prefetching (disable aggressive Link)     | Dev A | 1h         | —          | ✅ Done                                                              |
 | 15  | Text-to-Cypher natural language graph queries       | Dev B | 4h         | #7         | ✅ Done                                                              |
 | 16  | Graph community detection & pre-generated summaries | Dev B | 3h         | #7         | ❌ Descoped                                                          |
-| 17  | Mobile responsive polish + micro-animations         | Dev A | 3h         | —          | 🟡 Partial (Playwright mobile emulation done; visual polish ongoing) |
+| 17  | Mobile responsive polish + Interactive Sandbox      | Dev A | 3h         | —          | ✅ Done (Real-time reactivity + backend budget_overrides)            |
 | 18  | Demo script + presentation materials                | Both  | 2h         | All above  | ✅ Done (`presentation_script.md`)                                   |

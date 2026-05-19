@@ -183,52 +183,7 @@ def predict_batch(payload: BatchPredictionRequest) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
-@app.post("/api/v1/simulate", status_code=202)
-def simulate(payload: SimulationRequest) -> dict[str, Any]:
-    """
-    Endpoint for Marketing Simulation. Enqueues a task to process the simulation.
-    
-    Returns HTTP 202 Accepted with a task_id for the frontend to poll.
-    The heavy Bayesian MMM + NSGA-II computation runs in the Celery worker,
-    NOT in the main FastAPI thread.
-    
-    If an identical request is already cached in Redis the cached result is
-    returned immediately with HTTP 200 (no Celery round-trip).
-    
-    Args:
-        payload (SimulationRequest): The request payload containing timeframe, 
-            demographics, and budget allocation.
-            
-    Returns:
-        dict: A dictionary containing the task ID and status.
-            
-    Raises:
-        HTTPException: If an error occurs enqueuing the task.
-    """
-    try:
-        # ── Redis cache check ────────────────────────────────────────────
-        from src.api.cache import get_simulation_cache
-        cache = get_simulation_cache()
-        cache_ns = "simulate:micro"
-        cache_params = payload.model_dump()
-
-        cached = cache.get(cache_ns, cache_params)
-        if cached is not None:
-            logger.info("Returning cached simulation result (skipping Celery).")
-            return {"task_id": "cached", "status": "SUCCESS", "result": cached}
-
-        logger.info(
-            "Enqueuing simulation request: Impressions=%s, Spent=%s, age=%s, gender=%s, interest=%s",
-            payload.Impressions, payload.Spent, payload.age, payload.gender, payload.interest
-        )
-        
-        # Enqueue the Celery task — does NOT block the ASGI thread
-        task = run_simulation_task.delay(payload.model_dump())
-        
-        return {"task_id": task.id, "status": "processing"}
-    except Exception as exc:
-        logger.error("Error enqueuing simulation request: %s", exc)
-        raise HTTPException(status_code=500, detail="Internal server error enqueuing simulation") from exc
+# The simulate endpoint has been moved to src/api/routes/simulate.py
 
 
 @app.get("/api/v1/task/{task_id}")

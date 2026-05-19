@@ -88,6 +88,10 @@ export interface SimulationResponse {
   projected_roi: number
   incremental_roas: number
   pareto_optimal_budgets: Record<string, number>[]
+  /** Hill function shape parameter (steepness of the S-curve). Defaults to ~2 if absent. */
+  hill_S?: number
+  /** Hill function half-saturation constant (spend at which response = 50%). Defaults to derived from maxSpend. */
+  hill_K?: number
 }
 
 export interface SimulationTaskResponse {

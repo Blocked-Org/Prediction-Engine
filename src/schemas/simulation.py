@@ -99,3 +99,15 @@ class SimulationOnboardingStatus(BaseModel):
     clerk_user_id: str
     is_onboarded: bool
     has_campaign: bool = False
+
+
+class SimulationRequest(BaseModel):
+    """Nested payload for POST /api/v1/simulate"""
+
+    model_config = ConfigDict(extra="ignore")
+
+    clerk_user_id: str = Field(..., min_length=1)
+    endogenous: EndogenousMatrix
+    transactional: TransactionalMatrix
+    audience: AudienceMatrix
+    budget_overrides: dict[str, float] | None = Field(default=None, description="Optional overrides for specific channels.")

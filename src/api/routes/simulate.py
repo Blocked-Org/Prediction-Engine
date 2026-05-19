@@ -17,11 +17,66 @@ from src.schemas.simulation import (
     SimulationInitResponse,
     SimulationNodeCounts,
     SimulationOnboardingStatus,
+    SimulationRequest,
 )
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/simulate", tags=["simulate"])
+
+@router.post("", status_code=202)
+def simulate(payload: SimulationRequest) -> dict[str, Any]:
+    """
+    Endpoint for Marketing Simulation. Enqueues a task to process the simulation.
+    
+    Returns HTTP 202 Accepted with a task_id for the frontend to poll.
+    The heavy Bayesian MMM + NSGA-II computation runs in the Celery worker,
+    NOT in the main FastAPI thread.
+    
+    If an identical request is already cached in Redis the cached result is
+    returned immediately with HTTP 200 (no Celery round-trip).
+    """
+    try:
+        from src.api.worker import run_simulation_task
+        
+        # Flatten the payload for the engine (which expects the flat structure)
+        flat_payload = {
+            "Impressions": payload.endogenous.Impressions,
+            "Clicks": payload.endogenous.Clicks,
+            "Spent": payload.endogenous.Spent,
+            "Total_Conversion": payload.transactional.Total_Conversion,
+            "age": payload.audience.age,
+            "gender": payload.audience.gender,
+            "interest": payload.audience.interest,
+        }
+        
+        # Inject budget_overrides if present
+        if payload.budget_overrides:
+            flat_payload["budget_overrides"] = payload.budget_overrides
+            
+        # ── Redis cache check ────────────────────────────────────────────
+        from src.api.cache import get_simulation_cache
+        cache = get_simulation_cache()
+        cache_ns = "simulate:micro"
+
+        cached = cache.get(cache_ns, flat_payload)
+        if cached is not None:
+            logger.info("Returning cached simulation result (skipping Celery).")
+            return {"task_id": "cached", "status": "SUCCESS", "result": cached}
+
+        logger.info(
+            "Enqueuing simulation request: Impressions=%s, Spent=%s, age=%s, gender=%s, interest=%s, overrides=%s",
+            flat_payload["Impressions"], flat_payload["Spent"], flat_payload["age"], flat_payload["gender"], flat_payload["interest"], "yes" if payload.budget_overrides else "no"
+        )
+        
+        # Enqueue the Celery task — does NOT block the ASGI thread
+        task = run_simulation_task.delay(flat_payload)
+        
+        return {"task_id": task.id, "status": "processing"}
+    except Exception as exc:
+        logger.error("Error enqueuing simulation request: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error enqueuing simulation") from exc
+
 
 _CAMPAIGN_GRAPH_CYPHER = """
 MERGE (u:User {clerk_id: $clerk_user_id})
