@@ -15,36 +15,52 @@ from src.schemas.simulation import SimulationInitRequest, SimulationOnboardingSt
 VALID_PAYLOAD = {
     "clerk_user_id": "user_test_clerk_123",
     "endogenous": {
-        "budget": 250_000,
-        "primary_channels": ["Meta", "Google"],
-        "base_price": 42.5,
+        "Impressions": 10000.0,
+        "Clicks": 500,
+        "Spent": 1500.0
     },
     "transactional": {
-        "aov": 38.75,
-        "cac": 14.2,
+        "Total_Conversion": 50
     },
     "audience": {
-        "regions": ["Dhaka", "Chittagong"],
-        "target_age_range": "25-34",
+        "age": "25-34",
+        "gender": "all",
+        "interest": "technology"
     },
+    "exogenous": {
+        "competitors": ["BrandX", "BrandY"],
+        "macroeconomic_flags": ["inflation"]
+    }
 }
 
 
 @pytest.fixture
 def client() -> TestClient:
-    return TestClient(app)
+    with patch("src.api.auth.verify_clerk_token") as mock_verify, \
+         patch("src.api.auth._resolve_tenant_id", return_value="fake-tenant-uuid"), \
+         patch("src.api.auth.SessionLocal") as mock_session:
+        mock_verify.return_value = {
+            "sub": "user_test_clerk_123",
+            "org_id": "org_123",
+            "org_role": "org:admin",
+        }
+        mock_session.return_value = MagicMock()
+        
+        tc = TestClient(app)
+        tc.headers.update({"Authorization": "Bearer valid.jwt.token"})
+        yield tc
 
 
 def test_simulate_init_rejects_invalid_payload(client: TestClient) -> None:
-    bad = {**VALID_PAYLOAD, "endogenous": {**VALID_PAYLOAD["endogenous"], "budget": -1}}
+    bad = {**VALID_PAYLOAD, "endogenous": {**VALID_PAYLOAD["endogenous"], "Spent": -1.0}}
     response = client.post("/api/v1/simulate/init", json=bad)
     assert response.status_code == 422
 
 
-def test_simulate_init_rejects_empty_channels(client: TestClient) -> None:
+def test_simulate_init_rejects_negative_impressions(client: TestClient) -> None:
     bad = {
         **VALID_PAYLOAD,
-        "endogenous": {**VALID_PAYLOAD["endogenous"], "primary_channels": []},
+        "endogenous": {**VALID_PAYLOAD["endogenous"], "Impressions": -1.0},
     }
     response = client.post("/api/v1/simulate/init", json=bad)
     assert response.status_code == 422
@@ -148,7 +164,7 @@ def test_persist_simulation_init_executes_write_transaction() -> None:
     assert result.is_onboarded is True
     assert result.node_counts.competitors == 2
     assert captured_params["clerk_user_id"] == "user_test_clerk_123"
-    assert captured_params["primary_channels"] == ["Meta", "Google"]
+    assert captured_params["primary_channels"] == ["Meta"]
     assert captured_params["target_age_range"] == "25-34"
     session.execute_write.assert_called_once()
 

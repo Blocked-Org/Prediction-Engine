@@ -80,8 +80,30 @@ ollama run gemma4:26b
 ## API Endpoints (Fully Integrated)
 
 - `GET /health` : System health check
-- `POST /api/v1/simulate` : Triggers the Triple-Engine (Macro MMM, Micro ABM, Optimization) via Celery. Supports dynamic `budget_overrides` from the interactive sandbox.
+- `POST /api/v1/simulate` : Triggers the Triple-Engine (Macro MMM, Micro ABM, Optimization) via Celery. Protected by Role-Based Access Control (RBAC): `owner`, `admin`, and `analyst` roles allowed. Supports dynamic `budget_overrides` from the interactive sandbox.
+- `POST /api/v1/simulate/init` : Registers a new campaign graph. Allowed roles: `owner`, `admin`.
+- `GET /api/v1/simulate/results/{clerk_user_id}` : Loads dashboard results. Allowed roles: `owner`, `admin`, `analyst`, `viewer` (all active roles).
 - `POST /api/v1/forecast` : Triggers predictive forecasting via Celery.
+
+### Role-Based Access Control (RBAC)
+
+The backend enforces robust Role-Based Access Control using Clerk's `org_role` claims. User roles are mapped to our normalized levels (`owner`, `admin`, `analyst`, `viewer`):
+
+| Endpoint | Allowed Roles | Rationale |
+|---|---|---|
+| `POST /api/v1/simulate` | owner, admin, analyst | Viewers cannot execute heavy simulations |
+| `POST /api/v1/simulate/init` | owner, admin | Restricts graph changes to owners and admins |
+| `GET /api/v1/simulate/results/{id}` | owner, admin, analyst, viewer | Everyone can view analytical results |
+
+*The `GET /api/v1/simulate/status/{id}` endpoint remains fully public for read-only polling.*
+
+### API Key Management
+
+The backend includes a secure, tenant-scoped API Key CRUD system at `/api/v1/keys`:
+
+- `GET /api/v1/keys` : Lists active keys (exposing `key_prefix` and `name` — never the full key). Allowed roles: `owner`, `admin`.
+- `POST /api/v1/keys` : Creates a new API key. Generates a secure token `pe_k_{secrets.token_urlsafe(32)}` and stores its SHA-256 hash. Plaintext raw key is returned **exactly once** in this response. Allowed roles: `owner`, `admin`.
+- `DELETE /api/v1/keys/{key_id}` : Soft-deletes a key (sets `is_active=False`). Allowed roles: `owner`, `admin`.
 
 Frontend route handlers (Next.js):
 - `POST /api/forecast` : Frontend handshake to backend.
@@ -144,6 +166,9 @@ Common variables used by the current code paths:
 - `NEO4J_URI`
 - `NEO4J_USER`
 - `NEO4J_PASSWORD`
+- `CLERK_JWKS_URL`
+- `CLERK_ISSUER`
+- `CLERK_AUDIENCE`
 
 ## Notes
 

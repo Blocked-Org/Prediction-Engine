@@ -494,3 +494,34 @@ src/
 | 16  | Graph community detection & pre-generated summaries | Dev B | 3h         | #7         | ❌ Descoped                                                          |
 | 17  | Mobile responsive polish + Interactive Sandbox      | Dev A | 3h         | —          | ✅ Done (Real-time reactivity + backend budget_overrides)            |
 | 18  | Demo script + presentation materials                | Both  | 2h         | All above  | ✅ Done (`presentation_script.md`)                                   |
+
+---
+
+## 8.1 Multi-Tenant Security
+
+The system implements a robust, enterprise-grade multi-tenant security architecture designed to enforce complete isolation of customer data, tenant contexts, and role permissions.
+
+### Core Security Pillars
+
+#### 1. Clerk JWT Authentication & Middleware Validation
+Every request entering the backend API (excluding health-checks and static documentation) undergoes synchronous validation in the `ClerkTenantMiddleware`.
+- **Bearer Token Extraction:** The middleware extracts the `Authorization: Bearer <token>` header.
+- **JWT Verification:** Cryptographically validates the token against Clerk's JSON Web Key Sets (JWKS) URL.
+- **Identity & Organization Claims:** Resolves the `sub` (User ID), `org_id` (Active Organization ID), and `org_role` claims. An active organization selection is mandatory to access tenant-scoped resources.
+
+#### 2. Role-Based Access Control (RBAC)
+Role definitions are strictly defined via a four-tier `Role` enum: `owner`, `admin`, `analyst`, and `viewer`.
+- **Normalization:** Raw role claims from Clerk (e.g. `org:admin`) are mapped and normalized to the core `Role` enum.
+- **FastAPI Dependency Injection:** High-risk write routes (such as `/api/v1/simulate/init` and API Key creation) require specific roles (`owner` and `admin`) using the `Depends(require_role(...))` dependency factory, returning `403 Forbidden` for unauthorised actions.
+
+#### 3. Scoped API Key Management
+An enterprise tenant-scoped API Key system allows programmatic API access securely.
+- **SHA-256 Hashing:** Raw keys generated with a `pe_k_` prefix are cryptographically hashed using SHA-256 before storage.
+- **Write-Once Retrieval:** The raw key is exposed exactly once upon creation and is never returned in subsequent list or detail queries (which expose only the safe key prefix, name, and timestamps).
+- **Soft Delete:** Key deletion sets `is_active = False` rather than deleting records, retaining full historical auditing capability.
+
+#### 4. PostgreSQL Row-Level Security (RLS) via ContextVar
+PostgreSQL-level tenant isolation is handled at the database connection pool level.
+- **Thread-Safe ContextVar:** A Python thread-local context variable (`tenant_context`) is set by the authentication middleware on every incoming request.
+- **Connection Event Listener:** The SQLAlchemy database engine hooks into the session lifetime (`after_begin` event). It automatically injects the tenant ID into PostgreSQL's local runtime context via `SET LOCAL app.current_tenant = :tenant_id`.
+- **Automatic Enforcement:** The PostgreSQL engine restricts all queries dynamically through active RLS policies (`tenant_id = current_setting('app.current_tenant')::uuid`), preventing cross-tenant leakage even if raw SQL is executed.

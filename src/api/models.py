@@ -16,6 +16,7 @@ from datetime import date, datetime
 from typing import Any, Optional
 
 from sqlalchemy import (
+    Boolean,
     Column,
     Date,
     DateTime,
@@ -68,6 +69,9 @@ class Tenant(Base):
     simulation_results: Mapped[list["SimulationResult"]] = relationship(
         back_populates="tenant", cascade="all, delete-orphan"
     )
+    api_keys: Mapped[list["ApiKey"]] = relationship(
+        back_populates="tenant", cascade="all, delete-orphan"
+    )
 
 
 # ── 2. Organizations (new) ──────────────────────────────────────────
@@ -83,6 +87,10 @@ class Organization(Base):
         nullable=False,
     )
     org_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    clerk_org_id: Mapped[Optional[str]] = mapped_column(
+        String(255), unique=True, index=True,
+        comment="Clerk Organization ID (e.g. org_2xyz...) for JWT → tenant mapping",
+    )
     slug: Mapped[Optional[str]] = mapped_column(String(255), unique=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
@@ -286,3 +294,39 @@ class SimulationResult(Base):
     campaign: Mapped[Optional["Campaign"]] = relationship(
         back_populates="simulation_results"
     )
+
+
+# ── 9. API Keys (new) ──────────────────────────────────────────────────
+class ApiKey(Base):
+    __tablename__ = "api_keys"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("tenants.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    key_hash: Mapped[str] = mapped_column(
+        String(64), nullable=False, unique=True, index=True
+    )
+    key_prefix: Mapped[str] = mapped_column(String(8), nullable=False)
+    scopes: Mapped[Optional[Any]] = mapped_column(JSON, nullable=True)
+    created_by: Mapped[str] = mapped_column(String(255), nullable=False)
+    expires_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    last_used_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    is_active: Mapped[bool] = mapped_column(
+        Boolean, default=True, server_default="true"
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+    # relationships
+    tenant: Mapped["Tenant"] = relationship(back_populates="api_keys")

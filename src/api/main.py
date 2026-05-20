@@ -32,6 +32,7 @@ from src.api.schemas import (
 )
 from src.api.routes.simulate import router as simulate_router
 from src.api.routes.report import router as report_router
+from src.api.routes.keys import router as keys_router
 from src.api.service import FastApiPredictionFacade
 
 # Configure structured logging
@@ -62,8 +63,14 @@ app.add_middleware(
 # minimum_size=500 avoids compressing tiny health-check responses.
 app.add_middleware(GZipMiddleware, minimum_size=500)
 
+# Clerk multi-tenant auth middleware — validates the JWT, resolves org_id →
+# tenant_id, and sets the ContextVar for PostgreSQL RLS + Neo4j scoping.
+from src.api.middleware import ClerkTenantMiddleware  # noqa: E402
+app.add_middleware(ClerkTenantMiddleware)
+
 app.include_router(simulate_router)
 app.include_router(report_router)
+app.include_router(keys_router)
 
 
 

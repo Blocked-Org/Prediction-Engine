@@ -66,6 +66,9 @@ def _inject_tenant_context(
     session: Session, transaction, connection
 ) -> None:
     """Inject RLS tenant context at the start of every transaction."""
+    if connection.dialect.name != "postgresql":
+        return
+
     tenant_id = tenant_context.get()
     if tenant_id is None:
         return

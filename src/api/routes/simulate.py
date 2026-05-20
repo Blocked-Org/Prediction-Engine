@@ -9,6 +9,8 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from neo4j.exceptions import Neo4jError, ServiceUnavailable
 
+from src.api.auth import Role, require_role
+
 from src.api.db.neo4j_client import Neo4jManager, get_neo4j_manager
 from src.api.services.dashboard_results import get_dashboard_results
 from src.schemas.dashboard import DashboardResultsResponse
@@ -25,7 +27,10 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/simulate", tags=["simulate"])
 
 @router.post("", status_code=202)
-def simulate(payload: SimulationRequest) -> dict[str, Any]:
+def simulate(
+    payload: SimulationRequest,
+    role: Role = Depends(require_role(Role.owner, Role.admin, Role.analyst)),
+) -> dict[str, Any]:
     """
     Endpoint for Marketing Simulation. Enqueues a task to process the simulation.
     
@@ -141,22 +146,29 @@ def _build_cypher_params(
     campaign_id: str,
     agent_cluster_id: str,
 ) -> dict[str, Any]:
+    clicks = payload.endogenous.Clicks
+    spent = payload.endogenous.Spent
+    cpc = spent / clicks if clicks > 0 else 1.5
+    conversions = payload.transactional.Total_Conversion
+    aov = spent / conversions if conversions > 0 else 100.0
+    cac = spent / conversions if conversions > 0 else 50.0
+
     return {
         "clerk_user_id": payload.clerk_user_id,
         "campaign_id": campaign_id,
         "agent_cluster_id": agent_cluster_id,
-        "budget": payload.endogenous.budget,
-        "cpc": payload.endogenous.cpc,
-        "base_price": payload.endogenous.base_price,
-        "discount_rate": payload.endogenous.discount_rate,
-        "primary_channels": list(payload.endogenous.primary_channels),
-        "historical_revenue": payload.transactional.historical_revenue,
-        "aov": payload.transactional.aov,
-        "cac": payload.transactional.cac,
-        "ltv": payload.transactional.ltv,
-        "regions": payload.audience.regions,
-        "target_age_range": payload.audience.target_age_range,
-        "intent_clusters": payload.audience.intent_clusters,
+        "budget": spent,
+        "cpc": cpc,
+        "base_price": 100.0,
+        "discount_rate": 0.0,
+        "primary_channels": ["Meta"],
+        "historical_revenue": spent * 1.5,
+        "aov": aov,
+        "cac": cac,
+        "ltv": aov * 3.0,
+        "regions": ["Dhaka"],
+        "target_age_range": payload.audience.age,
+        "intent_clusters": [payload.audience.interest],
         "competitors": payload.exogenous.competitors,
         "macroeconomic_flags": payload.exogenous.macroeconomic_flags,
     }
@@ -266,6 +278,7 @@ def persist_simulation_init(
 def simulate_results(
     clerk_user_id: str,
     neo4j: Neo4jManager = Depends(get_neo4j_manager),
+    role: Role = Depends(require_role(Role.owner, Role.admin, Role.analyst, Role.viewer)),
 ) -> DashboardResultsResponse:
     """
     Return dashboard-ready simulation data for the user's latest Neo4j campaign.
@@ -316,6 +329,7 @@ def simulate_onboarding_status(
 def simulate_init(
     payload: SimulationInitRequest,
     neo4j: Neo4jManager = Depends(get_neo4j_manager),
+    role: Role = Depends(require_role(Role.owner, Role.admin)),
 ) -> SimulationInitResponse:
     """
     Validate onboarding matrices and persist them to the Neo4j knowledge graph.
@@ -325,9 +339,10 @@ def simulate_init(
     """
     try:
         logger.info(
-            "Initializing simulation graph for campaign (regions=%s, channels=%s, competitors=%d)",
-            payload.audience.regions,
-            payload.endogenous.primary_channels,
+            "Initializing simulation graph for campaign (age=%s, interest=%s, spent=%s, competitors=%d)",
+            payload.audience.age,
+            payload.audience.interest,
+            payload.endogenous.Spent,
             len(payload.exogenous.competitors),
         )
         return persist_simulation_init(neo4j, payload)

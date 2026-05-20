@@ -22,9 +22,13 @@ import pytest
 # ---------------------------------------------------------------------------
 
 SIMULATION_PAYLOAD = {
-    "campaign_timeframe": ["2026-01-01", "2026-03-31"],
-    "target_demographics": {"age_range": "25-34", "region": "Dhaka"},
-    "budget_allocation": {"Meta": 5000.0, "Google": 5000.0},
+    "Impressions": 10000.0,
+    "Clicks": 500,
+    "Spent": 1000.0,
+    "Total_Conversion": 50,
+    "age": "25-29",
+    "gender": "M",
+    "interest": "Travel",
 }
 
 FORECAST_PAYLOAD = {

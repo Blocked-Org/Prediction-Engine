@@ -13,19 +13,13 @@ def test_simulation_contract_validation():
     """
     # 1. Create a realistic dummy instance of SimulationRequest
     dummy_request = SimulationRequest(
-        campaign_timeframe=(date(2026, 6, 1), date(2026, 8, 31)),
-        target_demographics={
-            "age_min": 18,
-            "age_max": 45,
-            "region": "North America",
-            "interests": "Technology"
-        },
-        budget_allocation={
-            "Meta": 25000.0,
-            "Google": 40000.0,
-            "TikTok": 15000.0,
-            "Email": 5000.0
-        }
+        Impressions=10000.0,
+        Clicks=500,
+        Spent=1000.0,
+        Total_Conversion=50,
+        age="25-29",
+        gender="M",
+        interest="Travel",
     )
 
     # 2. Pass the dummy request into run_micro_simulation

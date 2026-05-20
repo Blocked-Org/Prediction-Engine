@@ -19,6 +19,21 @@ from src.api.schemas import SimulationResponse, ForecastResponse
 client = TestClient(app)
 
 
+@pytest.fixture(autouse=True)
+def mock_clerk_auth():
+    with patch("src.api.auth.verify_clerk_token") as mock_verify, \
+         patch("src.api.auth._resolve_tenant_id", return_value="fake-tenant-uuid"), \
+         patch("src.api.auth.SessionLocal") as mock_session:
+        mock_verify.return_value = {
+            "sub": "user_smoke_test_123",
+            "org_id": "org_smoke_123",
+            "org_role": "org:admin",
+        }
+        mock_session.return_value = MagicMock()
+        client.headers.update({"Authorization": "Bearer valid.jwt.token"})
+        yield
+
+
 # ---------------------------------------------------------------------------
 # Smoke Test 1: Health Endpoint
 # ---------------------------------------------------------------------------
@@ -44,7 +59,7 @@ def test_health_returns_200():
 # ---------------------------------------------------------------------------
 # Smoke Test 2: Full /simulate pipeline (real engines, mocked Celery)
 # ---------------------------------------------------------------------------
-@patch("src.api.main.run_simulation_task.delay")
+@patch("src.api.worker.run_simulation_task.delay")
 def test_simulate_endpoint_real_engines(mock_delay):
     """
     Posts a real SimulationRequest payload and validates the response schema.
@@ -56,12 +71,19 @@ def test_simulate_endpoint_real_engines(mock_delay):
     mock_delay.return_value = mock_task
 
     payload = {
-        "campaign_timeframe": ["2024-01-01", "2024-06-30"],
-        "target_demographics": {"age": "25-40", "location": "Dhaka"},
-        "budget_allocation": {
-            "Meta": 8000.0,
-            "Google": 5000.0,
-            "TikTok": 2000.0
+        "clerk_user_id": "user_smoke_test_123",
+        "endogenous": {
+            "Impressions": 10000.0,
+            "Clicks": 500,
+            "Spent": 1500.0
+        },
+        "transactional": {
+            "Total_Conversion": 50
+        },
+        "audience": {
+            "age": "25-34",
+            "gender": "all",
+            "interest": "technology"
         }
     }
 

@@ -18,6 +18,10 @@ psycopg2-binary>=2.9.0
 pydantic-settings>=2.1.0
 python-dotenv>=1.0.0
 
+# Auth (Clerk JWT verification)
+PyJWT[crypto]>=2.8.0
+httpx>=0.27.0
+
 # Advanced Simulation
 pymc>=5.10.0
 pymc-marketing>=0.4.0
