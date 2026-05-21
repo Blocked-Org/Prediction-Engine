@@ -15,15 +15,21 @@ export async function completeOnboarding(
   locale: string,
   payload: SimulationRequest
 ): Promise<OnboardingActionResult> {
-  const { userId } = await auth();
+  const { userId, getToken } = await auth();
   if (!userId) {
     return { success: false, error: "You must be signed in to complete onboarding." };
   }
 
   try {
+    // Get the Clerk session JWT for backend auth (org_id → tenant_id mapping)
+    const token = await getToken();
+
     const response = await fetch(`${API_URL}/api/v1/simulate/init`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify(payload),
       cache: "no-store",
     });
