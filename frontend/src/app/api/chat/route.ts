@@ -78,10 +78,10 @@ Cypher Query:`;
 
     let cypherQuery = cypherGeneration.text.trim();
     // Remove backticks if the model ignored instructions
-    if (cypherQuery.startsWith('\`\`\`cypher')) {
-      cypherQuery = cypherQuery.replace(/^\`\`\`cypher\n?|\n?\`\`\`$/g, '');
-    } else if (cypherQuery.startsWith('\`\`\`')) {
-      cypherQuery = cypherQuery.replace(/^\`\`\`\n?|\n?\`\`\`$/g, '');
+    if (cypherQuery.startsWith('```cypher')) {
+      cypherQuery = cypherQuery.replace(/^```cypher\n?|\n?```$/g, '');
+    } else if (cypherQuery.startsWith('```')) {
+      cypherQuery = cypherQuery.replace(/^```\n?|\n?```$/g, '');
     }
 
     // Security check: deny mutations
@@ -97,7 +97,7 @@ Cypher Query:`;
       const records = result.records.map((r) => r.toObject());
       dbResultsStr = JSON.stringify(records, null, 2);
     } catch (e: any) {
-      dbResultsStr = \`Error executing query: \${e.message}\`;
+      dbResultsStr = "Error executing query: " + e.message;
     } finally {
       await session.close();
     }
@@ -126,7 +126,7 @@ Do not invent data. If the database results are empty or contain an error, expla
       prompt: "Please provide the final answer.",
     });
 
-    return stream.toDataStreamResponse();
+    return stream.toTextStreamResponse();
   } catch (error: any) {
     console.error('Chat API Error:', error);
     return new Response(error.message || "An error occurred", { status: 500 });

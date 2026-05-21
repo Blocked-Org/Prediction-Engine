@@ -1,6 +1,7 @@
 import neo4j from 'neo4j-driver';
 import weaviate from 'weaviate-ts-client';
-import { WeaviateVectorStore, VectorStoreIndex } from 'llamaindex';
+import { VectorStoreIndex } from 'llamaindex';
+import { WeaviateVectorStore } from '@llamaindex/weaviate';
 const NEO4J_URI = process.env.NEO4J_URI || 'bolt://localhost:7687';
 const NEO4J_USERNAME = process.env.NEO4J_USERNAME || 'neo4j';
 const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || 'password';
@@ -20,7 +21,7 @@ const weaviateClient = weaviate.client({
 async function retrieveVectorContext(query: string): Promise<string> {
   try {
     const vectorStore = new WeaviateVectorStore({
-      weaviateClient,
+      weaviateClient: weaviateClient as any,
       indexName: 'Campaign', // Will fall back if not populated yet
     });
     
@@ -32,7 +33,7 @@ async function retrieveVectorContext(query: string): Promise<string> {
     
     const contextLines = ["### Weaviate Vector Retrieval (Semantic Matches)"];
     nodes.forEach((n) => {
-      contextLines.push(`- ${n.node.text}`);
+      contextLines.push(`- ${(n.node as any).text}`);
     });
     return contextLines.join('\\n');
   } catch (error: any) {

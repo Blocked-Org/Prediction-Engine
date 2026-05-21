@@ -5,6 +5,16 @@ const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
 const nextConfig: NextConfig = {
+  serverExternalPackages: [
+    'llamaindex',
+    '@llamaindex/core',
+    '@llamaindex/env',
+    '@llamaindex/weaviate',
+    '@llamaindex/node-parser',
+    '@llamaindex/workflow',
+    'weaviate-ts-client',
+    'neo4j-driver',
+  ],
   images: {
     formats: ['image/avif', 'image/webp'],
   },
