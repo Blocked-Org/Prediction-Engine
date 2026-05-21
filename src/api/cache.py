@@ -61,9 +61,9 @@ class SimulationCache:
         redis_url: str | None = None,
         default_ttl: int = DEFAULT_TTL_SECONDS,
     ) -> None:
-        self._url = redis_url or os.getenv(
+        self._url = redis_url or str(os.getenv(
             "REDIS_URL", "redis://localhost:6379/0"
-        )
+        ))
         self._ttl = default_ttl
         self._client: redis.Redis | None = None
 
@@ -80,11 +80,11 @@ class SimulationCache:
 
     # ── Public API ──────────────────────────────────────────────────────
 
-    def get(self, namespace: str, params: dict[str, Any]) -> dict[str, Any] | None:
+    async def get(self, namespace: str, params: dict[str, Any]) -> dict[str, Any] | None:
         """Retrieve a cached result, or ``None`` on miss / error."""
         key = _deterministic_key(namespace, params)
         try:
-            raw = self._get_client().get(key)
+            raw = await self._get_client().get(key)
             if raw is not None:
                 logger.info("Cache HIT  %s", key)
                 return json.loads(raw)
@@ -94,7 +94,7 @@ class SimulationCache:
             logger.warning("Redis GET failed for %s: %s", key, exc)
             return None
 
-    def set(
+    async def set(
         self,
         namespace: str,
         params: dict[str, Any],
@@ -106,21 +106,21 @@ class SimulationCache:
         ttl = ttl if ttl is not None else self._ttl
         try:
             payload = json.dumps(result, default=str)
-            self._get_client().setex(key, ttl, payload)
+            await self._get_client().setex(key, ttl, payload)
             logger.info("Cache SET  %s (TTL=%ds, size=%d bytes)", key, ttl, len(payload))
         except Exception as exc:
             logger.warning("Redis SET failed for %s: %s", key, exc)
 
-    def invalidate(self, namespace: str, params: dict[str, Any]) -> None:
+    async def invalidate(self, namespace: str, params: dict[str, Any]) -> None:
         """Remove a specific entry from the cache."""
         key = _deterministic_key(namespace, params)
         try:
-            self._get_client().delete(key)
+            await self._get_client().delete(key)
             logger.info("Cache DEL  %s", key)
         except Exception as exc:
             logger.warning("Redis DEL failed for %s: %s", key, exc)
 
-    def flush_namespace(self, namespace: str) -> int:
+    async def flush_namespace(self, namespace: str) -> int:
         """Delete all keys under a namespace prefix.  Returns count deleted."""
         pattern = f"bse:{namespace}:*"
         deleted = 0
@@ -128,9 +128,9 @@ class SimulationCache:
             client = self._get_client()
             cursor: int = 0
             while True:
-                cursor, keys = client.scan(cursor, match=pattern, count=200)
+                cursor, keys = await client.scan(cursor, match=pattern, count=200)
                 if keys:
-                    deleted += client.delete(*keys)
+                    deleted += await client.delete(*keys)
                 if cursor == 0:
                     break
             logger.info("Cache FLUSH %s — %d keys deleted", pattern, deleted)

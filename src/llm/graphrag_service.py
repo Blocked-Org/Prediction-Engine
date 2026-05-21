@@ -162,9 +162,9 @@ class GraphRAGService:
 
         with self._manager.driver.session() as session:
             if campaign_id:
-                result = session.run(_CAMPAIGN_BY_ID_CYPHER, campaign_id=campaign_id)
+                result = session.run(_CAMPAIGN_BY_ID_CYPHER, parameters={"campaign_id": campaign_id})
             else:
-                result = session.run(_TEXT_MATCH_CYPHER, query=query, top_k=top_k)
+                result = session.run(_TEXT_MATCH_CYPHER, parameters={"query": query, "top_k": top_k})
 
             return [dict(record) for record in result]
 

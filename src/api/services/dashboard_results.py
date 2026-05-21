@@ -168,7 +168,7 @@ def _recommendations(
         )
     ]
     if pareto_budgets and channels:
-        top_channel = max(pareto_budgets[0], key=pareto_budgets[0].get)
+        top_channel = max(pareto_budgets[0], key=lambda k: pareto_budgets[0][k])
         recs.append(
             Recommendation(
                 recommendation_id="rec_pareto",
@@ -277,7 +277,7 @@ def fetch_campaign_for_user(
     return dict(record)
 
 
-def get_dashboard_results(
+async def get_dashboard_results(
     manager: Neo4jManager,
     clerk_user_id: str,
 ) -> DashboardResultsResponse:
@@ -297,7 +297,7 @@ def get_dashboard_results(
         "competitor_names": sorted(campaign.get("competitor_names") or []),
     }
 
-    cached = cache.get(cache_ns, cache_params)
+    cached = await cache.get(cache_ns, cache_params)
     if cached is not None:
         try:
             return DashboardResultsResponse(**cached)
@@ -308,7 +308,7 @@ def get_dashboard_results(
         result = build_dashboard_results(campaign)
         # Persist to cache (1 hour TTL)
         try:
-            cache.set(cache_ns, cache_params, result.model_dump())
+            await cache.set(cache_ns, cache_params, result.model_dump())
         except Exception as cache_err:
             logger.warning("Failed to write simulation cache: %s", cache_err)
         return result

@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/simulate", tags=["simulate"])
 
 @router.post("", status_code=202)
-def simulate(
+async def simulate(
     payload: SimulationRequest,
     role: Role = Depends(require_role(Role.owner, Role.admin, Role.analyst)),
 ) -> dict[str, Any]:
@@ -64,7 +64,7 @@ def simulate(
         cache = get_simulation_cache()
         cache_ns = "simulate:micro"
 
-        cached = cache.get(cache_ns, flat_payload)
+        cached = await cache.get(cache_ns, flat_payload)
         if cached is not None:
             logger.info("Returning cached simulation result (skipping Celery).")
             return {"task_id": "cached", "status": "SUCCESS", "result": cached}
@@ -275,7 +275,7 @@ def persist_simulation_init(
 
 
 @router.get("/results/{clerk_user_id}", response_model=DashboardResultsResponse)
-def simulate_results(
+async def simulate_results(
     clerk_user_id: str,
     neo4j: Neo4jManager = Depends(get_neo4j_manager),
     role: Role = Depends(require_role(Role.owner, Role.admin, Role.analyst, Role.viewer)),
@@ -288,7 +288,7 @@ def simulate_results(
     ``processing`` when computation fails (retry shortly).
     """
     try:
-        return get_dashboard_results(neo4j, clerk_user_id)
+        return await get_dashboard_results(neo4j, clerk_user_id)
     except ServiceUnavailable as exc:
         logger.error("Neo4j unavailable during simulate/results: %s", exc)
         raise HTTPException(

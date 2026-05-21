@@ -193,7 +193,7 @@ def predict_batch(payload: BatchPredictionRequest) -> dict[str, Any]:
 
 
 @app.get("/api/v1/task/{task_id}")
-def get_task_status(task_id: str) -> Any:
+async def get_task_status(task_id: str) -> Any:
     """
     Retrieve the status and result of a Celery task.
     Supports both simulation and forecast tasks.
@@ -225,7 +225,7 @@ def get_task_status(task_id: str) -> Any:
             # We cache under the result key so that if the original params
             # hash is unavailable we can still serve it next time around.
             if isinstance(result, dict):
-                cache.set("simulate:micro", result, validated)
+                await cache.set("simulate:micro", result, validated)
         except Exception as cache_exc:
             logger.warning("Failed to cache task result: %s", cache_exc)
 

@@ -176,7 +176,7 @@ def save_waterfall_plot(
         picked_names = np.asarray(engine.feature_names_)[order]
         picked_vals = sv_row[order]
         plt.barh(np.arange(len(picked_vals)), picked_vals.astype(float)[::-1])
-        plt.yticks(np.arange(len(picked_vals))[::-1], picked_names[::-1])
+        plt.yticks(np.arange(len(picked_vals))[::-1], list(picked_names[::-1]))
         plt.axvline(0.0, color="#333333", linewidth=0.8)
         plt.title("Approximate waterfall fallback (matplotlib bar of SHAP contributions)")
     plt.tight_layout()
