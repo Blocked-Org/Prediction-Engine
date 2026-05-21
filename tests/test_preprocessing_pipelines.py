@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import pytest
 from src.preprocessing.pipelines import build_feature_preprocessor, ensure_feature_frame
 from src.preprocessing.config import DatasetConfig, OutlierConfig
 

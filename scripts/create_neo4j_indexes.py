@@ -16,14 +16,13 @@ Idempotent: Uses CREATE INDEX ... IF NOT EXISTS — safe to re-run.
 """
 
 import os
-import sys
 import logging
 from typing import List, Tuple
 
 from dotenv import load_dotenv
 load_dotenv()
 
-from neo4j import GraphDatabase
+from neo4j import GraphDatabase  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,

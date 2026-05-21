@@ -7,7 +7,7 @@ import uuid
 from datetime import date, timedelta
 from typing import Any
 
-from neo4j.exceptions import Neo4jError, ServiceUnavailable
+from neo4j.exceptions import ServiceUnavailable
 
 from src.api.db.neo4j_client import Neo4jManager
 from src.api.schemas import ForecastRequest, HistoricalSpendRecord, SimulationRequest

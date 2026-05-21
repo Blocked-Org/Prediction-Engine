@@ -25,10 +25,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from sqlalchemy import create_engine, inspect, text
-from sqlalchemy.orm import Session
-from alembic.config import Config
-from alembic import command
+from sqlalchemy import create_engine, inspect, text  # noqa: E402
+from sqlalchemy.orm import Session  # noqa: E402
+from alembic.config import Config  # noqa: E402
+from alembic import command  # noqa: E402
 
 # ── Configuration ────────────────────────────────────────────────────
 

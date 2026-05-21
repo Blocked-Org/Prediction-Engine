@@ -36,8 +36,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import Session
+from sqlalchemy import create_engine, text  # noqa: E402
+from sqlalchemy.orm import Session  # noqa: E402
 
 # ── Configuration ────────────────────────────────────────────────────
 

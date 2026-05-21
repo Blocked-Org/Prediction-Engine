@@ -25,7 +25,6 @@ import argparse
 import logging
 import os
 import sys
-import uuid
 from datetime import date, timedelta
 from typing import Any
 
@@ -33,8 +32,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from neo4j import GraphDatabase, Driver
-from neo4j.exceptions import ServiceUnavailable
+from neo4j import GraphDatabase, Driver  # noqa: E402
+from neo4j.exceptions import ServiceUnavailable  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,

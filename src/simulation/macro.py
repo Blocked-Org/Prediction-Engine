@@ -1,7 +1,4 @@
-import pymc as pm
 import pandas as pd
-import numpy as np
-import pymc_marketing.mmm as mmm
 
 def run_bayesian_mmm(data: pd.DataFrame, target_col: str, spend_cols: list):
     """

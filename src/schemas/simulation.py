@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field
 
 PrimaryChannel = Literal["Meta", "Google", "TikTok"]
 AgeRange = Literal["18-24", "25-34", "35-44", "45-54", "55+"]

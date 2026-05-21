@@ -15,12 +15,14 @@ export async function completeOnboarding(
   locale: string,
   payload: SimulationRequest
 ): Promise<OnboardingActionResult> {
-  const { userId, getToken } = await auth();
-  if (!userId) {
-    return { success: false, error: "You must be signed in to complete onboarding." };
-  }
+  let shouldRedirect = false;
 
   try {
+    const { userId, getToken } = await auth();
+    if (!userId) {
+      return { success: false, error: "You must be signed in to complete onboarding." };
+    }
+
     // Get the Clerk session JWT for backend auth (org_id → tenant_id mapping)
     const token = await getToken();
 
@@ -52,16 +54,8 @@ export async function completeOnboarding(
       publicMetadata: { isOnboarded: true },
     });
 
-    redirect(`/${locale}/dashboard`);
+    shouldRedirect = true;
   } catch (error) {
-    if (
-      error &&
-      typeof error === "object" &&
-      "digest" in error &&
-      String((error as { digest?: string }).digest).startsWith("NEXT_REDIRECT")
-    ) {
-      throw error;
-    }
     return {
       success: false,
       error:
@@ -70,6 +64,12 @@ export async function completeOnboarding(
           : "Failed to initialize simulation",
     };
   }
+
+  if (shouldRedirect) {
+    redirect(`/${locale}/dashboard`);
+  }
+  
+  return { success: true };
 }
 
 export async function syncOnboardingMetadata(

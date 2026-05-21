@@ -104,11 +104,11 @@ def _calculate_conversion_probability(matrix: pd.DataFrame) -> float:
     Q = P.iloc[:t, :t].values
     R = P.iloc[:t, t:].values
 
-    I = np.eye(t)
+    identity_matrix = np.eye(t)
     
     try:
-        # Fundamental matrix: N = (I - Q)^-1
-        N = np.linalg.inv(I - Q)
+        # Fundamental matrix: N = (identity_matrix - Q)^-1
+        N = np.linalg.inv(identity_matrix - Q)
     except np.linalg.LinAlgError:
         logger.warning("Singular matrix encountered during inversion. Falling back to matrix exponentiation.")
         # Fallback for ill-conditioned matrices (e.g. pure loops without escape)

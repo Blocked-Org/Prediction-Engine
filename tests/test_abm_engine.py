@@ -17,7 +17,6 @@ import pandas as pd
 
 from src.simulation.abm_engine import (
     ConsumerAgent,
-    EnvironmentConfig,
     MarketingEnvironment,
 )
 

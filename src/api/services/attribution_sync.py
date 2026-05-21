@@ -39,8 +39,8 @@ def get_raw_journeys_from_postgres():
         with engine.connect() as conn:
             df = pd.read_sql(text(query), conn)
             return df.to_dict('records')
-    except Exception as e:
-        print(f"PostgreSQL connection or table 'raw_tracking_events' missing. Using mock paths for now.")
+    except Exception:
+        print("PostgreSQL connection or table 'raw_tracking_events' missing. Using mock paths for now.")
         return mock_data
 
 def import_journeys_to_neo4j(driver, journeys):
@@ -124,10 +124,10 @@ def calculate_markov_chain_allocations(driver):
         Q = t_matrix.loc[transient, transient].values
         R = t_matrix.loc[transient, absorbing].values
         
-        # Fundamental Matrix N = (I - Q)^-1
-        I = np.eye(len(transient))
+        # Fundamental Matrix N = (identity_matrix - Q)^-1
+        identity_matrix = np.eye(len(transient))
         try:
-            N = np.linalg.inv(I - Q)
+            N = np.linalg.inv(identity_matrix - Q)
         except np.linalg.LinAlgError:
             return 0.0 # Matrix is singular
             

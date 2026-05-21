@@ -11,7 +11,6 @@ Run via: python -m scripts.test_e2e_engine
 """
 
 import logging
-import json
 from src.api.db.neo4j_client import Neo4jManager
 from src.api.services.dashboard_results import get_dashboard_results
 

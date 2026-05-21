@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping
 
 import numpy as np
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score

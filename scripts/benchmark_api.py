@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-import json
 import statistics
 import sys
 import time
@@ -194,7 +193,7 @@ async def benchmark_health(
     url = f"{base_url}/health"
     result = BenchmarkResult(endpoint=f"GET {url}")
 
-    print(f"\n🩺 Health check: GET /health")
+    print("\n🩺 Health check: GET /health")
     async with httpx.AsyncClient(timeout=timeout) as client:
         await _fire_get(client, url, result, 1)
     return result

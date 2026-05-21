@@ -10,7 +10,7 @@ from src.simulation.markov_attribution import build_transition_matrix, calculate
 logger = logging.getLogger(__name__)
 
 
-import numpy as np
+import numpy as np  # noqa: E402
 
 def cast_to_native(data: Any) -> Any:
     """
@@ -229,7 +229,6 @@ def run_macro_forecast(params: Any) -> Any:
 
         channels = list(budget_summary.keys())
         spend_values = list(budget_summary.values())
-        total_spend = sum(spend_values)
 
         # Build data matrix for the PyMC model
         data_matrix: Dict[str, Any] = {

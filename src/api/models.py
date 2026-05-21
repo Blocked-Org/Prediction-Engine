@@ -17,7 +17,6 @@ from typing import Any, Optional
 
 from sqlalchemy import (
     Boolean,
-    Column,
     Date,
     DateTime,
     ForeignKey,

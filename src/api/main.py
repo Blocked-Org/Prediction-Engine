@@ -14,7 +14,7 @@ from typing import Any
 from src.api.config import get_settings
 
 from celery.result import AsyncResult
-from src.api.worker import celery_app, run_simulation_task
+from src.api.worker import celery_app
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,7 +23,6 @@ from fastapi.middleware.gzip import GZipMiddleware
 from src.api.schemas import (
     ApiHealth,
     BatchPredictionRequest,
-    SimulationRequest,
     SimulationResponse,
     ForecastRequest,
     ForecastResponse

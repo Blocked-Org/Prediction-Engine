@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Any
+from typing import Optional
 
 from neo4j import GraphDatabase, Driver
 from neo4j.exceptions import ServiceUnavailable

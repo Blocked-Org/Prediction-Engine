@@ -1,6 +1,5 @@
 import pytest
 import numpy as np
-import pandas as pd
 from src.simulation.markov_attribution import build_transition_matrix, calculate_removal_effect
 
 

@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
 from src.api.db.neo4j_client import Neo4jManager, get_neo4j_manager

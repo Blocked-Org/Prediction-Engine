@@ -1,5 +1,3 @@
-import pytest
-from datetime import date
 from pydantic import ValidationError
 
 from src.api.schemas import SimulationRequest, SimulationResponse

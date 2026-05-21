@@ -5,10 +5,10 @@ from typing import Any, Dict
 from dotenv import load_dotenv
 load_dotenv()  # Must run before os.getenv('REDIS_URL') below
 
-from celery import Celery
+from celery import Celery  # noqa: E402
 
-from src.api.schemas import SimulationRequest, ForecastRequest
-from src.simulation.engine_runner import run_micro_simulation, run_macro_forecast
+from src.api.schemas import SimulationRequest, ForecastRequest  # noqa: E402
+from src.simulation.engine_runner import run_micro_simulation, run_macro_forecast  # noqa: E402
 
 # Configure logger
 logger = logging.getLogger(__name__)

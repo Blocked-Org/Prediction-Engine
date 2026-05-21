@@ -2,7 +2,6 @@
 Unit Test Suite for Optimization Engine (pymoo NSGA-II)
 """
 import numpy as np
-import pytest
 from src.simulation.optimization import run_genetic_optimization
 
 def mock_eval_function(x: np.ndarray) -> float:

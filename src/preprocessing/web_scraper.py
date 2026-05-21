@@ -67,7 +67,6 @@ class CompetitorScraper:
             if self.neo_mgr.driver:
                 self.neo_mgr.close()
 
-import asyncio
 
 class Crawl4AiScraper:
     """

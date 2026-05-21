@@ -21,7 +21,6 @@ new routes opt-in to tenant-scoped auth via the dependency.
 from __future__ import annotations
 
 import logging
-from typing import Set
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint

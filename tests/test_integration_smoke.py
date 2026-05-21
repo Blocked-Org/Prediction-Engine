@@ -14,7 +14,7 @@ from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 
 from src.api.main import app
-from src.api.schemas import SimulationResponse, ForecastResponse
+from src.api.schemas import ForecastResponse
 
 client = TestClient(app)
 

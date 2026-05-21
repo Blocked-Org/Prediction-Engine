@@ -68,7 +68,7 @@ def list_keys(
         tenant_uuid = uuid.UUID(auth.tenant_id)
         keys = (
             db.query(ApiKey)
-            .filter(ApiKey.tenant_id == tenant_uuid, ApiKey.is_active == True)
+            .filter(ApiKey.tenant_id == tenant_uuid, ApiKey.is_active)
             .order_by(ApiKey.created_at.desc())
             .all()
         )

@@ -1,7 +1,5 @@
 import pytest
 import pandas as pd
-import tempfile
-from pathlib import Path
 import json
 
 from src.preprocessing.dataset_io import (

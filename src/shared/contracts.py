@@ -1,6 +1,6 @@
 from typing import List, Optional
 from datetime import date
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 class ChannelAllocation(BaseModel):
     channel_name: str
