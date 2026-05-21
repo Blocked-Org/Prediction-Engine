@@ -17,7 +17,9 @@ The system is organized as a 6-layer stack:
 
 - `frontend/`: Next.js app, route handlers, components, i18n messages, Jest tests.
 - `src/`: FastAPI service, simulation engines, preprocessing, training, worker tasks.
-- `docker/` and `docker-compose.yml`: local infra bootstrap.
+- `docker-compose.yml` & `docker-compose.prod.yml`: local infra bootstrap and production stack definition.
+- `Dockerfile`: Multi-stage production build for the backend API and Celery workers.
+- `.github/workflows/`: GitHub Actions pipeline for CI/CD.
 - `shared/examples/`: contract payload examples.
 
 ## Prerequisites
@@ -124,6 +126,22 @@ The Python unit test harness is fully wired using `pytest`, featuring robust moc
 pytest tests/
 ```
 > **Current Status:** 102+ automated tests passing across the frontend and backend, covering the complete handshake (GraphRAG, NLP Pipeline, Bayesian Macro simulation, and Next.js State Management).
+
+## Continuous Integration (CI/CD)
+
+The repository uses **GitHub Actions** for CI/CD. The pipeline (`.github/workflows/ci.yml`) automatically runs on pushes and pull requests to `main`:
+1. **Lint & Type Check:** Verifies code quality for both frontend (`eslint`, `tsc`) and backend (`ruff`, `mypy`).
+2. **Backend Tests:** Spins up PostgreSQL, Neo4j, and Redis service containers, applies Alembic migrations, and runs the Pytest suite.
+3. **Docker Build:** Builds and verifies the multi-stage production image.
+
+## Production Deployment
+
+A production-ready `Dockerfile` and `docker-compose.prod.yml` are provided. The production stack includes resource limits and automatic restart policies, and enforces dependency health checks across the database services.
+
+To launch the production stack:
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
 
 **Developer / Coverage:**
 Install developer test dependencies (one-time) before running coverage reports:

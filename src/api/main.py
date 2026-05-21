@@ -7,13 +7,11 @@ and defines the API routers for the Prediction Engine.
 
 from __future__ import annotations
 
-import os
 import logging
 from pathlib import Path
 from typing import Any
 
-from dotenv import load_dotenv
-load_dotenv()  # Load .env before any os.getenv() calls
+from src.api.config import get_settings
 
 from celery.result import AsyncResult
 from src.api.worker import celery_app, run_simulation_task
@@ -82,16 +80,17 @@ def build_facade() -> FastApiPredictionFacade:
     Returns:
         FastApiPredictionFacade: The initialized facade.
     """
-    model_path = Path(os.environ.get("PE_MODEL_PATH", "models/xgb_pipeline.joblib")).expanduser()
-    meta_path_raw = os.environ.get("PE_METADATA_PATH")
+    settings = get_settings()
+    model_path = Path(settings.PE_MODEL_PATH).expanduser()
+    meta_path_raw = settings.PE_METADATA_PATH
     metadata_path = Path(meta_path_raw).expanduser() if meta_path_raw else None
-    background = Path(os.environ.get("PE_BACKGROUND_PARQUET", "data/processed/train.parquet")).expanduser()
+    background = Path(settings.PE_BACKGROUND_PARQUET).expanduser()
 
     return FastApiPredictionFacade.from_paths(
         model_path=model_path,
         metadata_path=metadata_path,
         background_parquet=background,
-        random_state=int(os.environ.get("PE_RANDOM_STATE", "42")),
+        random_state=settings.PE_RANDOM_STATE,
     )
 
 
@@ -140,8 +139,8 @@ def health_check() -> dict[str, Any]:
     # --- Redis Probe ---
     try:
         import redis as redis_lib
-        redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-        r = redis_lib.from_url(redis_url, socket_connect_timeout=2)
+        settings = get_settings()
+        r = redis_lib.from_url(settings.REDIS_URL, socket_connect_timeout=2)
         r.ping()
         services["redis"] = "ok"
     except Exception as exc:

@@ -344,6 +344,11 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
   - [ ] Screenshots/recordings of key flows
   - [x] Talking points mapping features to whitepaper sections
     - 10-row feature → problem mapping table (ROI chart → MTA, S-Curve → Linear Fallacy, Offline AI → Bandwidth, etc.)
+- [x] **DevOps & Production Infrastructure:**
+  - [x] Multi-stage `Dockerfile` and `.dockerignore` for the FastAPI backend.
+  - [x] `docker-compose.prod.yml` with health checks, Redis, and resource limits for robust deployment.
+  - [x] GitHub Actions CI/CD pipeline (`ci.yml`) for linting, type-checking, backend service container testing, and docker image build verification.
+
 
 ---
 

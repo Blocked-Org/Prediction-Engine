@@ -32,6 +32,14 @@ services:
       - neo4j_plugins:/plugins
     restart: unless-stopped
 
+  redis:
+    image: redis:7-alpine
+    container_name: prediction_engine_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+
 volumes:
   pg_data:
   neo4j_data:

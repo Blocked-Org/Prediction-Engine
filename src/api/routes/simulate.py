@@ -329,7 +329,7 @@ def simulate_onboarding_status(
 def simulate_init(
     payload: SimulationInitRequest,
     neo4j: Neo4jManager = Depends(get_neo4j_manager),
-    role: Role = Depends(require_role(Role.owner, Role.admin)),
+    role: Role = Depends(require_role(Role.owner, Role.admin, Role.analyst, Role.viewer)),
 ) -> SimulationInitResponse:
     """
     Validate onboarding matrices and persist them to the Neo4j knowledge graph.

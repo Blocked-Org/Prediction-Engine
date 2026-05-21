@@ -20,7 +20,6 @@ automatically reverted on COMMIT/ROLLBACK — no cleanup needed.
 
 from __future__ import annotations
 
-import os
 import logging
 import uuid
 from typing import Generator, Optional
@@ -31,14 +30,13 @@ from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import sessionmaker, Session
 
 from src.api.models import Base  # single shared declarative base  # noqa: F401
+from src.api.config import get_settings
 
 logger = logging.getLogger(__name__)
 
 # ── Connection URL ──────────────────────────────────────────────────
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://app_user:secure_password_here@localhost:5432/postgres",
-)
+settings = get_settings()
+DATABASE_URL = settings.DATABASE_URL
 
 # ── Thread-safe ContextVar for current tenant ───────────────────────
 # ContextVar natively supports async/await and thread-based concurrency

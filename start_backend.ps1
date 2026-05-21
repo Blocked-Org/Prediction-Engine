@@ -30,11 +30,7 @@ if (-not (Test-Path $UvicornPath) -or -not (Test-Path $CeleryPath)) {
     exit 1
 }
 
-# Verify .env exists
-if (-not (Test-Path ".\.env")) {
-    Write-Error "❌ .env file not found. Copy .env.example to .env and fill in credentials."
-    exit 1
-}
+# Removed .env check to support Doppler
 
 Write-Host ""
 Write-Host "🚀 Starting FastAPI server on http://localhost:8000 ..." -ForegroundColor Green
@@ -46,13 +42,13 @@ Write-Host ""
 # Start FastAPI in a new PowerShell window
 $fastapiJob = Start-Job -ScriptBlock {
     Set-Location $args[0]
-    & ".\.venv\Scripts\uvicorn.exe" src.api.main:app --reload --port 8000 --host 0.0.0.0
+    & doppler run -- ".\.venv\Scripts\uvicorn.exe" src.api.main:app --reload --port 8000 --host 0.0.0.0
 } -ArgumentList $PWD
 
 # Start Celery worker in a new PowerShell window
 $celeryJob = Start-Job -ScriptBlock {
     Set-Location $args[0]
-    & ".\.venv\Scripts\celery.exe" -A src.api.worker.celery_app worker --loglevel=info --pool=solo
+    & doppler run -- ".\.venv\Scripts\celery.exe" -A src.api.worker.celery_app worker --loglevel=info --pool=solo
 } -ArgumentList $PWD
 
 Write-Host "FastAPI Job ID  : $($fastapiJob.Id)" -ForegroundColor Green
