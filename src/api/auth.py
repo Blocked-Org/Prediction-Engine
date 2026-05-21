@@ -74,36 +74,7 @@ def _normalize_clerk_role(role_str: Optional[str]) -> Role:
         return Role.viewer
 
 
-def get_current_user_role(request: Request) -> Role:
-    """FastAPI dependency that reads org_role from auth context and normalizes it."""
-    auth_obj: Optional[ClerkAuth] = getattr(request.state, "auth", None)
-    if not auth_obj:
-        # Safely default to viewer if no auth state is found
-        return Role.viewer
-    return _normalize_clerk_role(auth_obj.org_role)
 
-
-def require_role(*allowed_roles: Role):
-    """Dependency factory that returns a dependency callable enforcing specific roles."""
-    def dependency(role: Role = Depends(get_current_user_role)) -> Role:
-        if role not in allowed_roles:
-            raise HTTPException(
-                status_code=403,
-                detail=f"Permission denied. Role '{role.value}' does not have access. Allowed roles: {[r.value for r in allowed_roles]}",
-            )
-        return role
-    return dependency
-
-
-def get_auth(request: Request) -> ClerkAuth:
-    """FastAPI convenience dependency that returns request.state.auth."""
-    auth_obj: Optional[ClerkAuth] = getattr(request.state, "auth", None)
-    if not auth_obj:
-        raise HTTPException(
-            status_code=401,
-            detail="Authentication credentials not found.",
-        )
-    return auth_obj
 
 # ---------------------------------------------------------------------------
 # Configuration — sourced from environment variables
@@ -356,3 +327,33 @@ def get_current_tenant(request: Request) -> ClerkAuth:
         tenant_id=tenant_id,
         claims=claims,
     )
+
+
+def get_current_user_role(auth_obj: ClerkAuth = Depends(get_current_tenant)) -> Role:
+    """FastAPI dependency that reads org_role from auth context and normalizes it."""
+    if not auth_obj:
+        # Safely default to viewer if no auth state is found
+        return Role.viewer
+    return _normalize_clerk_role(auth_obj.org_role)
+
+
+def require_role(*allowed_roles: Role):
+    """Dependency factory that returns a dependency callable enforcing specific roles."""
+    def dependency(role: Role = Depends(get_current_user_role)) -> Role:
+        if role not in allowed_roles:
+            raise HTTPException(
+                status_code=403,
+                detail=f"Permission denied. Role '{role.value}' does not have access. Allowed roles: {[r.value for r in allowed_roles]}",
+            )
+        return role
+    return dependency
+
+
+def get_auth(auth_obj: ClerkAuth = Depends(get_current_tenant)) -> ClerkAuth:
+    """FastAPI convenience dependency that returns the authenticated tenant."""
+    if not auth_obj:
+        raise HTTPException(
+            status_code=401,
+            detail="Authentication credentials not found.",
+        )
+    return auth_obj

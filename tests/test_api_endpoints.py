@@ -9,7 +9,7 @@ client = TestClient(app)
 @patch("src.api.auth._resolve_tenant_id", return_value="fake-tenant-uuid")
 @patch("src.api.auth.SessionLocal")
 @patch("src.api.auth.verify_clerk_token")
-@patch("src.api.main.run_simulation_task.delay")
+@patch("src.api.worker.run_simulation_task.delay")
 @patch("src.api.main.AsyncResult")
 def test_simulate_endpoint(mock_async_result, mock_delay, mock_verify, mock_session, mock_resolve):
     """

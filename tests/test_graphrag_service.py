@@ -36,7 +36,7 @@ def test_retrieve_campaign_context_by_id(mock_neo4j_manager):
     session_mock.run.assert_called_once()
     # Verify the CYpher param passed
     args, kwargs = session_mock.run.call_args
-    assert kwargs["campaign_id"] == "c-123"
+    assert kwargs["parameters"]["campaign_id"] == "c-123"
 
 def test_retrieve_campaign_context_text_match(mock_neo4j_manager):
     """Test retrieving context without campaign_id (fallback to text match)."""
@@ -55,8 +55,8 @@ def test_retrieve_campaign_context_text_match(mock_neo4j_manager):
     assert "$2,000.00" in result
     
     args, kwargs = session_mock.run.call_args
-    assert kwargs["query"] == "budget optimization"
-    assert kwargs["top_k"] == 5
+    assert kwargs["parameters"]["query"] == "budget optimization"
+    assert kwargs["parameters"]["top_k"] == 5
 
 def test_retrieve_campaign_context_no_results(mock_neo4j_manager):
     """Test fallback when no results are found."""

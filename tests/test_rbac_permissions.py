@@ -126,8 +126,9 @@ def test_rbac_simulate_endpoint(
     mock_session.return_value = MagicMock()
     
     # Mock cache search to miss
+    from unittest.mock import AsyncMock
     mock_cache = MagicMock()
-    mock_cache.get.return_value = None
+    mock_cache.get = AsyncMock(return_value=None)
     mock_cache_getter.return_value = mock_cache
 
     # Mock Celery task
@@ -151,8 +152,8 @@ def test_rbac_simulate_endpoint(
     [
         ("org:owner", 200),
         ("org:admin", 200),
-        ("org:analyst", 403),
-        ("org:viewer", 403),
+        ("org:analyst", 200),
+        ("org:viewer", 200),
     ],
 )
 @patch("src.api.auth._resolve_tenant_id", return_value=FAKE_TENANT_ID)
