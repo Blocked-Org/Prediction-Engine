@@ -120,6 +120,19 @@ jobs:
           # Give services an extra moment to fully initialize
           sleep 15
 
+      - name: Create app_user role for RLS policies
+        run: |
+          PGPASSWORD=super_secure_password psql -h localhost -U postgres -d prediction_engine -c "
+            DO \$\$
+            BEGIN
+              IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'app_user') THEN
+                CREATE ROLE app_user WITH LOGIN PASSWORD 'secure_password_here';
+              END IF;
+            END
+            \$\$;
+            GRANT USAGE ON SCHEMA public TO app_user;
+          "
+
       - name: Run Alembic migrations
         run: |
           alembic upgrade head
