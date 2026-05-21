@@ -37,10 +37,27 @@ if config.config_file_name is not None:
 logger = logging.getLogger("alembic.env")
 
 # ── Override sqlalchemy.url from the environment ────────────────────
-database_url = os.getenv(
-    "DATABASE_URL",
-    "postgresql://app_user:secure_password_here@localhost:5432/postgres",
-)
+# Priority:
+#   1. DATABASE_URL env var (explicit full connection string)
+#   2. Build from individual POSTGRES_* env vars (CI / Docker friendly)
+#   3. Dev default (local app_user)
+database_url = os.getenv("DATABASE_URL")
+
+if not database_url:
+    pg_user = os.getenv("POSTGRES_USER")
+    pg_password = os.getenv("POSTGRES_PASSWORD")
+    pg_host = os.getenv("POSTGRES_HOST", "localhost")
+    pg_port = os.getenv("POSTGRES_PORT", "5432")
+    pg_db = os.getenv("POSTGRES_DB", "postgres")
+
+    if pg_user and pg_password:
+        database_url = (
+            f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_db}"
+        )
+    else:
+        # Local development fallback
+        database_url = "postgresql://app_user:secure_password_here@localhost:5432/postgres"
+
 config.set_main_option("sqlalchemy.url", database_url)
 
 # ── Target metadata — the single source of truth for the schema ────

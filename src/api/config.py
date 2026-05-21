@@ -1,6 +1,7 @@
+import os
 from functools import lru_cache
 from typing import Literal, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class FeatureFlags(BaseModel):
@@ -40,6 +41,30 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
+    @model_validator(mode="after")
+    def _build_database_url_from_components(self) -> "Settings":
+        """Build DATABASE_URL from individual POSTGRES_* env vars when
+        DATABASE_URL was not explicitly provided (i.e. still at default).
+
+        This allows CI environments that set POSTGRES_USER, POSTGRES_PASSWORD,
+        etc. to connect without needing a full DATABASE_URL."""
+        default_url = "postgresql://app_user:secure_password_here@localhost:5432/postgres"
+        if self.DATABASE_URL != default_url:
+            # DATABASE_URL was explicitly set — respect it.
+            return self
+
+        pg_user = os.getenv("POSTGRES_USER")
+        pg_password = os.getenv("POSTGRES_PASSWORD")
+        if pg_user and pg_password:
+            pg_host = os.getenv("POSTGRES_HOST", "localhost")
+            pg_port = os.getenv("POSTGRES_PORT", "5432")
+            pg_db = os.getenv("POSTGRES_DB", "postgres")
+            self.DATABASE_URL = (
+                f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_db}"
+            )
+        return self
+
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
