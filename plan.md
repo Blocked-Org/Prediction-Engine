@@ -348,6 +348,8 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
   - [x] Multi-stage `Dockerfile` and `.dockerignore` for the FastAPI backend.
   - [x] `docker-compose.prod.yml` with health checks, Redis, and resource limits for robust deployment.
   - [x] GitHub Actions CI/CD pipeline (`ci.yml`) for linting, type-checking, backend service container testing, and docker image build verification.
+  - [x] **Production Configuration:** Transitioned backend to `pydantic-settings` for type-safe environment variables and feature flags.
+  - [x] **RBAC Updates:** Fixed onboarding authorization bug by allowing `viewer` and `analyst` roles to initialize their simulation graphs.
 
 
 ---
@@ -413,6 +415,7 @@ src/
 src/
 ├── api/
 │   ├── main.py                     # ✅ FastAPI app (11KB) — Redis cache integrated
+│   ├── config.py                   # ✅ Pydantic settings & Feature flags
 │   ├── cache.py                    # ✅ Redis caching layer (5KB) — SHA-256 key gen, 1h TTL
 │   ├── schemas.py                  # ✅ API schemas
 │   ├── service.py                  # ✅ API service layer

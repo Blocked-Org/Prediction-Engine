@@ -83,7 +83,7 @@ ollama run gemma4:26b
 
 - `GET /health` : System health check
 - `POST /api/v1/simulate` : Triggers the Triple-Engine (Macro MMM, Micro ABM, Optimization) via Celery. Protected by Role-Based Access Control (RBAC): `owner`, `admin`, and `analyst` roles allowed. Supports dynamic `budget_overrides` from the interactive sandbox.
-- `POST /api/v1/simulate/init` : Registers a new campaign graph. Allowed roles: `owner`, `admin`.
+- `POST /api/v1/simulate/init` : Registers a new campaign graph. Allowed roles: `owner`, `admin`, `analyst`, `viewer` (all authenticated users for onboarding).
 - `GET /api/v1/simulate/results/{clerk_user_id}` : Loads dashboard results. Allowed roles: `owner`, `admin`, `analyst`, `viewer` (all active roles).
 - `POST /api/v1/forecast` : Triggers predictive forecasting via Celery.
 
@@ -94,7 +94,7 @@ The backend enforces robust Role-Based Access Control using Clerk's `org_role` c
 | Endpoint | Allowed Roles | Rationale |
 |---|---|---|
 | `POST /api/v1/simulate` | owner, admin, analyst | Viewers cannot execute heavy simulations |
-| `POST /api/v1/simulate/init` | owner, admin | Restricts graph changes to owners and admins |
+| `POST /api/v1/simulate/init` | owner, admin, analyst, viewer | Allows all authenticated users to complete onboarding |
 | `GET /api/v1/simulate/results/{id}` | owner, admin, analyst, viewer | Everyone can view analytical results |
 
 *The `GET /api/v1/simulate/status/{id}` endpoint remains fully public for read-only polling.*
@@ -173,7 +173,7 @@ If you face difficulties installing tools and dependencies, check the following 
 
 ## Environment Variables
 
-Common variables used by the current code paths:
+The backend uses `pydantic-settings` (via `src/api/config.py`) to manage configuration, validate required keys, and support nested feature flags. Common variables include:
 
 - `FRONTEND_URL` (FastAPI CORS origin, default `http://localhost:3000`)
 - `PE_MODEL_PATH`
