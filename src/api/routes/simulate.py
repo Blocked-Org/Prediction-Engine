@@ -9,7 +9,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from neo4j.exceptions import Neo4jError, ServiceUnavailable
 
-from src.api.auth import Role, require_role
+from src.api.auth import Role, require_role, require_authenticated_user, ClerkAuth
 
 from src.api.db.neo4j_client import Neo4jManager, get_neo4j_manager
 from src.api.services.dashboard_results import get_dashboard_results
@@ -278,7 +278,7 @@ def persist_simulation_init(
 async def simulate_results(
     clerk_user_id: str,
     neo4j: Neo4jManager = Depends(get_neo4j_manager),
-    role: Role = Depends(require_role(Role.owner, Role.admin, Role.analyst, Role.viewer)),
+    _user: ClerkAuth = Depends(require_authenticated_user),
 ) -> DashboardResultsResponse:
     """
     Return dashboard-ready simulation data for the user's latest Neo4j campaign.
@@ -287,6 +287,9 @@ async def simulate_results(
     inputs. Returns ``no_campaign`` when the user has not onboarded, or
     ``processing`` when computation fails (retry shortly).
     """
+    if clerk_user_id != _user.user_id:
+        raise HTTPException(status_code=403, detail="Not authorized to access these results.")
+
     try:
         return await get_dashboard_results(neo4j, clerk_user_id)
     except ServiceUnavailable as exc:
@@ -329,7 +332,7 @@ def simulate_onboarding_status(
 def simulate_init(
     payload: SimulationInitRequest,
     neo4j: Neo4jManager = Depends(get_neo4j_manager),
-    role: Role = Depends(require_role(Role.owner, Role.admin, Role.analyst, Role.viewer)),
+    _user: ClerkAuth = Depends(require_authenticated_user),
 ) -> SimulationInitResponse:
     """
     Validate onboarding matrices and persist them to the Neo4j knowledge graph.

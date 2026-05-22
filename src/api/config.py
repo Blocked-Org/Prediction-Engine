@@ -16,8 +16,17 @@ class Settings(BaseSettings):
     # Database URIs
     DATABASE_URL: str = "postgresql://app_user:secure_password_here@localhost:5432/postgres"
     NEO4J_URI: str = "bolt://localhost:7687"
+    NEO4J_USERNAME: str = "neo4j"
+    NEO4J_PASSWORD: str = "secure_password_here"
     WEAVIATE_URL: str = "http://localhost:8080"
-    REDIS_URL: str = "redis://localhost:6379/0"
+
+    # Redis
+    REDIS_PASSWORD: str = "1234"
+    REDIS_URL: str = "redis://:1234@localhost:6379/0"
+
+    # Celery (defaults mirror REDIS_URL so Celery connects with auth)
+    CELERY_BROKER_URL: str = "redis://:1234@localhost:6379/0"
+    CELERY_RESULT_BACKEND: str = "redis://:1234@localhost:6379/0"
 
     # API Keys
     CLERK_SECRET_KEY: str = ""

@@ -13,7 +13,7 @@ class Neo4jSettings(BaseSettings):
     # NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD are the AuraDB variables.
     neo4j_uri: str = "bolt://localhost:7687"
     neo4j_username: str = "neo4j"
-    neo4j_password: str = "password"
+    neo4j_password: str = "secure_password_here"
     
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

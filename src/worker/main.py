@@ -11,7 +11,7 @@ logger.info("Starting src.worker.main initialization...")
 _start_time = time.time()
 REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
 REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
-REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', 'please_change_this_redis_password')
+REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', '1234')
 
 broker_url = f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/0"
 

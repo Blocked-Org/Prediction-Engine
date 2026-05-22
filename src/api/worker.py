@@ -13,8 +13,9 @@ from src.simulation.engine_runner import run_micro_simulation, run_macro_forecas
 # Configure logger
 logger = logging.getLogger(__name__)
 
-# Initialize Celery app using REDIS_URL from the environment
-redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+# Initialize Celery app using REDIS_URL from environment / .env
+# The URL MUST include the password component, e.g. redis://:mypassword@localhost:6379/0
+redis_url = os.getenv("REDIS_URL", "redis://:1234@localhost:6379/0")
 
 celery_app = Celery(
     "prediction_engine_worker",

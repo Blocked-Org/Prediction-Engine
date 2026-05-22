@@ -357,3 +357,67 @@ def get_auth(auth_obj: ClerkAuth = Depends(get_current_tenant)) -> ClerkAuth:
             detail="Authentication credentials not found.",
         )
     return auth_obj
+
+
+def require_authenticated_user(request: Request) -> ClerkAuth:
+    """FastAPI dependency that validates the JWT but does NOT require ``org_id``.
+
+    This is designed for routes that must work before the user has created
+    or selected a Clerk Organization — e.g. the onboarding ``/init`` endpoint.
+
+    It verifies the token signature and extracts ``sub`` (user_id), but
+    allows ``org_id`` to be empty.  If an ``org_id`` *is* present, tenant
+    resolution is attempted (best-effort, non-blocking on 403).
+    """
+    # --- Extract Bearer token ------------------------------------------------
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        raise HTTPException(
+            status_code=401,
+            detail="Missing or malformed Authorization header. "
+                   "Expected 'Bearer <token>'.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    token = auth_header.removeprefix("Bearer ").strip()
+    if not token:
+        raise HTTPException(
+            status_code=401,
+            detail="Empty Bearer token.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # --- Verify JWT ----------------------------------------------------------
+    claims = verify_clerk_token(token)
+
+    user_id: str = claims.get("sub", "")
+    org_id: str = claims.get("org_id", "")
+    org_role = claims.get("org_role")
+
+    if not user_id:
+        raise HTTPException(status_code=401, detail="JWT missing 'sub' claim.")
+
+    # --- Best-effort tenant resolution (org_id is optional) ------------------
+    tenant_id = ""
+    if org_id:
+        db = SessionLocal()
+        try:
+            tenant_id = _resolve_tenant_id(org_id, db)
+            tenant_context.set(tenant_id)
+        except HTTPException:
+            # Org not provisioned yet — that's OK for onboarding
+            logger.debug(
+                "Org '%s' not provisioned yet (user=%s) — proceeding without tenant.",
+                org_id,
+                user_id,
+            )
+        finally:
+            db.close()
+
+    return ClerkAuth(
+        user_id=user_id,
+        org_id=org_id,
+        org_role=org_role,
+        tenant_id=tenant_id,
+        claims=claims,
+    )

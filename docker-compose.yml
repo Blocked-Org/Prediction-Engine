@@ -1,13 +1,11 @@
-version: '3.8'
-
 services:
   postgres:
     image: timescale/timescaledb:latest-pg15
     container_name: prediction_engine_postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: super_secure_password
-      POSTGRES_DB: prediction_engine
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-super_secure_password}
+      POSTGRES_DB: ${POSTGRES_DB:-prediction_engine}
     ports:
       - "5432:5432"
     volumes:
@@ -18,7 +16,7 @@ services:
     image: neo4j:5.12.0
     container_name: prediction_engine_neo4j
     environment:
-      NEO4J_AUTH: neo4j/secure_password_here
+      NEO4J_AUTH: ${NEO4J_USERNAME:-neo4j}/${NEO4J_PASSWORD:-secure_password_here}
       # Enable APOC plugin for advanced graph algorithms
       NEO4J_PLUGINS: '["apoc"]'
       NEO4J_dbms_security_procedures_unrestricted: apoc.*
@@ -35,8 +33,11 @@ services:
   redis:
     image: redis:7-alpine
     container_name: prediction_engine_redis
+    command: redis-server --requirepass ${REDIS_PASSWORD:-1234}
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
     restart: unless-stopped
 
 
@@ -46,3 +47,4 @@ volumes:
   neo4j_logs:
   neo4j_import:
   neo4j_plugins:
+  redis_data:

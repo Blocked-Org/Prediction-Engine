@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     healthcheck:
@@ -17,7 +15,7 @@ services:
 
   redis:
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "redis-cli -a $${REDIS_PASSWORD:-1234} ping"]
       interval: 10s
       timeout: 5s
       retries: 5
