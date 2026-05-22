@@ -213,11 +213,16 @@ export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
 
         const data = await res.json();
 
+        // Show soft warning if backend was unavailable (fallback mode)
+        if (data._fallback) {
+          setSimulationError(data._warning ?? "Using client-side estimate — backend is temporarily unavailable.");
+        }
+
         if (data.task_id) {
           // Backend returned a Celery task — poll for result
           setActiveTaskId(data.task_id);
         } else if (data.optimization_result || data.optimized_allocations) {
-          // Synchronous result — merge immediately
+          // Synchronous result (or fallback) — merge immediately
           setSimulationData((prev) => ({
             ...prev,
             optimization_result: {
@@ -378,13 +383,17 @@ export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
 
       {/* ── Simulation status feedback ────────────────────────────────── */}
       {simulationError && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {simulationError}
+        <div className={`rounded-lg border px-4 py-3 text-sm ${
+          simulationError.includes("client-side estimate") || simulationError.includes("temporarily unavailable")
+            ? "border-amber-500/30 bg-amber-500/10 text-amber-300"
+            : "border-destructive/30 bg-destructive/10 text-destructive"
+        }`}>
+          {simulationError.includes("client-side estimate") ? "⚡ " : ""}{simulationError}
         </div>
       )}
 
       {isSimulating && (
-        <div className="rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-700">
+        <div className="rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-4 py-3 text-sm text-indigo-300">
           ⏳ Simulation is running… Charts will update automatically when
           results are ready.
         </div>
@@ -541,12 +550,12 @@ export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
         </CardHeader>
         <CardContent className="pt-2">
           {isLoadingMarkov ? (
-            <div className="flex h-[340px] flex-col items-center justify-center gap-3">
-              <Skeleton className="h-[290px] w-full rounded-xl" />
+            <div className="flex h-[240px] flex-col items-center justify-center gap-3">
+              <Skeleton className="h-[200px] w-full rounded-xl" />
               <Skeleton className="h-4 w-1/3" />
             </div>
           ) : (
-            <MarkovFunnelChart data={markovData} height={340} />
+            <MarkovFunnelChart data={markovData} height={240} />
           )}
         </CardContent>
       </Card>

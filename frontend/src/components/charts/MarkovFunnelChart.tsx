@@ -32,27 +32,42 @@ interface MarkovFunnelChartProps {
 
 // ── Layout constants ─────────────────────────────────────────────────────────
 
-const NODE_W = 120;
-const NODE_H = 44;
-const H_GAP = 160; // horizontal gap between columns
-const V_GAP = 64;  // vertical gap between nodes in same column
-const PAD_X = 60;
-const PAD_Y = 40;
+const NODE_W = 110;
+const NODE_H = 42;
+const H_GAP = 100; // horizontal gap between columns
+const V_GAP = 24;  // vertical gap between nodes in same column
+const PAD_X = 30;
+const PAD_Y = 32;
 
-// Predefined column ordering for standard marketing funnel stages
+// Predefined column ordering for standard marketing funnel stages.
+// Keywords are matched as substrings of node IDs (case-insensitive).
 const STAGE_ORDER: Record<string, number> = {
+  // Column 0 – Awareness / traffic sources
   start: 0,
   awareness: 0,
   organic: 0,
+  meta: 0,
+  tiktok: 0,
+  facebook: 0,
+  google: 0,
+  search: 0,
+  // Column 1 – Consideration / mid-funnel
   social: 1,
   display: 1,
-  search: 1,
+  visit: 1,
+  website: 1,
+  // Column 2 – Lower-funnel
   email: 2,
   retargeting: 2,
   consideration: 2,
+  cart: 2,
+  // Column 3 – Conversion
   conversion: 3,
   converted: 3,
-  null: 4,       // absorbed state – channel dropped
+  purchase: 3,
+  buy: 3,
+  // Column 4 – Null / absorbed
+  null: 4,
 };
 
 // Colour palette (indigo/emerald gradient, plus amber for absorbing state)
@@ -96,7 +111,7 @@ function cubicPath(
  *
  * Fully reactive — re-renders whenever `data` changes (state-driven).
  */
-export function MarkovFunnelChart({ data, height = 340 }: MarkovFunnelChartProps) {
+export function MarkovFunnelChart({ data, height = 240 }: MarkovFunnelChartProps) {
   const { nodes, edges } = data;
 
   // ── Layout computation ──────────────────────────────────────────────────
@@ -258,7 +273,7 @@ export function MarkovFunnelChart({ data, height = 340 }: MarkovFunnelChartProps
   }
 
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="w-full overflow-x-auto" style={{ maxHeight: 320 }}>
       <svg
         width="100%"
         viewBox={`0 0 ${svgWidth} ${svgHeight}`}

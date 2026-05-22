@@ -84,11 +84,11 @@ export default async function ReportingPage({ params }: ReportingPageProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${estimatedRevenue.toLocaleString()}
+              ৳{estimatedRevenue.toLocaleString()}
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              {(confidence_level * 100).toFixed(0)}% CI: $
-              {lower_bound.toLocaleString()} – ${upper_bound.toLocaleString()}
+              {(confidence_level * 100).toFixed(0)}% CI: ৳
+              {lower_bound.toLocaleString()} – ৳{upper_bound.toLocaleString()}
             </p>
           </CardContent>
         </Card>
@@ -100,7 +100,7 @@ export default async function ReportingPage({ params }: ReportingPageProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${totalSpend.toLocaleString()}</div>
+            <div className="text-2xl font-bold">৳{totalSpend.toLocaleString()}</div>
             <p className="mt-1 text-xs text-muted-foreground">
               {t("across_channels", {
                 count: optimization_result.optimized_allocations.length,
@@ -162,7 +162,7 @@ export default async function ReportingPage({ params }: ReportingPageProps) {
                   >
                     <td className="p-4 capitalize">{alloc.channel_name}</td>
                     <td className="p-4 text-right font-medium">
-                      ${alloc.spend.toLocaleString()}
+                      ৳{alloc.spend.toLocaleString()}
                     </td>
                     <td className="p-4 text-right text-muted-foreground">
                       {totalSpend > 0
@@ -194,9 +194,13 @@ export default async function ReportingPage({ params }: ReportingPageProps) {
           <CardContent>
             <div className="space-y-3">
               {optimization_result.recommendations.map((rec) => (
-                <div key={rec.recommendation_id} className="rounded-md bg-muted p-3">
-                  <span className="font-semibold text-primary">{rec.action}: </span>
-                  {rec.recommendation_reasoning}
+                <div key={rec.recommendation_id} className="flex items-center justify-between rounded-lg bg-gradient-to-r from-muted/50 to-muted p-3 border-l-2 border-l-violet-500 hover:bg-muted transition-colors">
+                  <div className="flex flex-col gap-1.5">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${rec.action === 'shift_budget' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-blue-500/10 text-blue-600'}`}>
+                      {rec.action.replace(/_/g, ' ')}
+                    </span>
+                    <span className="text-xs text-foreground/90">{rec.recommendation_reasoning}</span>
+                  </div>
                 </div>
               ))}
             </div>

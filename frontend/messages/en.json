@@ -38,14 +38,21 @@
     "simulation_processing_desc": "Your campaign model is being computed. Refresh in a moment to see updated results.",
     "no_recommendations": "No recommendations available yet.",
     "channel": "Channel",
-    "spend": "Spend ($)",
+    "spend": "Spend (৳)",
     "impressions": "Impressions",
     "clicks": "Clicks",
     "conversions": "Conversions",
     "ctr": "CTR",
-    "cpc": "CPC ($)",
+    "cpc": "CPC (৳)",
     "toggle_language": "Toggle language",
     "reporting": "Reporting"
+  },
+  "Simulation": {
+    "title": "What-If Simulation",
+    "description": "Adjust budget allocations per channel and run a scenario simulation.",
+    "total_allocated": "Total Allocated",
+    "run_button": "Run What-If Simulation",
+    "running": "Running Simulation…"
   },
   "ExecutiveReport": {
     "title": "Executive AI Report",

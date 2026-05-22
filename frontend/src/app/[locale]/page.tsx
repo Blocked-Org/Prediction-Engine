@@ -66,9 +66,10 @@ export default function HomePage() {
       <div className="z-10 w-full max-w-6xl flex flex-col items-center gap-8 text-center px-4 pt-32 pb-16 mt-10">
 
         {/* Floating Badge */}
-
-
-        {/* Title & Subtitle */}
+        <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-sm font-semibold text-amber-400 backdrop-blur-sm animate-fade-in-up">
+          <span>🏆</span>
+          Built for Infinity AI BuildFest 2026
+        </div>        {/* Title & Subtitle */}
         <div className="flex flex-col gap-6 items-center animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
           <h1 className="text-5xl sm:text-6xl md:text-8xl font-extrabold tracking-tight text-balance text-foreground font-noto-bengali leading-[1.1]">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500 drop-shadow-sm">

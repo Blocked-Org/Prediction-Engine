@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { Loader2, FlaskConical } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
@@ -80,6 +81,7 @@ export function SimulationControls({
   isLoading,
   totalSpend = 15000,
 }: SimulationControlsProps) {
+  const t = useTranslations("Simulation");
   const maxPerChannel = Math.max(totalSpend * 2, 50000);
 
   const [budgets, setBudgets] = useState<ChannelBudgets>({
@@ -133,11 +135,11 @@ export function SimulationControls({
         <div className="flex items-center gap-2">
           <FlaskConical className="size-5 text-indigo-500" />
           <CardTitle className="font-noto-bengali text-lg">
-            What-If Simulation
+            {t("title")}
           </CardTitle>
         </div>
         <CardDescription className="font-noto-bengali">
-          Adjust budget allocations per channel and run a scenario simulation.
+          {t("description")}
         </CardDescription>
       </CardHeader>
 
@@ -186,7 +188,7 @@ export function SimulationControls({
           isPulsing ? "animate-pulse border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)] bg-indigo-500/5" : ""
         }`}>
           <span className="text-sm font-medium text-muted-foreground">
-            Total Allocated
+            {t("total_allocated")}
           </span>
           <span className="text-lg font-bold tabular-nums">
             {formatCurrency(totalAllocated)}
@@ -204,15 +206,18 @@ export function SimulationControls({
           {isLoading ? (
             <>
               <Loader2 className="mr-2 size-4 animate-spin" />
-              Running Simulation…
+              {t("running")}
             </>
           ) : (
             <>
               <FlaskConical className="mr-2 size-4" />
-              Run What-If Simulation
+              {t("run_button")}
             </>
           )}
         </Button>
+        <p className="text-center text-xs text-muted-foreground mt-1">
+          Sliders update the preview curve instantly. This button runs a full Bayesian re-optimization on the server.
+        </p>
       </CardContent>
     </Card>
   );

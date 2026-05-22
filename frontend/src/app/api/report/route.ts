@@ -98,7 +98,7 @@ function buildFallbackReport(simulationData: any, locale: string): string {
   }
 
   const allocationLines = allocations.map((a: any) =>
-    `- **${a.channel_name}**: $${a.spend?.toLocaleString() ?? 0} (${totalSpend > 0 ? ((a.spend / totalSpend) * 100).toFixed(0) : 0}% of total budget)`
+    `- **${a.channel_name}**: ৳${a.spend?.toLocaleString() ?? 0} (${totalSpend > 0 ? ((a.spend / totalSpend) * 100).toFixed(0) : 0}% of total budget)`
   ).join('\n');
 
   const recLines = recommendations.map((r: any) => {
@@ -109,12 +109,12 @@ function buildFallbackReport(simulationData: any, locale: string): string {
   return [
     '## 📊 Executive Summary',
     '',
-    `The simulation engine has completed its analysis. Based on the **Pareto-optimal** budget allocation computed by the NSGA-II genetic algorithm, the projected revenue is **$${estimatedRevenue.toLocaleString()}** with an estimated ROI of **${roi}×** across ${allocations.length} channel${allocations.length !== 1 ? 's' : ''}.`,
+    `The simulation engine has completed its analysis. Based on the **Pareto-optimal** budget allocation computed by the NSGA-II genetic algorithm, the projected revenue is **৳${estimatedRevenue.toLocaleString()}** with an estimated ROI of **${roi}×** across ${allocations.length} channel${allocations.length !== 1 ? 's' : ''}.`,
     '',
     '### 💰 Optimized Budget Allocation',
     allocationLines || '- No allocations available.',
     '',
-    `**Total Campaign Spend:** $${totalSpend.toLocaleString()}`,
+    `**Total Campaign Spend:** ৳${totalSpend.toLocaleString()}`,
     '',
     '### 🧠 AI-Powered Recommendations',
     recLines || '- No recommendations generated for this scenario.',

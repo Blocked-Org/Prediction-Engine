@@ -221,3 +221,10 @@
 .animate-cursor-blink {
   animation: cursorBlink 1s step-end infinite;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up { opacity: 1; animation: none; }
+  .animate-fade-in { opacity: 1; animation: none; }
+  .pulseGlow { animation: none; }
+  .card-hover-lift { transition: none; }
+}

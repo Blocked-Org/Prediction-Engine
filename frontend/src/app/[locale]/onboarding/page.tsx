@@ -27,7 +27,7 @@ export default async function OnboardingPage({
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-zinc-50 to-white px-4 py-12 dark:from-zinc-950 dark:to-zinc-900">
+    <main className="min-h-screen bg-gradient-to-b from-zinc-50 to-white px-4 py-12 dark:from-slate-950 dark:via-[#0c0f1a] dark:to-slate-950">
       <SimulationWizard locale={locale} />
     </main>
   );
