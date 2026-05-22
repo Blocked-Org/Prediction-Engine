@@ -1,3 +1,5 @@
+import { auth } from "@clerk/nextjs/server";
+
 import type {
   OptimizationResult,
   SimulationScenario,
@@ -22,8 +24,23 @@ export async function fetchDashboardResults(
   clerkUserId: string
 ): Promise<DashboardResults | null> {
   try {
+    // Retrieve the Clerk session JWT for authenticating with the FastAPI backend
+    const { getToken } = await auth();
+    const token = await getToken();
+
+    if (!token) {
+      console.error("[fetchDashboardResults] No Clerk session token available — user may not be authenticated.");
+      return null;
+    }
+
     const url = `${API_URL}/api/v1/simulate/results/${encodeURIComponent(clerkUserId)}`;
-    const response = await fetch(url, { cache: "no-store" });
+    const response = await fetch(url, {
+      cache: "no-store",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
