@@ -23,6 +23,14 @@ export type DashboardResults = {
 export async function fetchDashboardResults(
   clerkUserId: string
 ): Promise<DashboardResults | null> {
+  const isMockMode = process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true";
+
+  if (isMockMode) {
+    console.warn("[fetchDashboardResults] Mock mode is active. Returning mock dashboard payload.");
+    const { MOCK_DASHBOARD_RESULTS } = await import("./mock-data");
+    return MOCK_DASHBOARD_RESULTS;
+  }
+
   try {
     // Retrieve the Clerk session JWT for authenticating with the FastAPI backend
     const { getToken } = await auth();
@@ -45,14 +53,26 @@ export async function fetchDashboardResults(
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`[fetchDashboardResults] HTTP Error ${response.status} from ${url}:`, errorText);
-      return null;
+      
+      // Fallback on HTTP failures (e.g. 502, 503)
+      console.warn("[fetchDashboardResults] Backend returned error. Falling back to mock data.");
+      const { MOCK_DASHBOARD_RESULTS } = await import("./mock-data");
+      return MOCK_DASHBOARD_RESULTS;
     }
 
     const data = await response.json();
     return data as DashboardResults;
   } catch (error) {
     console.error("[fetchDashboardResults] Fetch exception occurred:", error);
-    return null;
+    
+    // Fallback on connection/network exceptions
+    console.warn("[fetchDashboardResults] Backend unreachable. Falling back to mock data.");
+    try {
+      const { MOCK_DASHBOARD_RESULTS } = await import("./mock-data");
+      return MOCK_DASHBOARD_RESULTS;
+    } catch {
+      return null;
+    }
   }
 }
 

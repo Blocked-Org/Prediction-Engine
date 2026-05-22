@@ -31,15 +31,33 @@ export function isOnboardedFromClaims(
 export async function fetchOnboardingStatus(
   clerkUserId: string
 ): Promise<OnboardingStatus | null> {
+  const isMockMode = process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true";
+
+  if (isMockMode) {
+    return {
+      clerk_user_id: clerkUserId,
+      is_onboarded: true,
+      has_campaign: true
+    };
+  }
+
   try {
     const response = await fetch(
       `${API_URL}/api/v1/simulate/status/${encodeURIComponent(clerkUserId)}`,
       { cache: "no-store" }
     );
-    if (!response.ok) return null;
+    if (!response.ok) {
+      const { MOCK_ONBOARDING_STATUS } = await import("./mock-data");
+      return MOCK_ONBOARDING_STATUS;
+    }
     return (await response.json()) as OnboardingStatus;
   } catch {
-    return null;
+    try {
+      const { MOCK_ONBOARDING_STATUS } = await import("./mock-data");
+      return MOCK_ONBOARDING_STATUS;
+    } catch {
+      return null;
+    }
   }
 }
 

@@ -28,6 +28,7 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
 | **Day 5** | Implement local Ollama fallback, refine Bangla text and font subsetting.                        | Build web scraping workers (Firecrawl/Crawl4AI) and transition models to Celery/RQ workers.                |   ✅   |
 | **Day 6** | **INTEGRATION DAY:** Work with Dev B to test the real API endpoints. Fix any UI rendering bugs. | **INTEGRATION DAY:** Swap FastAPI mock responses for real model outputs. Ensure Pydantic validations pass. |   ✅   |
 | **Day 7** | Vercel Edge caching (ISR), selective prefetching. UI Polish.                                    | Final testing, database indexing, latency optimization. Prepare for presentation.                          |   ✅   |
+| **Day 8** | **MOCK MODE FALLBACK:** Add environment toggle and automatic unreachable fallbacks.             | —                                                                                                          |   ✅   |
 
 ---
 
@@ -167,6 +168,12 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
   - Backend integration for explicit budget_overrides piped to PyMC/Mesa engines
   - Micro-animations and hover effects for premium feel
 - [ ] **Landing page** (`src/app/[locale]/page.tsx` — 5.7 KB exists but may need polish)
+
+### 3.7 Offline Mock Mode Option (Day 8) ✅
+
+- [x] **Global Toggle Configuration**: Integrate support for `NEXT_PUBLIC_USE_MOCK_DATA="true"` environment flag.
+- [x] **Automatic Unreachable Fallback**: Configure API proxies (`/api/health`, `/api/simulate`, `/api/forecast`, `/api/analytics/*`) to automatically fall back to mock data if the backend server throws network/connection exceptions (e.g. `ECONNREFUSED` or `503 Service Unavailable`).
+- [x] **High-Fidelity Mock Payload Definitions**: Create `mock-data.ts` storing complete JSON structures representing valid `DashboardResults`, `OnboardingStatus`, `ROIAnalyticsResponse`, and `MarkovAnalyticsResponse` contract formats.
 
 ---
 

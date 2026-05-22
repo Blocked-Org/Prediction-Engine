@@ -14,6 +14,13 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ campaignId: string }> }
 ) {
+  const isMockMode = process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true";
+
+  if (isMockMode) {
+    const { MOCK_MARKOV_DATA } = await import("@/lib/mock-data");
+    return NextResponse.json(MOCK_MARKOV_DATA);
+  }
+
   try {
     // ── Auth: extract Clerk JWT ──────────────────────────────────────────
     const { getToken } = await auth();
@@ -39,16 +46,15 @@ export async function GET(
     );
 
     if (!response.ok) {
-      const error = await response.text();
-      return NextResponse.json({ error }, { status: response.status });
+      console.warn("[markov] Backend Markov analytics failed. Returning mock data.");
+      const { MOCK_MARKOV_DATA } = await import("@/lib/mock-data");
+      return NextResponse.json(MOCK_MARKOV_DATA);
     }
 
     return NextResponse.json(await response.json());
   } catch (error) {
-    console.error("Markov analytics proxy error:", error);
-    return NextResponse.json(
-      { error: "Backend unreachable" },
-      { status: 502 }
-    );
+    console.error("Markov analytics proxy error, returning mock:", error);
+    const { MOCK_MARKOV_DATA } = await import("@/lib/mock-data");
+    return NextResponse.json(MOCK_MARKOV_DATA);
   }
 }

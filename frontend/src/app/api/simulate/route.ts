@@ -11,6 +11,14 @@ import { NextResponse } from "next/server";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export async function POST(request: Request) {
+  const isMockMode = process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true";
+
+  if (isMockMode) {
+    return NextResponse.json({
+      task_id: "mock-task-123"
+    });
+  }
+
   try {
     // ── Auth: extract Clerk JWT ──────────────────────────────────────────
     const { getToken } = await auth();
@@ -35,8 +43,8 @@ export async function POST(request: Request) {
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      return NextResponse.json({ error }, { status: response.status });
+      console.warn("[simulate] Backend failed, returning mock task ID.");
+      return NextResponse.json({ task_id: "mock-task-123" });
     }
 
     return NextResponse.json(await response.json());
