@@ -135,12 +135,12 @@ export function DashboardView({ data }: DashboardViewProps) {
       </div>
 
       {/* Main Layout Grid: 70% Left / 30% Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 min-w-0">
         
         {/* ======================= */}
         {/* MAIN CONTENT AREA (Left) */}
         {/* ======================= */}
-        <div className="lg:col-span-2 flex flex-col gap-8">
+        <div className="lg:col-span-2 flex flex-col gap-8 min-w-0">
           
           {/* Top KPIs Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -259,7 +259,7 @@ export function DashboardView({ data }: DashboardViewProps) {
         {/* ======================= */}
         {/* SIDEBAR AREA (Right)    */}
         {/* ======================= */}
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-8 min-w-0">
           
           {/* Status Widget */}
           <Card className="border border-border/40 border-l-4 border-l-primary bg-zinc-900/60 backdrop-blur-xl shadow-lg relative overflow-hidden">

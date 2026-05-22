@@ -14,7 +14,7 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="flex w-full flex-col min-h-screen">
+      <main className="flex flex-1 min-w-0 flex-col min-h-screen transition-all duration-300 ease-in-out">
         <header className="flex h-16 shrink-0 items-center justify-between border-b px-4">
           <div className="flex items-center gap-2">
             <SidebarTrigger />
