@@ -42,7 +42,7 @@ export function PricingCard({
   const billingLabel = isAnnual ? '/yr' : '/mo'
 
   return (
-    <Card className={`relative flex flex-col justify-between overflow-hidden border-border/50 bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/50 ${isPopular ? 'shadow-lg shadow-primary/5 ring-1 ring-primary/40' : ''}`}>
+    <Card className={`relative flex flex-col justify-between overflow-hidden bg-card transition-all duration-300 hover:-translate-y-1 ${isPopular ? 'border-2 border-primary/70 shadow-[0_0_40px_rgba(99,102,241,0.25)] z-10 scale-105' : 'border border-border/50 hover:shadow-xl hover:border-primary/30 z-0'}`}>
       {isPopular && (
         <div className="absolute top-0 right-0">
           <Badge className="rounded-none rounded-bl-lg bg-primary text-primary-foreground font-semibold px-3 py-1 text-xs">

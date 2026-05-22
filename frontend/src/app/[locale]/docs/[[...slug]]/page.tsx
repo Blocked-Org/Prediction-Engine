@@ -2,13 +2,13 @@
 
 import { useTranslations, useLocale } from 'next-intl'
 import { useParams, useRouter } from 'next/navigation'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Link } from '@/i18n/routing'
 import { Navbar } from '@/components/marketing/Navbar'
 import { Footer } from '@/components/marketing/Footer'
 import { DOCS_DATA, DocArticle } from '@/lib/docs-data'
 import ReactMarkdown from 'react-markdown'
-import { Search, BookOpen, ChevronRight, Menu, X } from 'lucide-react'
+import { Search, BookOpen, ChevronRight, Menu, X, Terminal } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
@@ -16,10 +16,10 @@ export default function DocsPage() {
   const t = useTranslations('DocsPage')
   const locale = useLocale() as 'en' | 'bn'
   const params = useParams()
-  const router = useRouter()
   
   const [searchQuery, setSearchQuery] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [activeHeading, setActiveHeading] = useState<string>('')
 
   // Resolve slug from route parameters
   const slugArray = params.slug as string[] | undefined
@@ -58,18 +58,56 @@ export default function DocsPage() {
     return groups
   }, [filteredArticles])
 
+  // Extract headings for Table of Contents
+  const tableOfContents = useMemo(() => {
+    const text = activeArticle.content[locale] || ''
+    const matches = Array.from(text.matchAll(/^(#{2,3})\s+(.+)$/gm))
+    return matches.map((match) => {
+      const level = match[1].length
+      const title = match[2].replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1').replace(/[*`]/g, '')
+      const id = title.toLowerCase().replace(/[^\w]+/g, '-')
+      return { level, title, id }
+    })
+  }, [activeArticle, locale])
+
+  // Setup intersection observer for scroll spy
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveHeading(entry.target.id)
+          }
+        })
+      },
+      { rootMargin: '-100px 0px -80% 0px' }
+    )
+    
+    tableOfContents.forEach(({ id }) => {
+      const el = document.getElementById(id)
+      if (el) observer.observe(el)
+    })
+
+    return () => observer.disconnect()
+  }, [tableOfContents])
+
   // Sidebar Render Component
   const SidebarContent = () => (
     <div className="flex flex-col gap-6 w-full">
-      {/* Search Input */}
-      <div className="relative w-full">
-        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+      {/* Search Input with shortcut hint */}
+      <div className="relative w-full group">
+        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
         <Input
           placeholder={t('search_placeholder')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9 bg-card border-border/40 rounded-full w-full focus-visible:ring-primary/40"
+          className="pl-9 pr-14 bg-card/50 border-border/40 rounded-xl w-full focus-visible:ring-primary/40 backdrop-blur-sm"
         />
+        <div className="absolute right-3 top-2.5 flex items-center gap-1">
+           <kbd className="hidden sm:inline-flex h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+             <span className="text-xs">⌘</span>K
+           </kbd>
+        </div>
       </div>
 
       {/* Categories & Articles navigation */}
@@ -111,10 +149,10 @@ export default function DocsPage() {
   )
 
   return (
-    <div className="relative min-h-screen flex flex-col bg-background font-sans">
+    <div className="relative min-h-screen flex flex-col bg-background font-sans selection:bg-primary/30">
       <Navbar />
 
-      <main className="z-10 flex-grow max-w-7xl w-full mx-auto px-4 md:px-8 pt-24 pb-20 flex flex-col lg:flex-row gap-8">
+      <main className="z-10 flex-grow max-w-screen-2xl w-full mx-auto px-4 md:px-8 pt-24 pb-20 flex flex-col lg:flex-row gap-8">
         
         {/* Mobile Sidebar Trigger Toggle */}
         <div className="lg:hidden flex items-center justify-between border-b border-border/30 pb-4 mb-2">
@@ -141,54 +179,87 @@ export default function DocsPage() {
         )}
 
         {/* Desktop Sidebar (Left side) */}
-        <aside className="hidden lg:block w-72 shrink-0 border-r border-border/20 pr-6 h-[calc(100vh-140px)] overflow-y-auto sticky top-24">
+        <aside className="hidden lg:block w-72 shrink-0 border-r border-border/10 pr-6 h-[calc(100vh-140px)] overflow-y-auto sticky top-24 custom-scrollbar">
           <SidebarContent />
         </aside>
 
-        {/* Main Documentation Article Content (Right side) */}
-        <article className="flex-1 max-w-3xl lg:px-4">
-          <div className="prose prose-invert prose-slate max-w-none">
+        {/* Main Documentation Article Content (Center) */}
+        <article className="flex-1 max-w-4xl lg:px-6 min-w-0">
+          <div className="prose prose-invert prose-slate max-w-none animate-in fade-in slide-in-from-bottom-4 duration-700">
             <ReactMarkdown
               components={{
                 h1: ({ children }) => (
-                  <h1 className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight mb-6 pb-4 border-b border-border/20">
+                  <h1 className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight mb-8 pb-4 border-b border-border/20">
                     {children}
                   </h1>
                 ),
-                h2: ({ children }) => (
-                  <h2 className="text-2xl font-bold text-foreground tracking-tight mt-8 mb-4">
-                    {children}
-                  </h2>
-                ),
-                h3: ({ children }) => (
-                  <h3 className="text-xl font-semibold text-foreground tracking-tight mt-6 mb-3">
-                    {children}
-                  </h3>
-                ),
+                h2: ({ children }) => {
+                  const id = children?.toString().toLowerCase().replace(/[^\w]+/g, '-')
+                  return (
+                    <h2 id={id} className="text-2xl font-bold text-foreground tracking-tight mt-12 mb-4 pt-4 flex items-center group cursor-pointer">
+                      <a href={`#${id}`} className="absolute -ml-6 opacity-0 group-hover:opacity-100 text-primary transition-opacity text-xl">#</a>
+                      {children}
+                    </h2>
+                  )
+                },
+                h3: ({ children }) => {
+                  const id = children?.toString().toLowerCase().replace(/[^\w]+/g, '-')
+                  return (
+                    <h3 id={id} className="text-xl font-semibold text-foreground tracking-tight mt-8 mb-3 pt-2">
+                      {children}
+                    </h3>
+                  )
+                },
                 p: ({ children }) => (
-                  <p className="text-muted-foreground leading-relaxed mb-4 text-base">
+                  <p className="text-muted-foreground leading-relaxed mb-6 text-[15px]">
                     {children}
                   </p>
                 ),
                 ul: ({ children }) => (
-                  <ul className="list-disc pl-6 space-y-2 mb-4 text-muted-foreground">
+                  <ul className="list-disc pl-6 space-y-2 mb-6 text-muted-foreground text-[15px]">
                     {children}
                   </ul>
                 ),
                 li: ({ children }) => (
-                  <li className="text-base">
+                  <li className="leading-relaxed">
                     {children}
                   </li>
                 ),
-                code: ({ children }) => (
-                  <code className="bg-muted border border-border/50 rounded px-1.5 py-0.5 text-xs font-mono text-primary">
-                    {children}
-                  </code>
-                ),
+                code: ({ children, className }) => {
+                  // Inline code
+                  if (!className) {
+                    return (
+                      <code className="bg-primary/10 border border-primary/20 rounded-md px-1.5 py-0.5 text-[13px] font-mono text-primary font-medium">
+                        {children}
+                      </code>
+                    )
+                  }
+                  // Block code will be handled by pre
+                  return <code className={className}>{children}</code>
+                },
                 pre: ({ children }) => (
-                  <pre className="bg-muted border border-border/30 rounded-xl p-4 overflow-x-auto font-mono text-sm mb-6 shadow-inner text-foreground">
+                  <div className="relative group mb-8 rounded-xl overflow-hidden bg-[#0d1117] border border-border/30 shadow-2xl">
+                    {/* Fake macOS window header */}
+                    <div className="flex items-center px-4 py-3 bg-zinc-900/50 border-b border-white/5">
+                      <div className="flex gap-2">
+                        <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                        <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+                        <div className="w-3 h-3 rounded-full bg-green-500/80" />
+                      </div>
+                      <div className="ml-4 flex items-center text-xs font-mono text-zinc-500 gap-2">
+                         <Terminal className="h-3 w-3" />
+                         <span>terminal</span>
+                      </div>
+                    </div>
+                    <pre className="p-4 overflow-x-auto font-mono text-sm text-zinc-300 leading-relaxed custom-scrollbar">
+                      {children}
+                    </pre>
+                  </div>
+                ),
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-4 border-primary/50 pl-4 py-1 bg-primary/5 rounded-r-lg my-6 italic text-muted-foreground">
                     {children}
-                  </pre>
+                  </blockquote>
                 ),
               }}
             >
@@ -196,6 +267,29 @@ export default function DocsPage() {
             </ReactMarkdown>
           </div>
         </article>
+        
+        {/* Table of Contents (Right side) */}
+        {tableOfContents.length > 0 && (
+          <aside className="hidden xl:block w-64 shrink-0 h-[calc(100vh-140px)] sticky top-24 pl-6 border-l border-border/10">
+            <h4 className="text-sm font-bold text-foreground mb-4 uppercase tracking-wider">On this page</h4>
+            <nav className="flex flex-col gap-2.5">
+              {tableOfContents.map((heading, idx) => (
+                <a
+                  key={idx}
+                  href={`#${heading.id}`}
+                  className={`text-sm transition-colors ${
+                    activeHeading === heading.id 
+                      ? 'text-primary font-medium' 
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                  style={{ paddingLeft: `${(heading.level - 2) * 12}px` }}
+                >
+                  {heading.title}
+                </a>
+              ))}
+            </nav>
+          </aside>
+        )}
 
       </main>
 

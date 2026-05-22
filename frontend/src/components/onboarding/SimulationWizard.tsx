@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useAuth } from "@clerk/nextjs"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, type FieldPath } from "react-hook-form"
-import { Loader2, Sparkles, Eye, MousePointer, DollarSign, Target, Brain, Rocket } from "lucide-react"
+import { Loader2, Sparkles, Eye, MousePointer, DollarSign, Target, Brain, Rocket, Users, ChevronLeft, ChevronRight } from "lucide-react"
 
 import { completeOnboarding } from "@/actions/onboarding"
 import {
@@ -43,10 +43,12 @@ const STEPS = [
   {
     title: "Ad Metrics",
     subtitle: "Historical performance metrics to run simulation.",
+    icon: Target,
   },
   {
     title: "Demographics",
     subtitle: "Target audience constraints.",
+    icon: Users,
   },
 ]
 
@@ -65,6 +67,8 @@ function NumberField({
   step,
   icon: Icon,
   placeholder,
+  borderColor = "border-zinc-800/80",
+  leftBorderColor = "",
 }: {
   control: ReturnType<typeof useForm<SimulationWizardInput>>["control"]
   name: FieldPath<SimulationWizardInput>
@@ -73,36 +77,40 @@ function NumberField({
   step?: string
   icon?: React.ElementType
   placeholder?: string
+  borderColor?: string
+  leftBorderColor?: string
 }) {
   return (
     <FormField
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem className="flex flex-col gap-1">
+        <FormItem className="flex flex-col gap-1.5">
           <FormLabel className="flex items-center gap-2 text-sm font-semibold text-zinc-300">
-            {Icon && <Icon className="size-4 text-zinc-500" />}
+            {Icon && <Icon className="size-4 text-zinc-400" />}
             {label}
           </FormLabel>
           <FormControl>
-            <Input
-              type="number"
-              step={step ?? "any"}
-              placeholder={placeholder}
-              value={
-                typeof field.value === "number" && Number.isFinite(field.value)
-                  ? field.value
-                  : ""
-              }
-              onChange={(e) => {
-                const next = e.target.valueAsNumber
-                field.onChange(Number.isNaN(next) ? 0 : next)
-              }}
-              className="bg-black/40 border-zinc-800/80 text-white placeholder:text-zinc-600 focus-visible:ring-primary/45 rounded-xl h-11 transition-all"
-            />
+            <div className={`relative rounded-xl overflow-hidden border ${borderColor} ${leftBorderColor} transition-all duration-300 focus-within:border-primary/50 bg-zinc-950/40 backdrop-blur-sm group hover:-translate-y-0.5 hover:shadow-lg`}>
+              <Input
+                type="number"
+                step={step ?? "any"}
+                placeholder={placeholder}
+                value={
+                  typeof field.value === "number" && Number.isFinite(field.value)
+                    ? field.value
+                    : ""
+                }
+                onChange={(e) => {
+                  const next = e.target.valueAsNumber
+                  field.onChange(Number.isNaN(next) ? 0 : next)
+                }}
+                className="bg-transparent border-0 text-white placeholder:text-zinc-650 focus-visible:ring-0 focus-visible:ring-offset-0 h-12 transition-all font-medium font-mono"
+              />
+            </div>
           </FormControl>
           {description ? (
-            <FormDescription className="text-[11px] text-zinc-500 leading-tight">{description}</FormDescription>
+            <FormDescription className="text-[11px] text-zinc-500 leading-tight px-1">{description}</FormDescription>
           ) : null}
           <FormMessage className="text-xs text-destructive font-semibold" />
         </FormItem>
@@ -187,13 +195,19 @@ export function SimulationWizard({ locale }: { locale: string }) {
   }
 
   return (
-    <Card className="w-full bg-zinc-900/60 border-zinc-800/80 backdrop-blur-md rounded-3xl shadow-[0_0_80px_rgba(99,102,241,0.15)] text-white relative overflow-hidden">
+    <Card className="w-full bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-xl rounded-3xl shadow-[0_0_80px_rgba(99,102,241,0.1)] text-white relative overflow-hidden transition-all duration-500">
       
-      <CardHeader className="border-b border-zinc-800/60 pb-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <CardTitle className="text-2xl font-extrabold text-white">Brand Simulation Onboarding</CardTitle>
-            <CardDescription className="text-zinc-400">
+      {/* Decorative background glow */}
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
+
+      <CardHeader className="border-b border-zinc-800/60 pb-8 px-6 sm:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="space-y-1.5">
+            <CardTitle className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
+              <Brain className="h-6 w-6 text-primary" />
+              <span>Simulation Onboarding</span>
+            </CardTitle>
+            <CardDescription className="text-zinc-400 font-medium">
               Step {step + 1} of {STEPS.length}: {currentStep.title}
             </CardDescription>
           </div>
@@ -201,45 +215,52 @@ export function SimulationWizard({ locale }: { locale: string }) {
             type="button" 
             size="sm" 
             onClick={loadDemoPreset} 
-            className="rounded-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold shadow-lg shadow-orange-500/10 border-0 h-10 px-5 flex items-center justify-center gap-1.5 self-start sm:self-center"
+            className="rounded-full bg-zinc-900 hover:bg-zinc-800/80 text-amber-400 border border-amber-500/20 px-5 h-11 flex items-center justify-center gap-2 self-start sm:self-center transition-all duration-300 shadow-[0_0_15px_rgba(245,158,11,0.05)] hover:border-amber-500/40"
           >
             <Sparkles className="size-4 animate-pulse" />
-            <span>Load Demo Preset</span>
+            <span className="font-bold text-xs uppercase tracking-wider">Demo Preset</span>
           </Button>
         </div>
 
-        {/* Progress Tracker */}
+        {/* Enhanced Progress Tracker */}
         <div className="mt-8 relative">
-          <Progress 
-            value={progressValue} 
-            className="h-2 bg-zinc-950 border border-zinc-850 rounded-full" 
-            indicatorClassName="bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-500" 
+          <div className="absolute top-[18px] left-[10%] right-[10%] h-[2px] bg-zinc-800 pointer-events-none" />
+          
+          {/* Animated active bar */}
+          <div 
+            className="absolute top-[18px] left-[10%] h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 transition-all duration-500 pointer-events-none" 
+            style={{ width: `${step === 0 ? '40%' : '80%'}` }}
           />
-          <div className="flex justify-between mt-3 px-1">
+
+          <div className="flex justify-between items-center relative z-10 px-4">
             {STEPS.map((s, i) => {
               const isActive = i === step;
               const isPast = i < step;
+              const StepIcon = s.icon;
               return (
-                <div key={s.title} className="flex flex-col items-center gap-1">
-                  <div className={`w-3.5 h-3.5 rounded-full border transition-all duration-300 ${
+                <div key={s.title} className="flex flex-col items-center gap-2.5">
+                  <div className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-500 ${
                     isActive 
-                      ? 'bg-cyan-400 border-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.8)] animate-pulse' 
+                      ? 'bg-indigo-600 border-primary text-white shadow-[0_0_20px_rgba(99,102,241,0.5)] scale-110' 
                       : isPast 
-                        ? 'bg-primary border-primary' 
-                        : 'bg-zinc-800 border-zinc-850'
-                  }`} />
-                  <span className={`text-[10px] uppercase font-bold tracking-wider ${isActive ? 'text-cyan-400' : 'text-zinc-500'}`}>{s.title}</span>
+                        ? 'bg-primary border-primary text-white' 
+                        : 'bg-zinc-950 border-zinc-800 text-zinc-500'
+                  }`}>
+                    <StepIcon className="h-4.5 w-4.5" />
+                  </div>
+                  <span className={`text-[10px] uppercase font-black tracking-widest ${isActive ? 'text-primary' : 'text-zinc-500'}`}>{s.title}</span>
                 </div>
               );
             })}
           </div>
         </div>
-        <p className="text-sm text-zinc-400 text-center mt-4 italic font-medium">"{currentStep.subtitle}"</p>
+
+        <p className="text-sm text-zinc-400 text-center mt-6 italic font-medium leading-relaxed">"{currentStep.subtitle}"</p>
       </CardHeader>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CardContent className="space-y-6 pt-6 pb-6">
+          <CardContent className="space-y-8 pt-8 pb-8 px-6 sm:px-8">
             
             {step === 0 && (
               <div className="grid gap-6 sm:grid-cols-2">
@@ -250,6 +271,7 @@ export function SimulationWizard({ locale }: { locale: string }) {
                   description="Total historical ad impressions served."
                   icon={Eye}
                   placeholder="e.g., 50000"
+                  leftBorderColor="border-l-4 border-l-blue-500"
                 />
                 <NumberField
                   control={form.control}
@@ -259,6 +281,7 @@ export function SimulationWizard({ locale }: { locale: string }) {
                   step="1"
                   icon={MousePointer}
                   placeholder="e.g., 2500"
+                  leftBorderColor="border-l-4 border-l-purple-500"
                 />
                 <NumberField
                   control={form.control}
@@ -267,6 +290,7 @@ export function SimulationWizard({ locale }: { locale: string }) {
                   description="Historical media spend budget (USD)."
                   icon={DollarSign}
                   placeholder="e.g., 10000"
+                  leftBorderColor="border-l-4 border-l-emerald-500"
                 />
                 <NumberField
                   control={form.control}
@@ -276,6 +300,7 @@ export function SimulationWizard({ locale }: { locale: string }) {
                   step="1"
                   icon={Target}
                   placeholder="e.g., 150"
+                  leftBorderColor="border-l-4 border-l-pink-500"
                 />
               </div>
             )}
@@ -288,15 +313,15 @@ export function SimulationWizard({ locale }: { locale: string }) {
                   control={form.control}
                   name="age"
                   render={({ field }) => (
-                    <FormItem className="flex flex-col gap-1">
+                    <FormItem className="flex flex-col gap-1.5">
                       <FormLabel className="text-sm font-semibold text-zinc-300">Age Range</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value || ""}>
                         <FormControl>
-                          <SelectTrigger className="bg-black/40 border-zinc-800/80 text-white rounded-xl h-11 focus:ring-primary/45 transition-all">
+                          <SelectTrigger className="bg-zinc-950/40 border-zinc-800/80 text-white rounded-xl h-12 focus:ring-primary/45 transition-all">
                             <SelectValue placeholder="Select target age group" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-zinc-900 border-zinc-850 text-white rounded-xl">
+                        <SelectContent className="bg-zinc-900 border-zinc-800/80 text-white rounded-xl">
                           {AGE_RANGES.map((range) => (
                             <SelectItem key={range} value={range} className="focus:bg-zinc-800 focus:text-white cursor-pointer rounded-lg">
                               {range}
@@ -314,15 +339,15 @@ export function SimulationWizard({ locale }: { locale: string }) {
                   control={form.control}
                   name="gender"
                   render={({ field }) => (
-                    <FormItem className="flex flex-col gap-1">
+                    <FormItem className="flex flex-col gap-1.5">
                       <FormLabel className="text-sm font-semibold text-zinc-300">Gender</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value || ""}>
                         <FormControl>
-                          <SelectTrigger className="bg-black/40 border-zinc-800/80 text-white rounded-xl h-11 focus:ring-primary/45 transition-all">
+                          <SelectTrigger className="bg-zinc-950/40 border-zinc-800/80 text-white rounded-xl h-12 focus:ring-primary/45 transition-all">
                             <SelectValue placeholder="Select target gender" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-zinc-900 border-zinc-850 text-white rounded-xl">
+                        <SelectContent className="bg-zinc-900 border-zinc-800/80 text-white rounded-xl">
                           {GENDERS.map((gender) => (
                             <SelectItem key={gender} value={gender} className="focus:bg-zinc-800 focus:text-white cursor-pointer rounded-lg">
                               {gender === "M" ? "Male" : "Female"}
@@ -340,15 +365,15 @@ export function SimulationWizard({ locale }: { locale: string }) {
                   control={form.control}
                   name="interest"
                   render={({ field }) => (
-                    <FormItem className="sm:col-span-2 flex flex-col gap-1">
+                    <FormItem className="sm:col-span-2 flex flex-col gap-1.5">
                       <FormLabel className="text-sm font-semibold text-zinc-300">Core Interest / Behavioral Segment</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value || ""}>
                         <FormControl>
-                          <SelectTrigger className="bg-black/40 border-zinc-800/80 text-white rounded-xl h-11 focus:ring-primary/45 transition-all">
+                          <SelectTrigger className="bg-zinc-950/40 border-zinc-800/80 text-white rounded-xl h-12 focus:ring-primary/45 transition-all">
                             <SelectValue placeholder="Select audience interest vertical" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-zinc-900 border-zinc-850 text-white rounded-xl max-h-[220px] overflow-y-auto">
+                        <SelectContent className="bg-zinc-900 border-zinc-800/80 text-white rounded-xl max-h-[220px] overflow-y-auto">
                           {INTERESTS.map((interest) => (
                             <SelectItem key={interest} value={interest} className="focus:bg-zinc-800 focus:text-white cursor-pointer rounded-lg">
                               {interest}
@@ -365,21 +390,22 @@ export function SimulationWizard({ locale }: { locale: string }) {
             )}
 
             {submitError ? (
-              <p className="rounded-xl border border-destructive/35 bg-destructive/10 px-4 py-3 text-sm text-destructive font-semibold animate-shake">
+              <p className="rounded-xl border border-destructive/35 bg-destructive/10 px-4 py-3.5 text-sm text-destructive font-semibold animate-shake">
                 {submitError}
               </p>
             ) : null}
           </CardContent>
 
-          <CardFooter className="flex justify-between gap-3 border-t border-zinc-850/80 pt-6 pb-6">
+          <CardFooter className="flex justify-between gap-4 border-t border-zinc-850/80 pt-8 pb-8 px-6 sm:px-8">
             <Button
               type="button"
               variant="outline"
               onClick={handleBack}
               disabled={step === 0 || isSubmitting}
-              className="rounded-xl border-zinc-800 text-zinc-300 hover:bg-zinc-900 hover:text-white transition-all px-5 h-11"
+              className="rounded-xl border-zinc-800 text-zinc-300 hover:bg-zinc-900 hover:text-white transition-all px-5 h-12 flex items-center gap-1.5"
             >
-              Back
+              <ChevronLeft className="h-4 w-4" />
+              <span>Back</span>
             </Button>
 
             <div className="flex gap-2">
@@ -387,15 +413,16 @@ export function SimulationWizard({ locale }: { locale: string }) {
                 <Button 
                   type="button" 
                   onClick={handleNext}
-                  className="rounded-xl bg-white text-black hover:bg-zinc-200 transition-all font-bold px-6 h-11"
+                  className="rounded-xl bg-white text-black hover:bg-zinc-200 transition-all font-bold px-6 h-12 flex items-center gap-1.5 shadow-lg shadow-white/5"
                 >
-                  Continue
+                  <span>Continue</span>
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
               ) : (
                 <Button
                   type="submit"
                   disabled={isSubmitting || !isLoaded || !userId}
-                  className="rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-500 hover:opacity-90 transition-opacity text-white font-bold shadow-xl shadow-indigo-500/20 px-6 h-11"
+                  className="rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-500 hover:opacity-90 transition-opacity text-white font-bold shadow-xl shadow-indigo-500/25 px-6 h-12 flex items-center justify-center"
                 >
                   {isSubmitting ? (
                     <>

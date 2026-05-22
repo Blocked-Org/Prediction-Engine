@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { CheckCircle2, Send } from 'lucide-react'
+import { CheckCircle2, Send, Globe2, Zap, Shield, Clock } from 'lucide-react'
 
 export default function ContactPage() {
   const t = useTranslations('ContactPage')
@@ -54,20 +54,20 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="relative min-h-screen flex flex-col bg-background font-sans">
+    <div className="relative min-h-screen flex flex-col bg-background font-sans overflow-x-hidden">
       <Navbar />
 
       {/* Background Gradients */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[15%] right-[20%] w-[45%] h-[45%] rounded-full bg-primary/10 blur-[130px]" />
+        <div className="absolute top-[15%] right-[20%] w-[45%] h-[45%] rounded-full bg-primary/10 blur-[150px]" />
         <div className="absolute bottom-[10%] left-[10%] w-[50%] h-[50%] rounded-full bg-accent/10 blur-[150px]" />
       </div>
 
-      <main className="z-10 flex-grow pt-24 px-4 md:px-8 pb-20 flex flex-col items-center">
+      <main className="z-10 flex-grow pt-24 px-4 md:px-8 pb-32 flex flex-col items-center">
         
         {/* Header */}
-        <div className="mx-auto max-w-4xl text-center py-16">
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">
+        <div className="mx-auto max-w-4xl text-center py-16 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-foreground bg-gradient-to-br from-white to-zinc-400 bg-clip-text text-transparent pb-2">
             {t('title')}
           </h1>
           <p className="text-lg text-muted-foreground mt-4 max-w-xl mx-auto leading-relaxed">
@@ -75,106 +75,149 @@ export default function ContactPage() {
           </p>
         </div>
 
-        {/* Contact Form Box */}
-        <div className="w-full max-w-lg bg-card border border-border/40 backdrop-blur-md rounded-3xl p-8 shadow-xl">
+        {/* Split Layout Container */}
+        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           
-          {isSuccess ? (
-            <div className="flex flex-col items-center text-center gap-6 py-8 animate-in zoom-in duration-300">
-              <div className="h-16 w-16 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/30 text-emerald-400">
-                <CheckCircle2 className="h-10 w-10 animate-bounce" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <h3 className="text-2xl font-bold text-foreground">
-                  {t('success_title')}
-                </h3>
-                <p className="text-sm text-muted-foreground max-w-sm">
-                  {t('success_desc')}
-                </p>
-              </div>
-              <Button
-                onClick={() => setIsSuccess(false)}
-                className="mt-4 rounded-full px-6"
-                variant="outline"
-              >
-                Send Another Message
-              </Button>
+          {/* Left Column: Trust Markers */}
+          <div className="flex flex-col gap-10 animate-in fade-in slide-in-from-left-8 duration-1000 delay-150">
+            <div className="flex flex-col gap-4">
+              <h2 className="text-3xl font-bold text-foreground">Why talk to us?</h2>
+              <p className="text-muted-foreground leading-relaxed max-w-md">
+                Whether you need a custom LLM fine-tuning setup, dedicated Neo4j graphs, or simply have questions about how our Bayesian models perform in your industry, our simulation engineers are here to help.
+              </p>
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="flex flex-col gap-2 p-4 rounded-2xl bg-card/40 border border-border/40 backdrop-blur-sm">
+                <Clock className="h-6 w-6 text-primary mb-1" />
+                <h4 className="font-semibold text-foreground">Fast Turnaround</h4>
+                <p className="text-sm text-muted-foreground">Average response time is under 2 hours.</p>
+              </div>
               
-              {/* Name Field */}
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="name" className="text-sm font-semibold text-muted-foreground">
-                  {t('name')}
-                </Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="e.g. Adnan Rahman"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className={`bg-background border-border/40 focus-visible:ring-primary/40 ${errors.name ? 'border-destructive/60 focus-visible:ring-destructive/30' : ''}`}
-                />
-                {errors.name && (
-                  <p className="text-xs font-semibold text-destructive mt-0.5">{errors.name}</p>
-                )}
+              <div className="flex flex-col gap-2 p-4 rounded-2xl bg-card/40 border border-border/40 backdrop-blur-sm">
+                <Shield className="h-6 w-6 text-emerald-500 mb-1" />
+                <h4 className="font-semibold text-foreground">Privacy First</h4>
+                <p className="text-sm text-muted-foreground">We never share your ad spend data or model states.</p>
               </div>
 
-              {/* Email Field */}
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="email" className="text-sm font-semibold text-muted-foreground">
-                  {t('email')}
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="e.g. adnan@brand.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className={`bg-background border-border/40 focus-visible:ring-primary/40 ${errors.email ? 'border-destructive/60 focus-visible:ring-destructive/30' : ''}`}
-                />
-                {errors.email && (
-                  <p className="text-xs font-semibold text-destructive mt-0.5">{errors.email}</p>
-                )}
+              <div className="flex flex-col gap-2 p-4 rounded-2xl bg-card/40 border border-border/40 backdrop-blur-sm">
+                <Globe2 className="h-6 w-6 text-blue-500 mb-1" />
+                <h4 className="font-semibold text-foreground">Global Scale</h4>
+                <p className="text-sm text-muted-foreground">Serving models across 15+ emerging markets.</p>
               </div>
 
-              {/* Message Field */}
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="message" className="text-sm font-semibold text-muted-foreground">
-                  {t('message')}
-                </Label>
-                <Textarea
-                  id="message"
-                  placeholder="Tell us about your brand budget optimization targets..."
-                  rows={5}
-                  value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  className={`bg-background border-border/40 focus-visible:ring-primary/40 resize-none ${errors.message ? 'border-destructive/60 focus-visible:ring-destructive/30' : ''}`}
-                />
-                {errors.message && (
-                  <p className="text-xs font-semibold text-destructive mt-0.5">{errors.message}</p>
-                )}
+              <div className="flex flex-col gap-2 p-4 rounded-2xl bg-card/40 border border-border/40 backdrop-blur-sm">
+                <Zap className="h-6 w-6 text-amber-500 mb-1" />
+                <h4 className="font-semibold text-foreground">Custom Solutions</h4>
+                <p className="text-sm text-muted-foreground">Need more than 1,000 agents? Let's scale up.</p>
               </div>
+            </div>
+          </div>
 
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full h-12 rounded-full font-bold text-base mt-2 flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-primary/25"
-              >
-                {isSubmitting ? (
-                  <span>{t('sending')}</span>
-                ) : (
-                  <>
-                    <span>{t('submit')}</span>
-                    <Send className="h-4 w-4" />
-                  </>
-                )}
-              </Button>
+          {/* Right Column: Contact Form Box */}
+          <div className="w-full bg-card/60 border border-border/50 backdrop-blur-xl rounded-3xl p-8 shadow-2xl shadow-primary/5 animate-in fade-in slide-in-from-right-8 duration-1000 delay-300 relative overflow-hidden">
+            {/* Subtle internal glow */}
+            <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-primary/10 rounded-full blur-[80px] pointer-events-none" />
 
-            </form>
-          )}
+            {isSuccess ? (
+              <div className="flex flex-col items-center text-center gap-6 py-12 animate-in zoom-in duration-500">
+                <div className="h-20 w-20 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/30 text-emerald-400 relative">
+                  <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping opacity-75" />
+                  <CheckCircle2 className="h-10 w-10 relative z-10" />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <h3 className="text-2xl font-bold text-foreground">
+                    {t('success_title')}
+                  </h3>
+                  <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                    {t('success_desc')}
+                  </p>
+                </div>
+                <Button
+                  onClick={() => setIsSuccess(false)}
+                  className="mt-6 rounded-full px-8 h-12"
+                  variant="outline"
+                >
+                  Send Another Message
+                </Button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="flex flex-col gap-6 relative z-10">
+                
+                {/* Name Field */}
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="name" className="text-sm font-semibold text-foreground/80">
+                    {t('name')}
+                  </Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="e.g. Adnan Rahman"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className={`bg-background/50 border-border/50 h-12 rounded-xl focus-visible:ring-primary/40 ${errors.name ? 'border-destructive/60 focus-visible:ring-destructive/30' : ''}`}
+                  />
+                  {errors.name && (
+                    <p className="text-xs font-semibold text-destructive mt-0.5">{errors.name}</p>
+                  )}
+                </div>
 
+                {/* Email Field */}
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="email" className="text-sm font-semibold text-foreground/80">
+                    {t('email')}
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="e.g. adnan@brand.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className={`bg-background/50 border-border/50 h-12 rounded-xl focus-visible:ring-primary/40 ${errors.email ? 'border-destructive/60 focus-visible:ring-destructive/30' : ''}`}
+                  />
+                  {errors.email && (
+                    <p className="text-xs font-semibold text-destructive mt-0.5">{errors.email}</p>
+                  )}
+                </div>
+
+                {/* Message Field */}
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="message" className="text-sm font-semibold text-foreground/80">
+                    {t('message')}
+                  </Label>
+                  <Textarea
+                    id="message"
+                    placeholder="Tell us about your brand budget optimization targets..."
+                    rows={5}
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    className={`bg-background/50 border-border/50 rounded-xl focus-visible:ring-primary/40 resize-none py-3 ${errors.message ? 'border-destructive/60 focus-visible:ring-destructive/30' : ''}`}
+                  />
+                  {errors.message && (
+                    <p className="text-xs font-semibold text-destructive mt-0.5">{errors.message}</p>
+                  )}
+                </div>
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full h-14 rounded-xl font-bold text-base mt-2 flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02] shadow-[0_0_20px_rgba(var(--color-primary-rgb),0.2)]"
+                >
+                  {isSubmitting ? (
+                    <span className="animate-pulse">{t('sending')}</span>
+                  ) : (
+                    <>
+                      <span>{t('submit')}</span>
+                      <Send className="h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+
+              </form>
+            )}
+
+          </div>
         </div>
 
       </main>

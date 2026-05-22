@@ -139,7 +139,7 @@ export default function PricingPage() {
         </div>
 
         {/* Pricing Cards Grid */}
-        <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
           {tiers.map((tier) => (
             <PricingCard
               key={tier.id}
@@ -156,6 +156,71 @@ export default function PricingPage() {
               onCtaClick={() => handleCtaClick(tier.id)}
             />
           ))}
+        </div>
+
+        {/* Feature Comparison Matrix */}
+        <div className="mx-auto max-w-5xl mt-32">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-foreground">Compare Plans</h2>
+            <p className="text-muted-foreground mt-2">Find the right capabilities for your modeling needs.</p>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr>
+                  <th className="p-4 border-b border-border/40 font-semibold text-foreground w-1/3">Features</th>
+                  <th className="p-4 border-b border-border/40 font-semibold text-foreground text-center">Starter</th>
+                  <th className="p-4 border-b border-border/40 font-semibold text-primary text-center bg-primary/5 rounded-t-xl border-t border-l border-r border-primary/20">Professional</th>
+                  <th className="p-4 border-b border-border/40 font-semibold text-foreground text-center">Enterprise</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm text-muted-foreground">
+                <tr className="hover:bg-muted/30 transition-colors">
+                  <td className="p-4 border-b border-border/20 font-medium text-foreground">Bayesian MMM Forecasting</td>
+                  <td className="p-4 border-b border-border/20 text-center text-foreground">✓</td>
+                  <td className="p-4 border-b border-border/20 text-center text-primary bg-primary/5 border-l border-r border-primary/20">✓</td>
+                  <td className="p-4 border-b border-border/20 text-center text-foreground">✓</td>
+                </tr>
+                <tr className="hover:bg-muted/30 transition-colors">
+                  <td className="p-4 border-b border-border/20 font-medium text-foreground">Mesa Agent Simulation</td>
+                  <td className="p-4 border-b border-border/20 text-center">100 Agents</td>
+                  <td className="p-4 border-b border-border/20 text-center font-medium bg-primary/5 border-l border-r border-primary/20">1,000 Agents</td>
+                  <td className="p-4 border-b border-border/20 text-center font-medium text-foreground">Unlimited (Custom)</td>
+                </tr>
+                <tr className="hover:bg-muted/30 transition-colors">
+                  <td className="p-4 border-b border-border/20 font-medium text-foreground">Markov Attribution Journey</td>
+                  <td className="p-4 border-b border-border/20 text-center text-foreground">✓</td>
+                  <td className="p-4 border-b border-border/20 text-center text-primary bg-primary/5 border-l border-r border-primary/20">✓</td>
+                  <td className="p-4 border-b border-border/20 text-center text-foreground">✓</td>
+                </tr>
+                <tr className="hover:bg-muted/30 transition-colors">
+                  <td className="p-4 border-b border-border/20 font-medium text-foreground">NSGA-II Genetic Optimization</td>
+                  <td className="p-4 border-b border-border/20 text-center">-</td>
+                  <td className="p-4 border-b border-border/20 text-center text-primary bg-primary/5 border-l border-r border-primary/20">✓</td>
+                  <td className="p-4 border-b border-border/20 text-center text-foreground">✓</td>
+                </tr>
+                <tr className="hover:bg-muted/30 transition-colors">
+                  <td className="p-4 border-b border-border/20 font-medium text-foreground">Local Offline LLM (Gemma 4)</td>
+                  <td className="p-4 border-b border-border/20 text-center">-</td>
+                  <td className="p-4 border-b border-border/20 text-center text-primary bg-primary/5 border-l border-r border-primary/20">✓</td>
+                  <td className="p-4 border-b border-border/20 text-center text-foreground">✓</td>
+                </tr>
+                <tr className="hover:bg-muted/30 transition-colors">
+                  <td className="p-4 border-b border-border/20 font-medium text-foreground">Neo4j GraphRAG Integration</td>
+                  <td className="p-4 border-b border-border/20 text-center">-</td>
+                  <td className="p-4 border-b border-border/20 text-center bg-primary/5 border-l border-r border-primary/20">-</td>
+                  <td className="p-4 border-b border-border/20 text-center text-foreground">✓</td>
+                </tr>
+                <tr className="hover:bg-muted/30 transition-colors">
+                  <td className="p-4 border-b border-border/20 font-medium text-foreground">Support Level</td>
+                  <td className="p-4 border-b border-border/20 text-center">Community</td>
+                  <td className="p-4 border-b border-border/20 text-center bg-primary/5 border-l border-r border-primary/20 border-b-primary/20 rounded-b-xl">Priority Email</td>
+                  <td className="p-4 border-b border-border/20 text-center">24/7 Dedicated SLA</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
       </main>
