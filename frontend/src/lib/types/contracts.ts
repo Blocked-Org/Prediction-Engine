@@ -117,3 +117,36 @@ export interface ForecastResponse {
   incremental_sales: number
   confidence_interval: [number, number]   // [lower_5th, upper_95th] — REAL PyMC quantiles
 }
+
+// === Analytics API Contracts ===
+
+export interface ROIDataPointContract {
+  date: string
+  iroas: number
+  lower: number
+  upper: number
+}
+
+export interface ROIAnalyticsResponse {
+  campaign_id: string
+  data_points: ROIDataPointContract[]
+}
+
+export interface MarkovNodeContract {
+  id: string
+  label: string
+  trafficShare: number
+}
+
+export interface MarkovEdgeContract {
+  from: string
+  to: string
+  probability: number
+}
+
+export interface MarkovAnalyticsResponse {
+  campaign_id: string
+  nodes: MarkovNodeContract[]
+  edges: MarkovEdgeContract[]
+}
+

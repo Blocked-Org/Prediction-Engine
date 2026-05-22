@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import {
   MarkovFunnelChart,
-  generateMockMarkovData,
   type MarkovFunnelData,
 } from "../MarkovFunnelChart";
 
@@ -90,48 +89,3 @@ describe("MarkovFunnelChart", () => {
   });
 });
 
-// ── Tests: generateMockMarkovData ─────────────────────────────────────────────
-
-describe("generateMockMarkovData", () => {
-  const channels = ["Meta", "Google", "TikTok"];
-  const result = generateMockMarkovData(channels);
-
-  it("includes a node for each input channel", () => {
-    for (const ch of channels) {
-      const found = result.nodes.some(
-        (n) => n.id === ch.toLowerCase().replace(/\s+/g, "_")
-      );
-      expect(found).toBe(true);
-    }
-  });
-
-  it("always includes organic, retargeting, converted, and null nodes", () => {
-    const ids = result.nodes.map((n) => n.id);
-    expect(ids).toContain("organic");
-    expect(ids).toContain("retargeting");
-    expect(ids).toContain("converted");
-    expect(ids).toContain("null");
-  });
-
-  it("all trafficShare values are between 0 and 1", () => {
-    for (const node of result.nodes) {
-      expect(node.trafficShare).toBeGreaterThan(0);
-      expect(node.trafficShare).toBeLessThanOrEqual(1);
-    }
-  });
-
-  it("all edge probabilities are between 0 and 1", () => {
-    for (const edge of result.edges) {
-      expect(edge.probability).toBeGreaterThan(0);
-      expect(edge.probability).toBeLessThanOrEqual(1);
-    }
-  });
-
-  it("generates edges with valid from/to node ids", () => {
-    const nodeIds = new Set(result.nodes.map((n) => n.id));
-    for (const edge of result.edges) {
-      expect(nodeIds.has(edge.from)).toBe(true);
-      expect(nodeIds.has(edge.to)).toBe(true);
-    }
-  });
-});

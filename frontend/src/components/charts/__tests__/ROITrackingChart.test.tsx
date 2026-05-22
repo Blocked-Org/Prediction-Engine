@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import {
   ROITrackingChart,
-  generateMockROIData,
   type ROIDataPoint,
 } from "../ROITrackingChart";
 
@@ -60,32 +59,3 @@ describe("ROITrackingChart", () => {
   });
 });
 
-describe("generateMockROIData", () => {
-  it("returns the correct number of weekly data points", () => {
-    const points = generateMockROIData({ Meta: 5000, Google: 3000 }, "2024-01-01", 12);
-    expect(points).toHaveLength(12);
-  });
-
-  it("all points have iroas >= lower and iroas <= upper", () => {
-    const points = generateMockROIData({ Meta: 4000 });
-    for (const p of points) {
-      expect(p.iroas).toBeGreaterThanOrEqual(p.lower);
-      expect(p.iroas).toBeLessThanOrEqual(p.upper);
-    }
-  });
-
-  it("generates dates in ascending ISO-string order", () => {
-    const points = generateMockROIData({ Meta: 5000 }, "2024-03-01", 8);
-    for (let i = 1; i < points.length; i++) {
-      expect(points[i].date > points[i - 1].date).toBe(true);
-    }
-  });
-
-  it("higher spend produces a higher peak iROAS (up to the cap)", () => {
-    const lowSpend = generateMockROIData({ Meta: 1000 });
-    const highSpend = generateMockROIData({ Meta: 20000 });
-    const lastLow = lowSpend[lowSpend.length - 1].iroas;
-    const lastHigh = highSpend[highSpend.length - 1].iroas;
-    expect(lastHigh).toBeGreaterThan(lastLow);
-  });
-});

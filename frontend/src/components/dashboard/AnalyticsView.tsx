@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 
 import { ExecutiveReport } from "@/components/ExecutiveReport";
@@ -16,14 +16,12 @@ import {
 } from "@/components/ui/card";
 import type { DashboardSimulationData } from "@/lib/dashboard";
 import type { ChannelAllocation } from "@/lib/types/contracts";
-import {
-  generateMockROIData,
-  type ROIDataPoint,
-} from "@/components/charts/ROITrackingChart";
-import {
-  generateMockMarkovData,
-  type MarkovFunnelData,
-} from "@/components/charts/MarkovFunnelChart";
+import type {
+  ROIAnalyticsResponse,
+  MarkovAnalyticsResponse,
+} from "@/lib/types/contracts";
+import type { ROIDataPoint } from "@/components/charts/ROITrackingChart";
+import type { MarkovFunnelData } from "@/components/charts/MarkovFunnelChart";
 import {
   SimulationControls,
   type ChannelBudgets,
@@ -241,29 +239,86 @@ export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
   const estimatedRevenue =
     optimization_result.expected_forecast.estimated_revenue;
 
-  // ── Derive channel spend map for ROI + Markov mock generators ───────────
-  const channelSpendMap = useMemo<Record<string, number>>(
-    () =>
-      Object.fromEntries(
-        optimizedAllocations.map((a) => [a.channel_name, a.spend])
-      ),
-    [optimizedAllocations]
-  );
+  // ── Campaign ID for analytics API calls ─────────────────────────────────
+  const campaignId =
+    simulationData.simulation_scenario?.campaign_input?.campaign_id ?? null;
 
-  const channelNames = useMemo(
-    () => optimizedAllocations.map((a) => a.channel_name),
-    [optimizedAllocations]
-  );
+  // ── ROI data: fetched from backend ──────────────────────────────────────
+  const [roiDataPoints, setRoiDataPoints] = useState<ROIDataPoint[]>([]);
+  const [isLoadingROI, setIsLoadingROI] = useState(false);
+  const [roiError, setRoiError] = useState<string | null>(null);
 
-  // ── ROI data: use real backend data when available, else derive mock ─────
-  const roiDataPoints = useMemo<ROIDataPoint[]>(() => {
-    return generateMockROIData(channelSpendMap);
-  }, [channelSpendMap]);
+  // ── Markov data: fetched from backend ───────────────────────────────────
+  const [markovData, setMarkovData] = useState<MarkovFunnelData>({
+    nodes: [],
+    edges: [],
+  });
+  const [isLoadingMarkov, setIsLoadingMarkov] = useState(false);
+  const [markovError, setMarkovError] = useState<string | null>(null);
 
-  // ── Markov data: use real backend data when available, else derive mock ──
-  const markovData = useMemo<MarkovFunnelData>(() => {
-    return generateMockMarkovData(channelNames);
-  }, [channelNames]);
+  // ── Fetch ROI analytics ─────────────────────────────────────────────────
+  useEffect(() => {
+    if (!campaignId) return;
+
+    let cancelled = false;
+    setIsLoadingROI(true);
+    setRoiError(null);
+
+    fetch(`/api/analytics/roi/${encodeURIComponent(campaignId)}`)
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json() as Promise<ROIAnalyticsResponse>;
+      })
+      .then((data) => {
+        if (!cancelled) {
+          setRoiDataPoints(data.data_points);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setRoiError(err instanceof Error ? err.message : "Failed to load ROI data");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingROI(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [campaignId, simulationData]);
+
+  // ── Fetch Markov analytics ──────────────────────────────────────────────
+  useEffect(() => {
+    if (!campaignId) return;
+
+    let cancelled = false;
+    setIsLoadingMarkov(true);
+    setMarkovError(null);
+
+    fetch(`/api/analytics/markov/${encodeURIComponent(campaignId)}`)
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json() as Promise<MarkovAnalyticsResponse>;
+      })
+      .then((data) => {
+        if (!cancelled) {
+          setMarkovData({ nodes: data.nodes, edges: data.edges });
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setMarkovError(err instanceof Error ? err.message : "Failed to load Markov data");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingMarkov(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [campaignId, simulationData]);
 
   // Derive a single iROAS figure for the KPI card
   const latestIROAS =
@@ -355,13 +410,24 @@ export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
                 iROAS
               </p>
               <p className="text-2xl font-bold text-indigo-700">
-                {latestIROAS.toFixed(2)}×
+                {isLoadingROI ? "—" : `${latestIROAS.toFixed(2)}×`}
               </p>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <ROITrackingChart dataPoints={roiDataPoints} breakEvenThreshold={1.0} />
+          {isLoadingROI ? (
+            <div className="flex h-[320px] flex-col items-center justify-center gap-3">
+              <Skeleton className="h-[270px] w-full rounded-xl" />
+              <Skeleton className="h-4 w-1/4" />
+            </div>
+          ) : roiError ? (
+            <div className="flex h-[320px] items-center justify-center text-sm text-muted-foreground">
+              Failed to load ROI data. Please try again.
+            </div>
+          ) : (
+            <ROITrackingChart dataPoints={roiDataPoints} breakEvenThreshold={1.0} />
+          )}
         </CardContent>
       </Card>
 
@@ -376,7 +442,18 @@ export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-2">
-          <MarkovFunnelChart data={markovData} height={340} />
+          {isLoadingMarkov ? (
+            <div className="flex h-[340px] flex-col items-center justify-center gap-3">
+              <Skeleton className="h-[290px] w-full rounded-xl" />
+              <Skeleton className="h-4 w-1/3" />
+            </div>
+          ) : markovError ? (
+            <div className="flex h-[340px] items-center justify-center text-sm text-muted-foreground">
+              Failed to load Markov data. Please try again.
+            </div>
+          ) : (
+            <MarkovFunnelChart data={markovData} height={340} />
+          )}
         </CardContent>
       </Card>
 

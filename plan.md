@@ -90,18 +90,18 @@ Based on the whitepaper for the "Graph-Augmented Bayesian Simulation Engine", yo
   - Uses `lightweight-charts` (Canvas renderer)
   - Three series: iROAS point estimate, 90% credible interval band, break-even threshold
   - iROAS KPI badge in the card header reacts to simulation data
-  - `generateMockROIData()` derives realistic trajectory from channel spend until real backend is wired
+  - Data fetched from real backend (`/api/v1/analytics/roi/{campaign_id}`) with Skeleton loading states
 - [x] **Micro-Funnel Journey graph** — `MarkovFunnelChart.tsx` ✨ NEW
   - Pure SVG — zero extra dependencies
   - Nodes auto-arrange into funnel stage columns (Awareness → Consideration → Lower-Funnel → Conversion)
   - Cubic Bézier edges; stroke-width encodes P(i→j) transition probability
   - Traffic-share bar inside each node visualises relative audience size
-  - `generateMockMarkovData()` builds plausible funnel from channel names until backend is wired
+  - Data fetched from real backend (`/api/v1/analytics/markov/{campaign_id}`) with Skeleton loading states
 - [x] Charts react to state changes (all charts re-render when `data` prop changes)
 - [x] Both new charts dynamically imported in `AnalyticsView.tsx` (SSR-safe, lazy-loaded)
-- [x] Chart unit tests — 21 tests passing across all 4 chart components
-  - `ROITrackingChart.test.tsx` — 8 tests (render, legend, empty state, generator)
-  - `MarkovFunnelChart.test.tsx` — 13 tests (SVG, labels, headers, accessibility, edge %, generator)
+- [x] Chart unit tests passing across all 4 chart components
+  - `ROITrackingChart.test.tsx` — 4 tests (render, legend, empty state, threshold)
+  - `MarkovFunnelChart.test.tsx` — 7 tests (SVG, labels, headers, accessibility, edge %, self-loop)
 - [x] i18n keys added for both new charts in `en.json` and `bn.json`
 
 ### 3.4 LLM Orchestration — Layer 5 (Day 4) ✅
@@ -375,6 +375,9 @@ src/
 │   │   ├── sign-in/                # ✅ Clerk sign-in
 │   │   └── sign-up/                # ✅ Clerk sign-up
 │   ├── api/
+│   │   ├── analytics/
+│   │   │   ├── roi/[campaignId]/   # ✅ ROI analytics proxy (→ FastAPI)
+│   │   │   └── markov/[campaignId]/ # ✅ Markov analytics proxy (→ FastAPI)
 │   │   ├── forecast/               # ✅ Forecast proxy route
 │   │   ├── report/route.ts         # ✅ LLM report generation
 │   │   └── simulate/               # ✅ Simulation proxy route
@@ -422,7 +425,8 @@ src/
 │   ├── worker.py                   # ✅ Worker integration
 │   ├── routes/
 │   │   ├── simulate.py             # ✅ Simulate endpoint (10KB)
-│   │   └── report.py              # ✅ Report context endpoint (7.7KB)
+│   │   ├── report.py              # ✅ Report context endpoint (7.7KB)
+│   │   └── analytics.py           # ✅ ROI + Markov analytics (Redis-cached)
 │   ├── services/
 │   │   └── dashboard_results.py    # ✅ Dashboard service (11KB) — Redis cache integrated
 │   └── db/
@@ -461,7 +465,8 @@ src/
 │   └── tasks.py                  # ✅ Task definitions (3KB)
 └── schemas/
     ├── simulation.py              # ✅ Domain schemas (5KB)
-    └── dashboard.py               # ✅ Dashboard schemas
+    ├── dashboard.py               # ✅ Dashboard schemas
+    └── analytics.py               # ✅ ROI + Markov analytics schemas
 ```
 
 ---
@@ -479,6 +484,7 @@ src/
 | 5   | Integration handshake: frontend → real backend                  | Both  | 4h         | #1, #2     | ✅ Done                                           |
 | 6   | End-to-end simulation flow test                                 | Both  | 2h         | #5         | ✅ Done (`scripts/test_e2e_engine.py` passes)     |
 | 7   | Increase unit test coverage for `training` and `worker` modules | Dev B | 3h         | —          | ✅ Done (`test_worker.py` and `test_training.py`) |
+| 8   | Wire ROI + Markov charts to real backend analytics endpoints    | Both  | 3h         | #5         | ✅ Done (mock generators removed, Redis-cached FastAPI endpoints) |
 
 ### 🟡 P1 — Significantly improves demo quality
 

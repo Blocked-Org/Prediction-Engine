@@ -85,6 +85,8 @@ ollama run gemma4:26b
 - `POST /api/v1/simulate` : Triggers the Triple-Engine (Macro MMM, Micro ABM, Optimization) via Celery. Protected by Role-Based Access Control (RBAC): `owner`, `admin`, and `analyst` roles allowed. Supports dynamic `budget_overrides` from the interactive sandbox.
 - `POST /api/v1/simulate/init` : Registers a new campaign graph. Allowed roles: `owner`, `admin`, `analyst`, `viewer` (all authenticated users for onboarding).
 - `GET /api/v1/simulate/results/{clerk_user_id}` : Loads dashboard results. Allowed roles: `owner`, `admin`, `analyst`, `viewer` (all active roles).
+- `GET /api/v1/analytics/roi/{campaign_id}` : Returns a 26-week iROAS time-series with 90% credible intervals, derived from the Bayesian simulation engine. Results are cached in Redis (`SimulationCache`) for instant demo reloads.
+- `GET /api/v1/analytics/markov/{campaign_id}` : Returns the Markov funnel transition graph (nodes + edges with real transition probabilities from the ABM → Markov attribution pipeline). Redis-cached.
 - `POST /api/v1/forecast` : Triggers predictive forecasting via Celery.
 
 ### Role-Based Access Control (RBAC)
@@ -96,6 +98,8 @@ The backend enforces robust Role-Based Access Control using Clerk's `org_role` c
 | `POST /api/v1/simulate` | owner, admin, analyst | Viewers cannot execute heavy simulations |
 | `POST /api/v1/simulate/init` | owner, admin, analyst, viewer | Allows all authenticated users to complete onboarding |
 | `GET /api/v1/simulate/results/{id}` | owner, admin, analyst, viewer | Everyone can view analytical results |
+| `GET /api/v1/analytics/roi/{id}` | owner, admin, analyst, viewer | Everyone can view ROI analytics |
+| `GET /api/v1/analytics/markov/{id}` | owner, admin, analyst, viewer | Everyone can view Markov funnel data |
 
 *The `GET /api/v1/simulate/status/{id}` endpoint remains fully public for read-only polling.*
 
@@ -193,4 +197,5 @@ The backend uses `pydantic-settings` (via `src/api/config.py`) to manage configu
 - Bilingual UX is implemented with `next-intl` locale segments.
 - Executive report generation supports cloud/offline selection in the UI with streaming text generation.
 - Interactive Simulation Sandbox allows real-time slider reactivity and client-side Hill function visualization.
+- ROI tracking and Markov funnel charts fetch live data from the simulation engine (no frontend mock generators) with Redis caching for instant subsequent loads.
 - The pipeline is fully integrated end-to-end: from Neo4j Graph Retrieval -> PyMC/Mesa Engines -> Next.js Streaming Dashboard.
