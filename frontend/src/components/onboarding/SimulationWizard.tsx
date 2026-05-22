@@ -79,9 +79,9 @@ function NumberField({
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem>
-          <FormLabel className="flex items-center gap-2">
-            {Icon && <Icon className="size-4 text-muted-foreground" />}
+        <FormItem className="flex flex-col gap-1">
+          <FormLabel className="flex items-center gap-2 text-sm font-semibold text-zinc-300">
+            {Icon && <Icon className="size-4 text-zinc-500" />}
             {label}
           </FormLabel>
           <FormControl>
@@ -98,12 +98,13 @@ function NumberField({
                 const next = e.target.valueAsNumber
                 field.onChange(Number.isNaN(next) ? 0 : next)
               }}
+              className="bg-black/40 border-zinc-800/80 text-white placeholder:text-zinc-600 focus-visible:ring-primary/45 rounded-xl h-11 transition-all"
             />
           </FormControl>
           {description ? (
-            <FormDescription>{description}</FormDescription>
+            <FormDescription className="text-[11px] text-zinc-500 leading-tight">{description}</FormDescription>
           ) : null}
-          <FormMessage />
+          <FormMessage className="text-xs text-destructive font-semibold" />
         </FormItem>
       )}
     />
@@ -186,73 +187,92 @@ export function SimulationWizard({ locale }: { locale: string }) {
   }
 
   return (
-    <Card className="mx-auto w-full max-w-3xl shadow-[0_0_60px_rgba(99,102,241,0.15)] border-white/10 relative overflow-hidden">
-      <CardHeader>
-        <div className="flex items-start justify-between gap-4">
+    <Card className="w-full bg-zinc-900/60 border-zinc-800/80 backdrop-blur-md rounded-3xl shadow-[0_0_80px_rgba(99,102,241,0.15)] text-white relative overflow-hidden">
+      
+      <CardHeader className="border-b border-zinc-800/60 pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <CardTitle>Brand Simulation Onboarding</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl font-extrabold text-white">Brand Simulation Onboarding</CardTitle>
+            <CardDescription className="text-zinc-400">
               Step {step + 1} of {STEPS.length}: {currentStep.title}
             </CardDescription>
           </div>
-          <Button type="button" size="sm" onClick={loadDemoPreset} className="bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white shadow-lg">
-            <Sparkles className="size-4 animate-pulse mr-1" />
-            Load Demo Preset
+          <Button 
+            type="button" 
+            size="sm" 
+            onClick={loadDemoPreset} 
+            className="rounded-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold shadow-lg shadow-orange-500/10 border-0 h-10 px-5 flex items-center justify-center gap-1.5 self-start sm:self-center"
+          >
+            <Sparkles className="size-4 animate-pulse" />
+            <span>Load Demo Preset</span>
           </Button>
         </div>
-        <div className="mt-6 mb-2 relative">
-          <Progress value={progressValue} className="h-2 bg-muted/50" indicatorClassName="bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
-          <div className="flex justify-between mt-2 px-1">
+
+        {/* Progress Tracker */}
+        <div className="mt-8 relative">
+          <Progress 
+            value={progressValue} 
+            className="h-2 bg-zinc-950 border border-zinc-850 rounded-full" 
+            indicatorClassName="bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-500" 
+          />
+          <div className="flex justify-between mt-3 px-1">
             {STEPS.map((s, i) => {
               const isActive = i === step;
               const isPast = i < step;
               return (
-                <div key={s.title} className="flex flex-col items-center">
-                  <div className={`w-3 h-3 rounded-full mb-1 ${isActive ? 'bg-indigo-500 animate-pulse shadow-[0_0_10px_rgba(99,102,241,0.8)]' : isPast ? 'bg-indigo-500' : 'bg-muted-foreground/30'}`} />
-                  <span className={`text-xs ${isActive ? 'text-indigo-400 font-medium' : 'text-muted-foreground'}`}>{s.title}</span>
+                <div key={s.title} className="flex flex-col items-center gap-1">
+                  <div className={`w-3.5 h-3.5 rounded-full border transition-all duration-300 ${
+                    isActive 
+                      ? 'bg-cyan-400 border-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.8)] animate-pulse' 
+                      : isPast 
+                        ? 'bg-primary border-primary' 
+                        : 'bg-zinc-800 border-zinc-850'
+                  }`} />
+                  <span className={`text-[10px] uppercase font-bold tracking-wider ${isActive ? 'text-cyan-400' : 'text-zinc-500'}`}>{s.title}</span>
                 </div>
               );
             })}
           </div>
         </div>
-        <p className="text-sm text-muted-foreground text-center mt-2">{currentStep.subtitle}</p>
+        <p className="text-sm text-zinc-400 text-center mt-4 italic font-medium">"{currentStep.subtitle}"</p>
       </CardHeader>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6 pt-6 pb-6">
+            
             {step === 0 && (
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-6 sm:grid-cols-2">
                 <NumberField
                   control={form.control}
                   name="Impressions"
                   label="Impressions"
-                  description="Number of ad impressions."
+                  description="Total historical ad impressions served."
                   icon={Eye}
-                  placeholder="e.g., 50,000"
+                  placeholder="e.g., 50000"
                 />
                 <NumberField
                   control={form.control}
                   name="Clicks"
                   label="Clicks"
-                  description="Number of ad clicks."
+                  description="Total historical click interactions logged."
                   step="1"
                   icon={MousePointer}
-                  placeholder="e.g., 2,500"
+                  placeholder="e.g., 2500"
                 />
                 <NumberField
                   control={form.control}
                   name="Spent"
                   label="Spent"
-                  description="Amount of money spent on the ad."
+                  description="Historical media spend budget (USD)."
                   icon={DollarSign}
-                  placeholder="e.g., 10,000"
+                  placeholder="e.g., 10000"
                 />
                 <NumberField
                   control={form.control}
                   name="Total_Conversion"
                   label="Total Conversion"
-                  description="Total number of conversions."
+                  description="Historical conversion counts logged."
                   step="1"
                   icon={Target}
                   placeholder="e.g., 150"
@@ -261,109 +281,121 @@ export function SimulationWizard({ locale }: { locale: string }) {
             )}
 
             {step === 1 && (
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-6 sm:grid-cols-2">
+                
+                {/* Age Field */}
                 <FormField
                   control={form.control}
                   name="age"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Age Range</FormLabel>
+                    <FormItem className="flex flex-col gap-1">
+                      <FormLabel className="text-sm font-semibold text-zinc-300">Age Range</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value || ""}>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select an age range" />
+                          <SelectTrigger className="bg-black/40 border-zinc-800/80 text-white rounded-xl h-11 focus:ring-primary/45 transition-all">
+                            <SelectValue placeholder="Select target age group" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="bg-zinc-900 border-zinc-850 text-white rounded-xl">
                           {AGE_RANGES.map((range) => (
-                            <SelectItem key={range} value={range}>
+                            <SelectItem key={range} value={range} className="focus:bg-zinc-800 focus:text-white cursor-pointer rounded-lg">
                               {range}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      <FormMessage />
+                      <FormMessage className="text-xs text-destructive font-semibold" />
                     </FormItem>
                   )}
                 />
+
+                {/* Gender Field */}
                 <FormField
                   control={form.control}
                   name="gender"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Gender</FormLabel>
+                    <FormItem className="flex flex-col gap-1">
+                      <FormLabel className="text-sm font-semibold text-zinc-300">Gender</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value || ""}>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select gender" />
+                          <SelectTrigger className="bg-black/40 border-zinc-800/80 text-white rounded-xl h-11 focus:ring-primary/45 transition-all">
+                            <SelectValue placeholder="Select target gender" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="bg-zinc-900 border-zinc-850 text-white rounded-xl">
                           {GENDERS.map((gender) => (
-                            <SelectItem key={gender} value={gender}>
+                            <SelectItem key={gender} value={gender} className="focus:bg-zinc-800 focus:text-white cursor-pointer rounded-lg">
                               {gender === "M" ? "Male" : "Female"}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      <FormMessage />
+                      <FormMessage className="text-xs text-destructive font-semibold" />
                     </FormItem>
                   )}
                 />
+
+                {/* Interest Field */}
                 <FormField
                   control={form.control}
                   name="interest"
                   render={({ field }) => (
-                    <FormItem className="sm:col-span-2">
-                      <FormLabel>Interest</FormLabel>
+                    <FormItem className="sm:col-span-2 flex flex-col gap-1">
+                      <FormLabel className="text-sm font-semibold text-zinc-300">Core Interest / Behavioral Segment</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value || ""}>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select an interest" />
+                          <SelectTrigger className="bg-black/40 border-zinc-800/80 text-white rounded-xl h-11 focus:ring-primary/45 transition-all">
+                            <SelectValue placeholder="Select audience interest vertical" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="bg-zinc-900 border-zinc-850 text-white rounded-xl max-h-[220px] overflow-y-auto">
                           {INTERESTS.map((interest) => (
-                            <SelectItem key={interest} value={interest}>
+                            <SelectItem key={interest} value={interest} className="focus:bg-zinc-800 focus:text-white cursor-pointer rounded-lg">
                               {interest}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      <FormMessage />
+                      <FormMessage className="text-xs text-destructive font-semibold" />
                     </FormItem>
                   )}
                 />
+
               </div>
             )}
 
             {submitError ? (
-              <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              <p className="rounded-xl border border-destructive/35 bg-destructive/10 px-4 py-3 text-sm text-destructive font-semibold animate-shake">
                 {submitError}
               </p>
             ) : null}
           </CardContent>
 
-          <CardFooter className="flex justify-between gap-2 border-t mt-4 pt-4">
+          <CardFooter className="flex justify-between gap-3 border-t border-zinc-850/80 pt-6 pb-6">
             <Button
               type="button"
               variant="outline"
               onClick={handleBack}
               disabled={step === 0 || isSubmitting}
+              className="rounded-xl border-zinc-800 text-zinc-300 hover:bg-zinc-900 hover:text-white transition-all px-5 h-11"
             >
               Back
             </Button>
 
             <div className="flex gap-2">
               {!isLastStep ? (
-                <Button type="button" onClick={handleNext}>
+                <Button 
+                  type="button" 
+                  onClick={handleNext}
+                  className="rounded-xl bg-white text-black hover:bg-zinc-200 transition-all font-bold px-6 h-11"
+                >
                   Continue
                 </Button>
               ) : (
                 <Button
                   type="submit"
                   disabled={isSubmitting || !isLoaded || !userId}
-                  className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:opacity-90 transition-opacity"
+                  className="rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-500 hover:opacity-90 transition-opacity text-white font-bold shadow-xl shadow-indigo-500/20 px-6 h-11"
                 >
                   {isSubmitting ? (
                     <>

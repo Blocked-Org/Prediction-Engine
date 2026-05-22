@@ -72,5 +72,174 @@
     "allocation_breakdown": "Optimized Allocation Breakdown",
     "allocation_desc": "Pareto-optimal budget distribution per channel",
     "share": "Share (%)"
+  },
+  "Navbar": {
+    "features": "Features",
+    "pricing": "Pricing",
+    "docs": "Docs",
+    "contact": "Contact",
+    "dashboard": "Dashboard",
+    "logo": "InfinitySim"
+  },
+  "Footer": {
+    "rights": "All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "tagline": "Augmented Bayesian simulations for the future of marketing."
+  },
+  "PricingPage": {
+    "title": "Simple, Transparent Pricing",
+    "subtitle": "Choose the plan that fits your brand's growth journey.",
+    "monthly": "Monthly",
+    "annual": "Annual",
+    "save_20": "Save 20%",
+    "popular": "Most Popular",
+    "currency_bdt": "৳ (BDT)",
+    "currency_usd": "$ (USD)",
+    "get_started": "Get Started",
+    "contact_sales": "Contact Sales",
+    "tiers": {
+      "starter": {
+        "name": "Starter",
+        "desc": "Perfect for small local brands beginning their optimization journey."
+      },
+      "professional": {
+        "name": "Professional",
+        "desc": "For scaling brands requiring comprehensive MMM and simulation capabilities."
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "desc": "Custom models, dedicated nodes, and deep Neo4j GraphRAG integration."
+      }
+    },
+    "features": {
+      "mmm": "Bayesian MMM Forecasting",
+      "abm": "Agent-Based Simulation (100 synthetic agents)",
+      "abm_full": "Full Mesa ABM (1,000+ synthetic agents)",
+      "markov": "Markov Attribution Journey",
+      "genetic": "Genetic Budget Optimization",
+      "rag": "Neo4j GraphRAG Reports",
+      "offline": "Local Offline LLM Support",
+      "support": "Email Support",
+      "support_priority": "Priority 24/7 Support",
+      "custom_nodes": "Custom Simulation Nodes"
+    }
+  },
+  "FeaturesPage": {
+    "title": "Advanced 6-Layer Architecture",
+    "subtitle": "How the Graph-Augmented Bayesian Simulation Engine works.",
+    "layers": {
+      "data": {
+        "name": "Layer 1: Ingestion & Data Sources",
+        "desc": "Aggregates internal ad spends, exogenous market intelligence, and consumer transactional logs."
+      },
+      "storage": {
+        "name": "Layer 2: Storage & Knowledge Graph",
+        "desc": "TimescaleDB for time-series logs, Weaviate for embeddings, and Neo4j for semantic relationship mapping."
+      },
+      "mmm": {
+        "name": "Layer 3: Bayesian MMM",
+        "desc": "Uses PyMC-Marketing to build adstock decay and Hill saturation S-Curves, avoiding the linear budget fallacy."
+      },
+      "abm": {
+        "name": "Layer 4: Agent-Based Mesa Engine",
+        "desc": "1,000+ autonomous consumer agents simulating exposure, word-of-mouth, and conversion paths."
+      },
+      "opt": {
+        "name": "Layer 5: Genetic Optimization",
+        "desc": "NSGA-II multi-objective genetic algorithms determining the Pareto-optimal budget frontier."
+      },
+      "llm": {
+        "name": "Layer 6: Local & Cloud LLMs",
+        "desc": "Bilingual executive summaries and Cypher natural language querying grounded in Neo4j context."
+      }
+    }
+  },
+  "DocsPage": {
+    "title": "Developer Documentation",
+    "subtitle": "Integrate and run the Prediction Engine platform.",
+    "search_placeholder": "Search documentation...",
+    "categories": {
+      "getting_started": "Getting Started",
+      "simulation": "Simulation Engine",
+      "attribution": "Attribution & GraphRAG",
+      "api_reference": "API Reference"
+    }
+  },
+  "FAQ": {
+    "title": "Frequently Asked Questions",
+    "q1": "What is Bayesian MMM?",
+    "a1": "Bayesian Marketing Mix Modeling (MMM) uses PyMC to evaluate ad effectiveness by incorporating prior information and estimating non-linear saturation curves, rather than assuming linear responses.",
+    "q2": "What are Mesa Agent-Based Simulations?",
+    "a2": "Agent-Based Models (ABM) simulate the actions and interactions of autonomous customer agents to assess how advertising exposures diffuse via word-of-mouth and convert over time.",
+    "q3": "Does the system support offline mode?",
+    "a3": "Yes, for maximum privacy, the platform supports offline execution utilizing a local Ollama instance running Gemma 4.",
+    "q4": "How does GraphRAG prevent AI hallucinations?",
+    "a4": "GraphRAG retrieves exact facts from the Neo4j Knowledge Graph to feed into the LLM system prompt. The model is constrained to write reports based strictly on the retrieved mathematics."
+  },
+  "ContactPage": {
+    "title": "Get in Touch",
+    "subtitle": "Have questions about InfinitySim? Let's connect.",
+    "name": "Full Name",
+    "email": "Email Address",
+    "message": "Message / Inquiry",
+    "submit": "Send Message",
+    "sending": "Sending...",
+    "success_title": "Message Sent!",
+    "success_desc": "Thank you for reaching out. Our team will get back to you shortly.",
+    "errors": {
+      "name": "Name must be at least 2 characters.",
+      "email": "Please enter a valid email address.",
+      "message": "Message must be at least 10 characters."
+    }
+  },
+  "LandingPage": {
+    "hero": {
+      "tagline": "AI BuildFest 2026 Winner",
+      "title_gradient": "Simulate Campaigns.",
+      "title_main": "Optimize Budgets. Predict Causal Outcomes.",
+      "subtitle": "A Graph-Augmented Bayesian Simulation Engine built for emerging markets. Replace guessing with mathematical modeling that runs anywhere, even offline.",
+      "cta_start": "Start Simulating",
+      "cta_docs": "Read Whitepaper",
+      "monthly_spend_label": "Monthly Spend:",
+      "simulate_btn": "Simulate ROI",
+      "simulate_btn_short": "Go"
+    },
+    "simulator": {
+      "title": "Interactive Campaign Sandbox",
+      "subtitle": "Adjust budgets dynamically to simulate adstock lag, saturation curves, and agent conversions in real time.",
+      "meta_ads": "Meta Ads Budget",
+      "google_search": "Google Search Budget",
+      "tiktok_ads": "TikTok Ads Budget",
+      "metrics": {
+        "iroas": "Projected iROAS",
+        "reach": "Audience Reach",
+        "conversions": "Simulated Conversions (ABM)",
+        "optimal_mix": "Optimal Allocation"
+      },
+      "explanation": "These projections run interactive Hill S-Curves and Mesa 3.0 Agent state calculations in the browser. In production, these calibrate against your historical datasets via PyMC."
+    },
+    "bento": {
+      "title": "Solving 4 Structural Blind Spots",
+      "subtitle": "Traditional attribution models fail in walled gardens. Here is how InfinitySim fixes it.",
+      "spot1_title": "1. Cold-Start Problem",
+      "spot1_desc": "Uses Transfer Learning to estimate curves for new products with no historical data.",
+      "spot2_title": "2. Linear Scale Fallacy",
+      "spot2_desc": "Applies Hill S-Curves to project the exact point where advertising yield diminishes.",
+      "spot3_title": "3. Temporal Lag Neglect",
+      "spot3_desc": "Models adstock memory retention and delay carries across consumer paths.",
+      "spot4_title": "4. Privacy & Walled Gardens",
+      "spot4_desc": "Aggregated Bayesian modeling replaces invasive third-party cookie tracking."
+    },
+    "pipeline": {
+      "title": "The Simulation Pipeline",
+      "subtitle": "How the 6-layer engine processes data into actionable decisions.",
+      "step1": "Data Ingestion (Firecrawl)",
+      "step2": "Bayesian MMM (PyMC)",
+      "step3": "Micro-Agent Modeling (Mesa)",
+      "step4": "NSGA-II Genetic Optimizer",
+      "step5": "Neo4j GraphRAG",
+      "step6": "SHAP Verified Report"
+    }
   }
 }
