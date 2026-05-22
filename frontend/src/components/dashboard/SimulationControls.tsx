@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Loader2, FlaskConical } from "lucide-react";
 
 import { Slider } from "@/components/ui/slider";
@@ -62,9 +62,9 @@ const CHANNELS = [
 // ── Formatting helpers ────────────────────────────────────────────────────────
 
 function formatCurrency(value: number): string {
-  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000) return `$${(value / 1_000).toFixed(1)}K`;
-  return `$${value.toFixed(0)}`;
+  if (value >= 1_000_000) return `৳${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 1_000) return `৳${(value / 1_000).toFixed(1)}K`;
+  return `৳${value.toFixed(0)}`;
 }
 
 function formatPercent(value: number, total: number): string {
@@ -92,14 +92,24 @@ export function SimulationControls({
 
   const handleSliderChange = useCallback(
     (channel: keyof ChannelBudgets, values: number[]) => {
-      setBudgets((prev) => {
-        const next = { ...prev, [channel]: values[0] };
-        onBudgetsChange?.(next);
-        return next;
-      });
+      setBudgets((prev) => ({ ...prev, [channel]: values[0] }));
     },
-    [onBudgetsChange]
+    []
   );
+
+  // Propagate budget changes to parent *after* the render commits,
+  // avoiding the "Cannot update a component while rendering" warning.
+  useEffect(() => {
+    onBudgetsChange?.(budgets);
+  }, [budgets, onBudgetsChange]);
+
+  const [isPulsing, setIsPulsing] = useState(false);
+
+  useEffect(() => {
+    setIsPulsing(true);
+    const timer = setTimeout(() => setIsPulsing(false), 500);
+    return () => clearTimeout(timer);
+  }, [totalAllocated]);
 
   const handleRun = useCallback(() => {
     onRunSimulation(budgets);
@@ -111,7 +121,13 @@ export function SimulationControls({
       className="relative overflow-hidden border-dashed border-indigo-300/50"
     >
       {/* Decorative gradient accent */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 via-emerald-400 to-pink-500" />
+      <div 
+        className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 via-emerald-400 to-pink-500"
+        style={{
+          backgroundSize: '200% 100%',
+          animation: 'shimmer 4s linear infinite',
+        }}
+      />
 
       <CardHeader className="pb-4">
         <div className="flex items-center gap-2">
@@ -166,7 +182,9 @@ export function SimulationControls({
         ))}
 
         {/* ── Total allocation summary ─────────────────────────────────── */}
-        <div className="flex items-center justify-between rounded-lg border bg-muted/40 px-4 py-3">
+        <div className={`flex items-center justify-between rounded-lg border bg-muted/40 px-4 py-3 transition-all duration-300 ${
+          isPulsing ? "animate-pulse border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)] bg-indigo-500/5" : ""
+        }`}>
           <span className="text-sm font-medium text-muted-foreground">
             Total Allocated
           </span>

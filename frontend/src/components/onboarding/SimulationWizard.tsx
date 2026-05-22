@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useAuth } from "@clerk/nextjs"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, type FieldPath } from "react-hook-form"
-import { Loader2, Sparkles } from "lucide-react"
+import { Loader2, Sparkles, Eye, MousePointer, DollarSign, Target, Brain, Rocket } from "lucide-react"
 
 import { completeOnboarding } from "@/actions/onboarding"
 import {
@@ -17,6 +17,7 @@ import {
 } from "@/schemas/simulation"
 import type { SimulationRequest } from "@/lib/types/contracts"
 import { Button } from "@/components/ui/button"
+import { LoadingOverlay } from "@/components/ui/LoadingOverlay"
 import {
   Card,
   CardContent,
@@ -62,12 +63,16 @@ function NumberField({
   label,
   description,
   step,
+  icon: Icon,
+  placeholder,
 }: {
   control: ReturnType<typeof useForm<SimulationWizardInput>>["control"]
   name: FieldPath<SimulationWizardInput>
   label: string
   description?: string
   step?: string
+  icon?: React.ElementType
+  placeholder?: string
 }) {
   return (
     <FormField
@@ -75,11 +80,15 @@ function NumberField({
       name={name}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>{label}</FormLabel>
+          <FormLabel className="flex items-center gap-2">
+            {Icon && <Icon className="size-4 text-muted-foreground" />}
+            {label}
+          </FormLabel>
           <FormControl>
             <Input
               type="number"
               step={step ?? "any"}
+              placeholder={placeholder}
               value={
                 typeof field.value === "number" && Number.isFinite(field.value)
                   ? field.value
@@ -177,7 +186,7 @@ export function SimulationWizard({ locale }: { locale: string }) {
   }
 
   return (
-    <Card className="mx-auto w-full max-w-2xl">
+    <Card className="mx-auto w-full max-w-3xl shadow-[0_0_60px_rgba(99,102,241,0.15)] border-white/10 relative overflow-hidden">
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
@@ -186,13 +195,27 @@ export function SimulationWizard({ locale }: { locale: string }) {
               Step {step + 1} of {STEPS.length}: {currentStep.title}
             </CardDescription>
           </div>
-          <Button type="button" variant="outline" size="sm" onClick={loadDemoPreset}>
-            <Sparkles className="size-4" />
+          <Button type="button" size="sm" onClick={loadDemoPreset} className="bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white shadow-lg">
+            <Sparkles className="size-4 animate-pulse mr-1" />
             Load Demo Preset
           </Button>
         </div>
-        <Progress value={progressValue} className="mt-4 h-2" />
-        <p className="text-sm text-muted-foreground">{currentStep.subtitle}</p>
+        <div className="mt-6 mb-2 relative">
+          <Progress value={progressValue} className="h-2 bg-muted/50" indicatorClassName="bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
+          <div className="flex justify-between mt-2 px-1">
+            {STEPS.map((s, i) => {
+              const isActive = i === step;
+              const isPast = i < step;
+              return (
+                <div key={s.title} className="flex flex-col items-center">
+                  <div className={`w-3 h-3 rounded-full mb-1 ${isActive ? 'bg-indigo-500 animate-pulse shadow-[0_0_10px_rgba(99,102,241,0.8)]' : isPast ? 'bg-indigo-500' : 'bg-muted-foreground/30'}`} />
+                  <span className={`text-xs ${isActive ? 'text-indigo-400 font-medium' : 'text-muted-foreground'}`}>{s.title}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <p className="text-sm text-muted-foreground text-center mt-2">{currentStep.subtitle}</p>
       </CardHeader>
 
       <Form {...form}>
@@ -205,6 +228,8 @@ export function SimulationWizard({ locale }: { locale: string }) {
                   name="Impressions"
                   label="Impressions"
                   description="Number of ad impressions."
+                  icon={Eye}
+                  placeholder="e.g., 50,000"
                 />
                 <NumberField
                   control={form.control}
@@ -212,12 +237,16 @@ export function SimulationWizard({ locale }: { locale: string }) {
                   label="Clicks"
                   description="Number of ad clicks."
                   step="1"
+                  icon={MousePointer}
+                  placeholder="e.g., 2,500"
                 />
                 <NumberField
                   control={form.control}
                   name="Spent"
                   label="Spent"
                   description="Amount of money spent on the ad."
+                  icon={DollarSign}
+                  placeholder="e.g., 10,000"
                 />
                 <NumberField
                   control={form.control}
@@ -225,6 +254,8 @@ export function SimulationWizard({ locale }: { locale: string }) {
                   label="Total Conversion"
                   description="Total number of conversions."
                   step="1"
+                  icon={Target}
+                  placeholder="e.g., 150"
                 />
               </div>
             )}
@@ -332,6 +363,7 @@ export function SimulationWizard({ locale }: { locale: string }) {
                 <Button
                   type="submit"
                   disabled={isSubmitting || !isLoaded || !userId}
+                  className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:opacity-90 transition-opacity"
                 >
                   {isSubmitting ? (
                     <>
@@ -339,7 +371,10 @@ export function SimulationWizard({ locale }: { locale: string }) {
                       Running Simulation…
                     </>
                   ) : (
-                    "Complete onboarding"
+                    <>
+                      <Rocket className="size-4 mr-2" />
+                      Launch Simulation
+                    </>
                   )}
                 </Button>
               )}
@@ -347,6 +382,7 @@ export function SimulationWizard({ locale }: { locale: string }) {
           </CardFooter>
         </form>
       </Form>
+      {isSubmitting && <LoadingOverlay absolute />}
     </Card>
   )
 }
