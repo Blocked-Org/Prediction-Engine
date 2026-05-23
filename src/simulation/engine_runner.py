@@ -33,15 +33,34 @@ def cast_to_native(data: Any) -> Any:
     return data
 
 
-def _fetch_competitor_proxy() -> float:
+def _fetch_competitor_proxy(competitor_urls: list[str] | None = None) -> float:
     """
     Queries Neo4j for the count of ingested CompetitorContext nodes.
     Normalises the count to a [0.0, 1.0] scalar representing competitive pressure.
     Gracefully returns 0.0 if Neo4j is unreachable.
 
+    If ``competitor_urls`` are provided, dispatches Firecrawl scraping tasks
+    via the Celery worker before querying the graph.
+
+    Args:
+        competitor_urls: Optional list of URLs to scrape via Firecrawl.
+
     Returns:
         float: Normalised competitor proxy score (0.0 if unavailable).
     """
+    # Dispatch Firecrawl scraping for user-provided competitor URLs
+    if competitor_urls:
+        try:
+            from src.api.worker import scrape_competitor_data
+            for url in competitor_urls:
+                try:
+                    scrape_competitor_data.delay(str(url))
+                    logger.info(f"Enqueued Firecrawl scrape for competitor URL: {url}")
+                except Exception as exc:
+                    logger.warning(f"Failed to enqueue scrape for {url}: {exc}")
+        except ImportError:
+            logger.warning("Cannot import scrape_competitor_data — skipping competitor URL scraping.")
+
     try:
         from src.api.db.neo4j_client import Neo4jManager
         mgr = Neo4jManager()
@@ -78,27 +97,54 @@ def run_micro_simulation(params: Union[SimulationRequest, Dict[str, Any]]) -> Si
         SimulationResponse: A Pydantic schema strictly adhering to the API contract.
     """
     try:
-        # 1. Parse params and run MarketingEnvironment Mesa model for 10 steps
-        ad_exposure = 0.1
+        # 1. Parse params — extract per-channel spend and demographics
         channels = ['Meta', 'Google', 'TikTok']
-        total_budget = 0.0
+        spend_meta = 0.0
+        spend_google = 0.0
+        spend_tiktok = 0.0
+        revenue = 0.0
+        age = None
+        gender = None
+        interest = None
+        competitor_urls: list[str] = []
         
         budget_overrides = None
         if isinstance(params, SimulationRequest):
-            total_budget = params.Spent
+            spend_meta = params.spend_meta
+            spend_google = params.spend_google
+            spend_tiktok = params.spend_tiktok
+            revenue = params.revenue
+            age = getattr(params, "age", None)
+            gender = getattr(params, "gender", None)
+            interest = getattr(params, "interest", None)
+            competitor_urls = getattr(params, "competitor_urls", []) or []
             budget_overrides = getattr(params, "budget_overrides", None)
-            ad_exposure = min(1.0, max(0.01, total_budget / 100000.0))
         elif isinstance(params, dict):
-            total_budget = float(params.get('Spent', 0.0))
+            spend_meta = float(params.get('spend_meta', 0.0))
+            spend_google = float(params.get('spend_google', 0.0))
+            spend_tiktok = float(params.get('spend_tiktok', 0.0))
+            revenue = float(params.get('revenue', 0.0))
+            age = params.get('age')
+            gender = params.get('gender')
+            interest = params.get('interest')
+            competitor_urls = params.get('competitor_urls', []) or []
             budget_overrides = params.get('budget_overrides')
-            ad_exposure = min(1.0, max(0.01, total_budget / 100000.0))
+
+        total_budget = spend_meta + spend_google + spend_tiktok
 
         if budget_overrides:
             total_budget = sum(budget_overrides.values())
-            ad_exposure = min(1.0, max(0.01, total_budget / 100000.0))
 
-        logger.info(f"Starting micro-simulation with ad_exposure: {ad_exposure}, total_budget: {total_budget}")
-        env = MarketingEnvironment(num_agents=1000, ad_exposure=ad_exposure)
+        ad_exposure = min(1.0, max(0.01, total_budget / 100000.0))
+
+        logger.info(f"Starting micro-simulation with ad_exposure: {ad_exposure}, total_budget: {total_budget}, spend: Meta={spend_meta} Google={spend_google} TikTok={spend_tiktok}")
+        env = MarketingEnvironment(
+            num_agents=1000,
+            ad_exposure=ad_exposure,
+            age=age,
+            gender=gender,
+            interest=interest,
+        )
         
         # Step the ABM simulation 10 times
         for _ in range(10):
@@ -131,7 +177,7 @@ def run_micro_simulation(params: Union[SimulationRequest, Dict[str, Any]]) -> Si
         # ------------------------------------------------------------------ #
         # 4. GRAPH-AUGMENTED ENRICHMENT — pull competitor proxy from Neo4j    #
         # ------------------------------------------------------------------ #
-        competitor_proxy = _fetch_competitor_proxy()
+        competitor_proxy = _fetch_competitor_proxy(competitor_urls=competitor_urls)
         logger.info(f"Competitor proxy scalar from Neo4j: {competitor_proxy}")
 
         # Feed competitor proxy into Bayesian engine as an exogenous control
@@ -141,7 +187,8 @@ def run_micro_simulation(params: Union[SimulationRequest, Dict[str, Any]]) -> Si
         if budget_overrides:
             spend_values = [float(budget_overrides.get(ch, total_budget / 3)) for ch in channels]
         else:
-            spend_values = [total_budget * 0.5, total_budget * 0.3, total_budget * 0.2]
+            # Use actual per-channel spend from user input (no hardcoded split)
+            spend_values = [spend_meta, spend_google, spend_tiktok]
         data_matrix: Dict[str, Any] = {
             ch: [spend] for ch, spend in zip(channels, spend_values)
         }
@@ -164,7 +211,8 @@ def run_micro_simulation(params: Union[SimulationRequest, Dict[str, Any]]) -> Si
         df = env.datacollector.get_model_vars_dataframe()
         total_conversions = float(df['Total_Conversions'].iloc[-1]) if not df.empty else 0.0
         
-        abm_roi = (total_conversions / 1000.0) * 3.5
+        # Calculate actual ROI from real revenue / total_spend (no magic number)
+        abm_roi = revenue / total_budget if total_budget > 0 else 0.0
         # Weight: 60% Bayesian signal, 40% ABM — Bayesian dominates when graph data is present
         graph_weight = 0.6 if competitor_proxy > 0.0 else 0.0
         projected_roi = round(

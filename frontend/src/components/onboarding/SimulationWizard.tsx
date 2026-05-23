@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useAuth } from "@clerk/nextjs"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, type FieldPath } from "react-hook-form"
-import { Loader2, Sparkles, Eye, MousePointer, DollarSign, Target, Brain, Rocket, Users, ChevronLeft, ChevronRight } from "lucide-react"
+import { Loader2, Sparkles, Eye, MousePointer, DollarSign, Target, Brain, Rocket, Users, ChevronLeft, ChevronRight, Globe, Link } from "lucide-react"
 
 import { completeOnboarding } from "@/actions/onboarding"
 import {
@@ -50,13 +50,22 @@ const STEPS = [
     subtitle: "Target audience constraints.",
     icon: Users,
   },
+  {
+    title: "Market Intel",
+    subtitle: "Competitor intelligence & exogenous signals.",
+    icon: Globe,
+  },
 ]
 
 const EMPTY_DEFAULTS: Partial<SimulationWizardInput> = {
   Impressions: 0,
   Clicks: 0,
-  Spent: 0,
+  spend_meta: 0,
+  spend_google: 0,
+  spend_tiktok: 0,
   Total_Conversion: 0,
+  revenue: 0,
+  competitor_urls: "",
 }
 
 function NumberField({
@@ -138,9 +147,11 @@ export function SimulationWizard({ locale }: { locale: string }) {
   async function handleNext() {
     let fieldsToValidate: FieldPath<SimulationWizardInput>[] = []
     if (step === 0) {
-      fieldsToValidate = ["Impressions", "Clicks", "Spent", "Total_Conversion"]
+      fieldsToValidate = ["Impressions", "Clicks", "spend_meta", "spend_google", "spend_tiktok", "Total_Conversion", "revenue"]
     } else if (step === 1) {
       fieldsToValidate = ["age", "gender", "interest"]
+    } else if (step === 2) {
+      fieldsToValidate = ["competitor_urls"]
     }
     const valid = await form.trigger(fieldsToValidate)
     if (valid) {
@@ -170,21 +181,37 @@ export function SimulationWizard({ locale }: { locale: string }) {
     setIsSubmitting(true)
     setSubmitError(null)
 
+    // Parse competitor URLs from comma-separated string into array
+    const competitorUrlList = values.competitor_urls
+      ? values.competitor_urls
+          .split(",")
+          .map((u) => u.trim())
+          .filter((u) => u.length > 0)
+      : []
+
     const payload: SimulationRequest = {
       clerk_user_id: userId,
       endogenous: {
         Impressions: values.Impressions,
         Clicks: values.Clicks,
-        Spent: values.Spent,
+        spend_meta: values.spend_meta,
+        spend_google: values.spend_google,
+        spend_tiktok: values.spend_tiktok,
       },
       transactional: {
         Total_Conversion: values.Total_Conversion,
+        revenue: values.revenue,
       },
       audience: {
         age: values.age,
         gender: values.gender,
         interest: values.interest,
       },
+      ...(competitorUrlList.length > 0 && {
+        exogenous: {
+          competitor_urls: competitorUrlList,
+        },
+      }),
     }
 
     const result = await completeOnboarding(locale, payload)
@@ -263,45 +290,83 @@ export function SimulationWizard({ locale }: { locale: string }) {
           <CardContent className="space-y-8 pt-8 pb-8 px-6 sm:px-8">
             
             {step === 0 && (
-              <div className="grid gap-6 sm:grid-cols-2">
-                <NumberField
-                  control={form.control}
-                  name="Impressions"
-                  label="Impressions"
-                  description="Total historical ad impressions served."
-                  icon={Eye}
-                  placeholder="e.g., 50000"
-                  leftBorderColor="border-l-4 border-l-blue-500"
-                />
-                <NumberField
-                  control={form.control}
-                  name="Clicks"
-                  label="Clicks"
-                  description="Total historical click interactions logged."
-                  step="1"
-                  icon={MousePointer}
-                  placeholder="e.g., 2500"
-                  leftBorderColor="border-l-4 border-l-purple-500"
-                />
-                <NumberField
-                  control={form.control}
-                  name="Spent"
-                  label="Spent"
-                  description="Historical media spend budget (USD)."
-                  icon={DollarSign}
-                  placeholder="e.g., 10000"
-                  leftBorderColor="border-l-4 border-l-emerald-500"
-                />
-                <NumberField
-                  control={form.control}
-                  name="Total_Conversion"
-                  label="Total Conversion"
-                  description="Historical conversion counts logged."
-                  step="1"
-                  icon={Target}
-                  placeholder="e.g., 150"
-                  leftBorderColor="border-l-4 border-l-pink-500"
-                />
+              <div className="space-y-6">
+                {/* Row 1: Impressions & Clicks */}
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <NumberField
+                    control={form.control}
+                    name="Impressions"
+                    label="Impressions"
+                    description="Total historical ad impressions served."
+                    icon={Eye}
+                    placeholder="e.g., 50000"
+                    leftBorderColor="border-l-4 border-l-blue-500"
+                  />
+                  <NumberField
+                    control={form.control}
+                    name="Clicks"
+                    label="Clicks"
+                    description="Total historical click interactions logged."
+                    step="1"
+                    icon={MousePointer}
+                    placeholder="e.g., 2500"
+                    leftBorderColor="border-l-4 border-l-purple-500"
+                  />
+                </div>
+
+                {/* Row 2: Per-channel spend (Meta / Google / TikTok) */}
+                <div className="grid gap-6 sm:grid-cols-3">
+                  <NumberField
+                    control={form.control}
+                    name="spend_meta"
+                    label="Meta Ads Budget"
+                    description="Historical Meta / Facebook ad spend."
+                    icon={DollarSign}
+                    placeholder="e.g., 75000"
+                    leftBorderColor="border-l-4 border-l-blue-600"
+                  />
+                  <NumberField
+                    control={form.control}
+                    name="spend_google"
+                    label="Google Ads Budget"
+                    description="Historical Google Ads spend."
+                    icon={DollarSign}
+                    placeholder="e.g., 50000"
+                    leftBorderColor="border-l-4 border-l-red-500"
+                  />
+                  <NumberField
+                    control={form.control}
+                    name="spend_tiktok"
+                    label="TikTok Ads Budget"
+                    description="Historical TikTok Ads spend."
+                    icon={DollarSign}
+                    placeholder="e.g., 25000"
+                    leftBorderColor="border-l-4 border-l-cyan-400"
+                  />
+                </div>
+
+                {/* Row 3: Revenue & Conversions */}
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <NumberField
+                    control={form.control}
+                    name="revenue"
+                    label="Historical Total Revenue"
+                    description="Total revenue generated across all channels."
+                    icon={DollarSign}
+                    placeholder="e.g., 500000"
+                    leftBorderColor="border-l-4 border-l-emerald-500"
+                  />
+                  <NumberField
+                    control={form.control}
+                    name="Total_Conversion"
+                    label="Total Conversion"
+                    description="Historical conversion counts logged."
+                    step="1"
+                    icon={Target}
+                    placeholder="e.g., 150"
+                    leftBorderColor="border-l-4 border-l-pink-500"
+                  />
+                </div>
               </div>
             )}
 
@@ -386,6 +451,36 @@ export function SimulationWizard({ locale }: { locale: string }) {
                   )}
                 />
 
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="competitor_urls"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col gap-1.5">
+                      <FormLabel className="flex items-center gap-2 text-sm font-semibold text-zinc-300">
+                        <Link className="size-4 text-zinc-400" />
+                        Competitor URLs
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative rounded-xl overflow-hidden border border-zinc-800/80 border-l-4 border-l-amber-500 transition-all duration-300 focus-within:border-primary/50 bg-zinc-950/40 backdrop-blur-sm group hover:-translate-y-0.5 hover:shadow-lg">
+                          <textarea
+                            {...field}
+                            placeholder="https://daraz.com.bd, https://chaldal.com"
+                            className="w-full bg-transparent border-0 text-white placeholder:text-zinc-650 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[120px] p-4 transition-all font-medium font-mono resize-y"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormDescription className="text-[11px] text-zinc-500 leading-tight px-1">
+                        Provide comma-separated URLs of competitor websites. These will be dynamically scraped to adjust simulation baselines. MUST be valid HTTP/HTTPS URLs.
+                      </FormDescription>
+                      <FormMessage className="text-xs text-destructive font-semibold" />
+                    </FormItem>
+                  )}
+                />
               </div>
             )}
 

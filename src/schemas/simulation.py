@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Literal, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 PrimaryChannel = Literal["Meta", "Google", "TikTok"]
 AgeRange = Literal["18-24", "25-34", "35-44", "45-54", "55+"]
@@ -21,7 +21,14 @@ class EndogenousMatrix(BaseModel):
 
     Impressions: float = Field(..., ge=0, description="Number of ad impressions.")
     Clicks: int = Field(..., ge=0, description="Number of ad clicks.")
-    Spent: float = Field(..., ge=0, description="Amount of money spent on the ad.")
+    spend_meta: float = Field(..., ge=0, description="Meta Ads spend budget.")
+    spend_google: float = Field(..., ge=0, description="Google Ads spend budget.")
+    spend_tiktok: float = Field(..., ge=0, description="TikTok Ads spend budget.")
+
+    @property
+    def total_spend(self) -> float:
+        """Total spend across all channels."""
+        return self.spend_meta + self.spend_google + self.spend_tiktok
 
 
 class TransactionalMatrix(BaseModel):
@@ -30,6 +37,9 @@ class TransactionalMatrix(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
     Total_Conversion: int = Field(..., ge=0, description="Total number of conversions.")
+    revenue: float = Field(..., ge=0, description="Historical total revenue.")
+    aov: Optional[float] = Field(default=None, description="Derived average order value (revenue / conversions).")
+    cac: Optional[float] = Field(default=None, description="Derived customer acquisition cost (total_spend / conversions).")
 
 
 class AudienceMatrix(BaseModel):
@@ -50,6 +60,10 @@ class ExogenousMatrix(BaseModel):
     competitors: list[str] = Field(
         default_factory=lambda: list(DEFAULT_COMPETITORS),
         description="Named competitors in the category.",
+    )
+    competitor_urls: list[HttpUrl] = Field(
+        default_factory=list,
+        description="Competitor website URLs for Firecrawl scraping. Must be valid HTTP(S) URLs.",
     )
     macroeconomic_flags: list[str] = Field(
         default_factory=lambda: list(DEFAULT_MACRO_FLAGS),

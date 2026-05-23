@@ -48,18 +48,22 @@ class ApiHealth(BaseModel):
 
 class SimulationRequest(BaseModel):
     """
-    Request payload matching the 7 features of the trained XGBoost pipeline.
-    Field names must match the model's expected columns exactly.
+    Flat request payload used by the Celery worker for micro-simulation.
+    Per-channel spend replaces the legacy single 'Spent' field.
     """
     model_config = ConfigDict(extra="ignore")
 
     Impressions: float = Field(..., ge=0, description="Number of ad impressions.")
     Clicks: int = Field(..., ge=0, description="Number of ad clicks.")
-    Spent: float = Field(..., ge=0, description="Amount of money spent on the ad.")
+    spend_meta: float = Field(..., ge=0, description="Meta Ads spend budget.")
+    spend_google: float = Field(..., ge=0, description="Google Ads spend budget.")
+    spend_tiktok: float = Field(..., ge=0, description="TikTok Ads spend budget.")
     Total_Conversion: int = Field(..., ge=0, description="Total number of conversions.")
+    revenue: float = Field(..., ge=0, description="Historical total revenue.")
     age: str = Field(..., description="Age range, e.g. '25-29'.")
     gender: str = Field(..., description="Gender: 'M' or 'F'.")
     interest: str = Field(..., description="User interest category, e.g. 'Travel', 'Sports', 'Tech'.")
+    competitor_urls: list[str] = Field(default_factory=list, description="Competitor URLs for Firecrawl scraping.")
     budget_overrides: dict[str, float] | None = Field(default=None, description="Optional overrides for specific channels.")
 
 

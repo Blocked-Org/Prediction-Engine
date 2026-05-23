@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paper Storyboard - Prediction Engine</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap');
+        
+        body { 
+            font-family: 'Architects Daughter', cursive; 
+            background-color: #f0f0f0; 
+            padding: 2rem;
+            color: #333;
+        }
+        
+        .paper-card {
+            background: #fff;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            border: 2px solid #555;
+            box-shadow: 5px 5px 0px rgba(0,0,0,0.2);
+            position: relative;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .paper-card::before {
+            content: '';
+            position: absolute;
+            top: -10px; left: 50%;
+            transform: translateX(-50%);
+            width: 80px; height: 30px;
+            background: rgba(255, 255, 150, 0.6);
+            border: 1px solid #ccc;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .sketch-box {
+            border: 2px dashed #888;
+            padding: 1rem;
+            text-align: center;
+            margin: 1rem 0;
+            color: #666;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        h2 { 
+            border-bottom: 2px solid #555; 
+            padding-bottom: 0.5rem; 
+            display: inline-block;
+        }
+
+        .arrow {
+            text-align: center;
+            font-size: 2rem;
+            color: #555;
+            margin: -1rem 0 2rem 0;
+        }
+
+        @media print {
+            body { 
+                background: white; 
+                padding: 1rem; 
+            }
+            .paper-card { 
+                page-break-inside: avoid;
+                break-inside: avoid;
+                box-shadow: none;
+                border: 2px solid #000;
+                margin-bottom: 2rem;
+            }
+            .arrow {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            /* Optional: Hide the tape in print for cleaner look */
+            .paper-card::before {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; margin-bottom: 2rem; font-size: 2.5rem;">Prediction Engine - Paper Sketches</h1>
+    
+    <div class="paper-card">
+        <h2>Panel 1: The Problem (Context)</h2>
+        <div style="display: flex; gap: 1rem;">
+            <div class="sketch-box" style="flex: 1; flex-direction: column;">
+                😐<br/>
+                (User staring at giant messy CSV file)
+            </div>
+            <div style="flex: 1; padding: 1rem;">
+                <b>User (Data Analyst):</b> "I have 50,000 rows of customer data and my boss wants to know who will churn by tomorrow!"<br/>
+                <b>Emotion:</b> Overwhelmed, Stressed.
+            </div>
+        </div>
+    </div>
+
+    <div class="arrow">↓</div>
+
+    <div class="paper-card">
+        <h2>Panel 2: The Solution (Landing Page)</h2>
+        <div style="font-size: 1.5rem; text-align: center; margin: 1rem 0;">PREDICTION ENGINE</div>
+        <div class="sketch-box">
+            [ Upload Dataset Dropzone ]<br/>
+            (User drags file here)
+        </div>
+        <p><i>Note: Emphasize ease of use. Big dropzone.</i></p>
+        <p><b>User Action:</b> Relieved, they drag and drop the CSV into the browser window.</p>
+    </div>
+    
+    <div class="arrow">↓</div>
+
+    <div class="paper-card">
+        <h2>Panel 3: Configuration</h2>
+        <div style="display: flex; gap: 1rem;">
+            <div class="sketch-box" style="flex: 1;">
+                Data Columns:<br/>
+                - Age<br/>
+                - Income<br/>
+                - History
+            </div>
+            <div class="sketch-box" style="flex: 1;">
+                Target: [Dropdown]<br/><br/>
+                Model: (o) XGBoost ( ) Neural<br/><br/>
+                [ RUN BUTTON ]
+            </div>
+        </div>
+        <p><b>User Context:</b> Quickly picks 'Churn' from the dropdown and trusts the default 'XGBoost'.</p>
+    </div>
+    
+    <div class="arrow">↓</div>
+
+    <div class="paper-card">
+        <h2>Panel 4: Processing & Training</h2>
+        <div class="sketch-box" style="flex-direction: column;">
+            <div style="font-size: 2rem; margin-bottom: 1rem;">⚙️</div>
+            Training model...<br/>
+            [===================> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;] 75%<br/>
+            <i>Extracting features...</i>
+        </div>
+        <p><i>Note: Show live updates so the user doesn't think the page is frozen.</i></p>
+        <p><b>User Emotion:</b> Anticipation. Thinks, "Wow, that was fast, I didn't even have to write Python code."</p>
+    </div>
+
+    <div class="arrow">↓</div>
+
+    <div class="paper-card">
+        <h2>Panel 5: Results Dashboard</h2>
+        <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+            <div class="sketch-box" style="flex: 1; min-height: 80px;">Accuracy<br/><b>95%</b></div>
+            <div class="sketch-box" style="flex: 1; min-height: 80px;">RMSE<br/><b>0.12</b></div>
+            <div class="sketch-box" style="flex: 1; min-height: 80px;">Train Time<br/><b>45s</b></div>
+        </div>
+        
+        <div style="display: flex; gap: 1rem;">
+            <div class="sketch-box" style="flex: 2; height: 200px;">
+                [ Line Chart: Predictions vs Actuals ]<br/><br/>
+                📈
+            </div>
+            <div class="sketch-box" style="flex: 1; height: 200px;">
+                [ SHAP Waterfall ]<br/>
+                Feature 1 ====|<br/>
+                Feature 2 ==|<br/>
+                Feature 3 =====|
+            </div>
+        </div>
+        
+        <div style="text-align: right; margin-top: 1rem;">
+            <button style="font-family: 'Architects Daughter'; font-size: 1.2rem; padding: 0.5rem 1rem; border: 2px solid #555; background: #eee; cursor: pointer;">Download Report ↓</button>
+        </div>
+    </div>
+    
+</body>
+</html>

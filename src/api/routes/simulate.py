@@ -48,18 +48,22 @@ async def simulate(
         flat_payload = {
             "Impressions": payload.endogenous.Impressions,
             "Clicks": payload.endogenous.Clicks,
-            "Spent": payload.endogenous.Spent,
+            "spend_meta": payload.endogenous.spend_meta,
+            "spend_google": payload.endogenous.spend_google,
+            "spend_tiktok": payload.endogenous.spend_tiktok,
             "Total_Conversion": payload.transactional.Total_Conversion,
+            "revenue": payload.transactional.revenue,
             "age": payload.audience.age,
             "gender": payload.audience.gender,
             "interest": payload.audience.interest,
+            "competitor_urls": [str(u) for u in payload.exogenous.competitor_urls],
         }
         
         # Inject budget_overrides if present
         if payload.budget_overrides:
             flat_payload["budget_overrides"] = payload.budget_overrides
             
-        # ── Redis cache check ────────────────────────────────────────────
+        # ── Redis cache check ────────────────────────────────────────────────────────
         from src.api.cache import get_simulation_cache
         cache = get_simulation_cache()
         cache_ns = "simulate:micro"
@@ -69,9 +73,10 @@ async def simulate(
             logger.info("Returning cached simulation result (skipping Celery).")
             return {"task_id": "cached", "status": "SUCCESS", "result": cached}
 
+        total_spend = payload.endogenous.spend_meta + payload.endogenous.spend_google + payload.endogenous.spend_tiktok
         logger.info(
-            "Enqueuing simulation request: Impressions=%s, Spent=%s, age=%s, gender=%s, interest=%s, overrides=%s",
-            flat_payload["Impressions"], flat_payload["Spent"], flat_payload["age"], flat_payload["gender"], flat_payload["interest"], "yes" if payload.budget_overrides else "no"
+            "Enqueuing simulation request: Impressions=%s, total_spend=%s, age=%s, gender=%s, interest=%s, competitor_urls=%d, overrides=%s",
+            flat_payload["Impressions"], total_spend, flat_payload["age"], flat_payload["gender"], flat_payload["interest"], len(flat_payload["competitor_urls"]), "yes" if payload.budget_overrides else "no"
         )
         
         # Enqueue the Celery task — does NOT block the ASGI thread
@@ -147,22 +152,23 @@ def _build_cypher_params(
     agent_cluster_id: str,
 ) -> dict[str, Any]:
     clicks = payload.endogenous.Clicks
-    spent = payload.endogenous.Spent
-    cpc = spent / clicks if clicks > 0 else 1.5
+    total_spend = payload.endogenous.total_spend
+    cpc = total_spend / clicks if clicks > 0 else 1.5
     conversions = payload.transactional.Total_Conversion
-    aov = spent / conversions if conversions > 0 else 100.0
-    cac = spent / conversions if conversions > 0 else 50.0
+    revenue = payload.transactional.revenue
+    aov = revenue / conversions if conversions > 0 else 100.0
+    cac = total_spend / conversions if conversions > 0 else 50.0
 
     return {
         "clerk_user_id": payload.clerk_user_id,
         "campaign_id": campaign_id,
         "agent_cluster_id": agent_cluster_id,
-        "budget": spent,
+        "budget": total_spend,
         "cpc": cpc,
         "base_price": 100.0,
         "discount_rate": 0.0,
-        "primary_channels": ["Meta"],
-        "historical_revenue": spent * 1.5,
+        "primary_channels": ["Meta", "Google", "TikTok"],
+        "historical_revenue": revenue,
         "aov": aov,
         "cac": cac,
         "ltv": aov * 3.0,
@@ -341,12 +347,15 @@ def simulate_init(
     uses parameterised queries to prevent injection.
     """
     try:
+        total_spend = payload.endogenous.total_spend
         logger.info(
-            "Initializing simulation graph for campaign (age=%s, interest=%s, spent=%s, competitors=%d)",
+            "Initializing simulation graph for campaign (age=%s, interest=%s, total_spend=%s, spend_meta=%s, competitors=%d, competitor_urls=%d)",
             payload.audience.age,
             payload.audience.interest,
-            payload.endogenous.Spent,
+            total_spend,
+            payload.endogenous.spend_meta,
             len(payload.exogenous.competitors),
+            len(payload.exogenous.competitor_urls),
         )
         return persist_simulation_init(neo4j, payload)
     except ServiceUnavailable as exc:

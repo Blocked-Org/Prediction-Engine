@@ -72,15 +72,21 @@ export interface SimulationRequest {
   endogenous: {
     Impressions: number;
     Clicks: number;
-    Spent: number;
+    spend_meta: number;
+    spend_google: number;
+    spend_tiktok: number;
   };
   transactional: {
     Total_Conversion: number;
+    revenue: number;
   };
   audience: {
     age: string;
     gender: string;
     interest: string;
+  };
+  exogenous?: {
+    competitor_urls?: string[];
   };
 }
 

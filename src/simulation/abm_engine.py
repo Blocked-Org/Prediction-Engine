@@ -1,7 +1,13 @@
 import logging
+from typing import Optional
 
 import mesa
 from pydantic import BaseModel, Field, validate_call
+
+from src.simulation.abm_heuristics_config import (
+    SEGMENTS,
+    compute_segment_weights,
+)
 
 # Configure module-level logger for defensive programming
 logger = logging.getLogger(__name__)
@@ -82,6 +88,9 @@ class EnvironmentConfig(BaseModel):
     """
     num_agents: int = Field(1000, gt=0, description="Total number of agents to simulate.")
     ad_exposure: float = Field(0.1, ge=0.0, le=1.0, description="Intensity of the marketing campaign (0.0 to 1.0).")
+    age: Optional[str] = Field(default=None, description="Target age range from frontend.")
+    gender: Optional[str] = Field(default=None, description="Target gender from frontend.")
+    interest: Optional[str] = Field(default=None, description="Target interest vertical from frontend.")
 
 
 class MarketingEnvironment(mesa.Model):
@@ -98,26 +107,52 @@ class MarketingEnvironment(mesa.Model):
     """
 
     @validate_call
-    def __init__(self, num_agents: int = 1000, ad_exposure: float = 0.1) -> None:
+    def __init__(
+        self,
+        num_agents: int = 1000,
+        ad_exposure: float = 0.1,
+        age: Optional[str] = None,
+        gender: Optional[str] = None,
+        interest: Optional[str] = None,
+    ) -> None:
         """
         Initializes the MarketingEnvironment model.
 
         Args:
             num_agents (int): The number of consumer agents to generate. Default 1000.
             ad_exposure (float): The base advertising exposure level. Default 0.1.
+            age (Optional[str]): Target age range from frontend (e.g. '18-24').
+            gender (Optional[str]): Target gender from frontend ('M' or 'F').
+            interest (Optional[str]): Target interest vertical from frontend.
         """
         super().__init__()
         
         # Strict validation using Pydantic
-        self.config = EnvironmentConfig(num_agents=num_agents, ad_exposure=ad_exposure)
+        self.config = EnvironmentConfig(
+            num_agents=num_agents,
+            ad_exposure=ad_exposure,
+            age=age,
+            gender=gender,
+            interest=interest,
+        )
         self.ad_exposure = self.config.ad_exposure
         
-        demographic_segments = ['urban_millennial', 'rural', 'suburban_family', 'gen_z_student']
+        # Compute demographic segment weights from user inputs via heuristics config
+        if age and gender and interest:
+            segment_weights = compute_segment_weights(age, gender, interest)
+            logger.info(f"ABM segment weights from demographics: {segment_weights}")
+        else:
+            # Fallback to uniform distribution when demographics are not provided
+            segment_weights = {seg: 1.0 / len(SEGMENTS) for seg in SEGMENTS}
+            logger.info("ABM using uniform segment weights (no demographics provided).")
+
+        segments_list = list(segment_weights.keys())
+        weights_list = list(segment_weights.values())
 
         for i in range(self.config.num_agents):
             try:
-                # Randomize agent attributes
-                segment = self.random.choice(demographic_segments)
+                # Select segment using weighted distribution from user demographics
+                segment = self.random.choices(segments_list, weights=weights_list, k=1)[0]
                 loyalty = self.random.uniform(0.0, 1.0)
                 base_prob = self.random.uniform(0.01, 0.1)
                 

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive GUI Storyboard - Prediction Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        
+        .sticky-note {
+            background-color: #fef08a; /* yellow-200 */
+            border-left: 5px solid #eab308;
+            box-shadow: 2px 4px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        /* Interactivity CSS */
+        .step-container { display: none; }
+        .step-container.active { 
+            display: flex; 
+            animation: slideIn 0.3s ease-out forwards; 
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-8 min-h-screen">
+    
+    <div class="max-w-6xl mx-auto mb-12 text-center">
+        <h1 class="text-4xl font-extrabold text-gray-800 mb-3 tracking-tight">Prediction Engine - Interactive Storyboard</h1>
+        <p class="text-gray-500 mb-8 max-w-2xl mx-auto text-lg">Click the navigation buttons in the context panels to experience the user journey sequentially, just as a user would.</p>
+        
+        <!-- Interactive Progress Stepper -->
+        <div class="flex justify-center items-center space-x-2 sm:space-x-4">
+            <button onclick="showStep(1)" id="indicator-1" class="w-12 h-12 flex justify-center items-center rounded-full bg-indigo-600 shadow-md text-white font-bold transition transform hover:scale-105">1</button>
+            <div class="w-16 h-1 rounded bg-gray-300 transition-colors duration-300" id="line-1"></div>
+            <button onclick="showStep(2)" id="indicator-2" class="w-12 h-12 flex justify-center items-center rounded-full bg-gray-300 text-gray-600 font-bold transition transform hover:scale-105 hover:bg-gray-400">2</button>
+            <div class="w-16 h-1 rounded bg-gray-300 transition-colors duration-300" id="line-2"></div>
+            <button onclick="showStep(3)" id="indicator-3" class="w-12 h-12 flex justify-center items-center rounded-full bg-gray-300 text-gray-600 font-bold transition transform hover:scale-105 hover:bg-gray-400">3</button>
+            <div class="w-16 h-1 rounded bg-gray-300 transition-colors duration-300" id="line-3"></div>
+            <button onclick="showStep(4)" id="indicator-4" class="w-12 h-12 flex justify-center items-center rounded-full bg-gray-300 text-gray-600 font-bold transition transform hover:scale-105 hover:bg-gray-400">4</button>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto pb-12">
+        
+        <!-- STEP 1: Dashboard Home -->
+        <div id="step-1" class="step-container flex-col md:flex-row gap-8 items-stretch active">
+            <!-- Context Sticky Note -->
+            <div class="w-full md:w-80 sticky-note p-6 rounded-lg text-gray-800 flex flex-col justify-between">
+                <div>
+                    <div class="absolute -top-3 -left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow transform -rotate-12 border-2 border-white">Context</div>
+                    <h3 class="font-bold text-2xl mb-4 border-b-2 border-yellow-400 pb-2">1: The Entry Point</h3>
+                    <p class="text-sm mb-4"><strong>Identity:</strong> Data Analyst with strict deadlines.</p>
+                    <p class="text-sm mb-6"><strong>Goal & Emotion:</strong> Needs to start a predictive task quickly. Feels a bit intimidated by overly complex ML dashboards.</p>
+                    <div class="bg-yellow-300 p-3 rounded shadow-inner text-sm border border-yellow-500">
+                        <strong class="text-indigo-800 block mb-1">User Action:</strong> 
+                        Sees the giant bold "New Task" button and clicks it to begin.
+                    </div>
+                </div>
+                <button onclick="showStep(2)" class="w-full mt-6 py-3 bg-gray-900 border border-black text-white font-bold rounded shadow-lg hover:bg-gray-800 transition flex justify-center items-center group">Simulate Click <span class="ml-2 transform group-hover:translate-x-1 transition">➔</span></button>
+            </div>
+
+            <!-- UI Mockup -->
+            <div class="flex-grow bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden transform transition duration-500 hover:shadow-indigo-500/20">
+                <!-- App Header -->
+                <div class="bg-gradient-to-r from-indigo-700 to-indigo-900 text-white p-5 flex justify-between items-center">
+                    <div class="font-extrabold text-xl tracking-wider flex items-center">
+                        <svg class="w-6 h-6 mr-2 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        PredictionEngine
+                    </div>
+                    <div class="hidden sm:flex space-x-6 text-sm font-medium items-center">
+                        <a href="#" class="border-b-2 border-white pb-1">Home</a>
+                        <a href="#" class="opacity-70 hover:opacity-100 transition">Models</a>
+                        <a href="#" class="opacity-70 hover:opacity-100 transition">Pipelines</a>
+                        <div class="w-8 h-8 rounded-full bg-indigo-500 border-2 border-indigo-400 flex items-center justify-center font-bold">DA</div>
+                    </div>
+                </div>
+                
+                <div class="p-10">
+                    <div class="bg-indigo-50 border border-indigo-100 p-10 rounded-xl text-center mb-10 shadow-sm relative overflow-hidden">
+                        <div class="absolute -right-10 -top-10 opacity-10"><svg class="w-64 h-64" fill="currentColor" viewBox="0 0 20 20"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+                        <h2 class="text-3xl font-black text-indigo-900 mb-3 relative z-10">Ready to uncover the future?</h2>
+                        <p class="text-indigo-600 mb-8 relative z-10 max-w-md mx-auto">Build state-of-the-art predictive models in three simple steps. No coding required.</p>
+                        <div class="relative z-10 space-x-4">
+                            <button onclick="showStep(2)" class="bg-indigo-600 text-white px-8 py-3 rounded-lg font-bold shadow-lg hover:bg-indigo-500 hover:-translate-y-0.5 transform transition">New Prediction Task</button>
+                            <button class="bg-white border-2 border-indigo-200 text-indigo-700 px-8 py-3 rounded-lg font-bold shadow-sm hover:bg-indigo-50 transition">My Data Lake</button>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-lg mb-4 flex items-center"><svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Recent Models</h3>
+                        <div class="border rounded-lg p-5 flex justify-between items-center bg-gray-50 hover:bg-white hover:shadow-md cursor-pointer transition">
+                            <div>
+                                <span class="font-bold text-lg text-gray-800 block">Churn_Predictor_v3</span>
+                                <span class="text-sm text-gray-500">Trained on 50k rows • XGBoost</span>
+                            </div>
+                            <span class="text-green-700 font-bold text-sm bg-green-100 px-3 py-1.5 rounded-full border border-green-200">Ready for Inference</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2: Data Ingestion -->
+        <div id="step-2" class="step-container flex-col md:flex-row gap-8 items-stretch">
+            <div class="w-full md:w-80 sticky-note p-6 rounded-lg text-gray-800 flex flex-col justify-between">
+                <div>
+                    <div class="absolute -top-3 -left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow transform -rotate-12 border-2 border-white">Context</div>
+                    <h3 class="font-bold text-2xl mb-4 border-b-2 border-yellow-400 pb-2">2: Feeding Data</h3>
+                    <p class="text-sm mb-6"><strong>Emotion:</strong> Relieved! They see a friendly, massive drag-and-drop zone instead of complicated database connections or API token requests.</p>
+                    <div class="bg-yellow-300 p-3 rounded shadow-inner text-sm border border-yellow-500">
+                        <strong class="text-indigo-800 block mb-1">User Action:</strong> 
+                        Drags their locally saved <code>users.csv</code> into the dashed box.
+                    </div>
+                </div>
+                <div class="mt-6 flex space-x-3">
+                    <button onclick="showStep(1)" class="w-1/3 py-3 bg-gray-200 text-gray-800 font-bold rounded shadow hover:bg-gray-300 transition">Back</button>
+                    <button onclick="showStep(3)" class="w-2/3 py-3 bg-gray-900 border border-black text-white font-bold rounded shadow-lg hover:bg-gray-800 transition flex justify-center items-center group">Drop File <span class="ml-2 transform group-hover:translate-x-1 transition">➔</span></button>
+                </div>
+            </div>
+            
+            <div class="flex-grow bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
+                <div class="bg-gray-50 border-b p-5 font-bold text-xl text-gray-800 flex items-center">
+                    <span class="bg-indigo-600 text-white w-7 h-7 inline-flex items-center justify-center rounded-full text-sm mr-3 shadow-inner">1</span> 
+                    Upload Dataset
+                </div>
+                <div class="flex flex-col sm:flex-row h-full min-h-[400px]">
+                    <div class="w-full sm:w-64 bg-gray-50 p-6 border-r border-gray-200">
+                        <ul class="space-y-8 relative">
+                            <div class="absolute left-[9px] top-[14px] bottom-0 w-0.5 bg-gray-200 -z-10"></div>
+                            <li class="font-bold text-indigo-700 flex items-center bg-indigo-50 p-2 -ml-2 rounded-lg"><span class="w-5 h-5 bg-indigo-600 border-4 border-indigo-200 rounded-full mr-3 shadow-xl"></span> Upload Data</li>
+                            <li class="text-gray-400 font-medium flex items-center pl-2"><span class="w-3 h-3 bg-gray-300 rounded-full mr-4 border-2 border-white"></span> Configure</li>
+                            <li class="text-gray-400 font-medium flex items-center pl-2"><span class="w-3 h-3 bg-gray-300 rounded-full mr-4 border-2 border-white"></span> Train</li>
+                        </ul>
+                    </div>
+                    <div class="flex-grow p-10 flex items-center justify-center bg-white">
+                        <div class="border-4 border-dashed border-indigo-200 bg-indigo-50/50 hover:bg-indigo-50 rounded-2xl p-16 text-center w-full shadow-inner cursor-pointer hover:border-indigo-400 transition" onclick="showStep(3)">
+                            <div class="w-20 h-20 mx-auto bg-indigo-100 text-indigo-500 rounded-full flex items-center justify-center mb-6 shadow-sm">
+                                <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                            </div>
+                            <p class="text-xl text-gray-800 font-bold">Drag and drop CSV/JSON file here</p>
+                            <p class="text-gray-500 mt-2 font-medium">Files supported up to 500MB</p>
+                            <button class="mt-6 border-2 border-gray-300 text-gray-700 px-6 py-2 rounded-lg font-bold shadow-sm bg-white hover:bg-gray-50 transition">Browse Files</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 3: Model Configuration -->
+        <div id="step-3" class="step-container flex-col md:flex-row gap-8 items-stretch">
+            <div class="w-full md:w-80 sticky-note p-6 rounded-lg text-gray-800 flex flex-col justify-between">
+                <div>
+                    <div class="absolute -top-3 -left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow transform -rotate-12 border-2 border-white">Context</div>
+                    <h3 class="font-bold text-2xl mb-4 border-b-2 border-yellow-400 pb-2">3: Configuration</h3>
+                    <p class="text-sm mb-6"><strong>Goal:</strong> Define the ML task. The user is thankful they don't have to fiddle with one-hot encoding or scaling unless they want to; the UI abstracts it.</p>
+                    <div class="bg-yellow-300 p-3 rounded shadow-inner text-sm border border-yellow-500">
+                        <strong class="text-indigo-800 block mb-1">User Action:</strong> 
+                        Selects the target column "Customer_Churn" and eagerly clicks Train.
+                    </div>
+                </div>
+                <div class="mt-6 flex space-x-3">
+                    <button onclick="showStep(2)" class="w-1/3 py-3 bg-gray-200 text-gray-800 font-bold rounded shadow hover:bg-gray-300 transition">Back</button>
+                    <button onclick="showStep(4)" class="w-2/3 py-3 bg-gray-900 border border-black text-white font-bold rounded shadow-lg hover:bg-gray-800 transition flex justify-center items-center group">Train <span class="ml-2">🚀</span></button>
+                </div>
+            </div>
+            
+            <div class="flex-grow bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
+                <div class="bg-gray-50 border-b p-5 font-bold text-xl text-gray-800 flex items-center">
+                    <span class="bg-indigo-600 text-white w-7 h-7 inline-flex items-center justify-center rounded-full text-sm mr-3 shadow-inner">2</span> 
+                    Pipeline Configuration
+                </div>
+                <div class="flex flex-col sm:flex-row h-full">
+                    <div class="w-full sm:w-64 bg-gray-50 p-6 border-r border-gray-200">
+                        <ul class="space-y-8 relative">
+                            <div class="absolute left-[9px] top-[14px] bottom-0 w-0.5 bg-gray-200 -z-10 bg-indigo-200"></div>
+                            <li class="font-bold text-green-600 flex items-center pl-2"><svg class="w-5 h-5 bg-green-100 text-green-600 rounded-full mr-3 shadow-sm border border-green-200 p-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> <span class="line-through">Upload Data</span></li>
+                            
+                            <li class="font-bold text-indigo-700 flex items-center bg-indigo-50 p-2 -ml-2 rounded-lg"><span class="w-5 h-5 bg-indigo-600 border-4 border-indigo-200 rounded-full mr-3 shadow-xl"></span> Configure</li>
+                            
+                            <li class="text-gray-400 font-medium flex items-center pl-2"><span class="w-3 h-3 bg-gray-300 rounded-full mr-4 border-2 border-white"></span> Train</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="flex-grow p-8 space-y-8 bg-white min-h-[400px]">
+                        
+                        <div class="bg-white border p-6 rounded-xl shadow-sm hover:shadow-md transition">
+                            <label class="block text-gray-800 mb-2 font-bold flex items-center"><div class="w-6 h-6 bg-indigo-100 text-indigo-700 rounded text-center mr-2 text-sm leading-6">A</div> select target column</label>
+                            <select class="mt-1 block w-full rounded-lg border-gray-300 border-2 py-3 pl-3 pr-10 focus:border-indigo-500 focus:ring-indigo-500 bg-gray-50 shadow-inner font-medium text-gray-700">
+                                <option>Predict: Customer_Churn (Categorical)</option>
+                                <option>Predict: Monthly_Revenue (Numerical)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="bg-white border p-5 rounded-xl shadow-sm">
+                                <label class="block mb-4 font-bold text-gray-800 border-b pb-2">Pre-processing Rules</label>
+                                <div class="space-y-4">
+                                    <label class="flex items-center text-gray-700 cursor-pointer p-2 hover:bg-gray-50 rounded"><input type="checkbox" checked class="mr-4 w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500"> Handle Outliers Automatically</label>
+                                    <label class="flex items-center text-gray-700 cursor-pointer p-2 hover:bg-gray-50 rounded"><input type="checkbox" checked class="mr-4 w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500"> Median Imputation</label>
+                                </div>
+                            </div>
+                            <div class="bg-white border p-5 rounded-xl shadow-sm relative overflow-hidden">
+                                <div class="absolute top-0 right-0 bg-indigo-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg shadow">Recommended</div>
+                                <label class="block mb-4 font-bold text-gray-800 border-b pb-2">Algorithm Engine</label>
+                                <div class="space-y-4">
+                                    <label class="flex items-center cursor-pointer p-2 bg-indigo-50 rounded border border-indigo-100"><input type="radio" name="alg" checked class="mr-4 w-5 h-5 text-indigo-600 focus:ring-indigo-500"> <span class="font-bold text-indigo-900">AutoML (Best Model)</span></label>
+                                    <label class="flex items-center text-gray-700 cursor-pointer p-2 hover:bg-gray-50 rounded"><input type="radio" name="alg" class="mr-4 w-5 h-5 text-gray-400"> XGBoost</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="pt-2">
+                            <button onclick="showStep(4)" class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white px-6 py-4 rounded-xl font-bold text-lg hover:from-indigo-500 hover:to-indigo-700 w-full shadow-lg transition transform hover:-translate-y-1 flex justify-center items-center">
+                                Start Pipeline
+                                <svg class="w-6 h-6 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 4: Results -->
+        <div id="step-4" class="step-container flex-col md:flex-row gap-8 items-stretch">
+            <div class="w-full md:w-80 sticky-note p-6 rounded-lg text-gray-800 flex flex-col justify-between">
+                <div>
+                    <div class="absolute -top-3 -left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow transform -rotate-12 border-2 border-white">Context</div>
+                    <h3 class="font-bold text-2xl mb-4 border-b-2 border-yellow-400 pb-2">4: Insights</h3>
+                    <p class="text-sm mb-6"><strong>Emotion & Goal:</strong> Pure satisfaction. They have a very high accuracy model and the visual SHAP charts allow them to justify the AI's logic to the business stakeholders.</p>
+                    <div class="bg-yellow-300 p-3 rounded shadow-inner text-sm border border-yellow-500">
+                        <strong class="text-indigo-800 block mb-1">User Action:</strong> 
+                        Synthesizes results and clicks Export Report to share.
+                    </div>
+                </div>
+                <div class="mt-6 flex space-x-3">
+                    <button onclick="showStep(3)" class="w-1/3 py-3 bg-gray-200 text-gray-800 font-bold rounded shadow hover:bg-gray-300 transition">Back</button>
+                    <button onclick="showStep(1)" class="w-2/3 py-3 border-2 border-black text-black bg-white font-bold rounded shadow-lg hover:bg-gray-100 transition flex justify-center items-center">Restart <span class="ml-2">↺</span></button>
+                </div>
+            </div>
+            
+            <div class="flex-grow bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden relative">
+                
+                <div class="bg-gray-50 border-b p-5 font-bold text-xl text-gray-800 flex justify-between items-center z-10 relative">
+                    <div class="flex items-center">
+                        <span class="bg-green-500 text-white w-7 h-7 inline-flex flex justify-center rounded-full text-sm mr-3 font-black shadow pt-1">✓</span> 
+                        Model Complete
+                    </div>
+                    <button class="bg-white border-2 border-indigo-200 text-indigo-700 font-bold px-4 py-2 rounded-lg text-sm hover:bg-indigo-50 shadow-sm transition flex items-center"><svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg> Export PDF</button>
+                </div>
+                
+                <div class="p-8">
+                    <!-- KPI Row -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
+                        <div class="bg-white p-5 border border-gray-100 rounded-xl text-center shadow-[0_4px_15px_-3px_rgba(0,0,0,0.1)] border-b-4 border-b-blue-500">
+                            <div class="text-xs text-blue-500 font-black tracking-widest uppercase mb-1">Accuracy</div>
+                            <div class="text-4xl font-black text-gray-800">95.4%</div>
+                        </div>
+                        <div class="bg-white p-5 border border-gray-100 rounded-xl text-center shadow-[0_4px_15px_-3px_rgba(0,0,0,0.1)] border-b-4 border-b-green-500">
+                            <div class="text-xs text-green-500 font-black tracking-widest uppercase mb-1">F1-Score</div>
+                            <div class="text-4xl font-black text-gray-800">0.93</div>
+                        </div>
+                        <div class="bg-white p-5 border border-gray-100 rounded-xl text-center shadow-[0_4px_15px_-3px_rgba(0,0,0,0.1)] border-b-4 border-b-purple-500">
+                            <div class="text-xs text-purple-500 font-black tracking-widest uppercase mb-1">ROC-AUC</div>
+                            <div class="text-4xl font-black text-gray-800">0.97</div>
+                        </div>
+                        <div class="bg-gray-50 p-5 border border-gray-100 rounded-xl text-center border-b-4 border-b-gray-400">
+                            <div class="text-xs text-gray-500 font-black tracking-widest uppercase mb-1">Train Time</div>
+                            <div class="text-4xl font-black text-gray-800">42s</div>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        
+                        <!-- Feature Importance -->
+                        <div class="border border-gray-200 rounded-xl p-6 shadow-sm bg-white">
+                            <h4 class="font-black text-gray-800 mb-6 flex items-center border-b pb-3 uppercase tracking-wide text-sm">
+                                <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg> 
+                                Explainability (SHAP)
+                            </h4>
+                            <div class="space-y-6">
+                                <div>
+                                    <div class="flex justify-between text-sm font-bold text-gray-700 mb-1"><span>MonthlyCharges</span><span class="text-indigo-600">85% impact</span></div>
+                                    <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden shadow-inner"><div class="bg-indigo-600 h-3" style="width: 85%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm font-bold text-gray-700 mb-1"><span>Tenure (Months)</span><span class="text-indigo-500">72% impact</span></div>
+                                    <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden shadow-inner"><div class="bg-indigo-500 h-3" style="width: 72%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm font-bold text-gray-700 mb-1"><span>ContractType</span><span class="text-indigo-400">61% impact</span></div>
+                                    <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden shadow-inner"><div class="bg-indigo-400 h-3" style="width: 61%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm font-bold text-gray-700 mb-1"><span>SupportTickets</span><span class="text-indigo-300">45% impact</span></div>
+                                    <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden shadow-inner"><div class="bg-indigo-300 h-3" style="width: 45%"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Secondary Chart -->
+                        <div class="border border-gray-200 rounded-xl p-0 flex flex-col justify-center bg-gray-50 overflow-hidden shadow-inner">
+                            <div class="p-4 border-b bg-white font-black text-gray-800 text-sm uppercase tracking-wide flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                Confusion Matrix Preview
+                            </div>
+                            <!-- Mockup of matrix grid -->
+                            <div class="p-6 grid grid-cols-2 gap-2 h-full content-center">
+                                <div class="bg-blue-100 p-4 rounded text-center border border-blue-200"><div class="text-xs text-blue-600 font-bold mb-1">True Negative</div><div class="font-black text-xl text-blue-900">12,042</div></div>
+                                <div class="bg-red-50 p-4 rounded text-center border border-red-100"><div class="text-xs text-red-500 font-bold mb-1">False Positive</div><div class="font-black text-xl text-red-700">301</div></div>
+                                <div class="bg-red-50 p-4 rounded text-center border border-red-100"><div class="text-xs text-red-500 font-bold mb-1">False Negative</div><div class="font-black text-xl text-red-700">158</div></div>
+                                <div class="bg-blue-200 p-4 rounded text-center border border-blue-300"><div class="text-xs text-blue-700 font-bold mb-1">True Positive</div><div class="font-black text-xl text-blue-900">4,902</div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Script to handle interactions -->
+    <script>
+        function showStep(s) {
+            // Hide all steps
+            document.querySelectorAll('.step-container').forEach(el => {
+                el.classList.remove('active');
+            });
+            // Show targeted step
+            document.getElementById('step-' + s).classList.add('active');
+            
+            // Update visual progress tracker
+            for(let i=1; i<=4; i++) {
+                let ind = document.getElementById('indicator-' + i);
+                
+                if(i <= s) {
+                    ind.className = "w-12 h-12 flex justify-center items-center rounded-full shadow-md font-bold transition transform hover:scale-105 bg-indigo-600 text-white";
+                } else {
+                    ind.className = "w-12 h-12 flex justify-center items-center rounded-full font-bold transition transform hover:scale-105 hover:bg-gray-400 bg-gray-300 text-gray-600";
+                }
+                
+                if(i < 4) {
+                    let line = document.getElementById('line-' + i);
+                    if(i < s) {
+                        line.className = "w-16 h-1 rounded transition-colors duration-300 bg-indigo-600";
+                    } else {
+                        line.className = "w-16 h-1 rounded transition-colors duration-300 bg-gray-300";
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
