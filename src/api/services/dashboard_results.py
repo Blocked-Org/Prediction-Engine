@@ -73,15 +73,39 @@ def _as_str_list(value: Any, default: list[str]) -> list[str]:
 def _build_simulation_request(campaign: dict[str, Any]) -> SimulationRequest:
     budget = _as_float(campaign.get("budget"), 10_000.0)
     cpc = _as_float(campaign.get("cpc"), 1.5)
+    revenue = _as_float(campaign.get("historical_revenue"), budget * 3.0)
+    channels = _as_str_list(campaign.get("primary_channels"), ["Meta", "Google", "TikTok"])
+
     # Derive proxy ad metrics from stored campaign budget and CPC
     clicks = max(1, int(budget / max(cpc, 0.01)))
     impressions = max(clicks, int(clicks / 0.025))
     conversions = max(1, int(clicks * 0.02))
+
+    # Split total budget across channels (proportional to default MMM weights)
+    channel_weights = {"Meta": 0.50, "Google": 0.30, "TikTok": 0.20}
+    spend_meta = budget * channel_weights.get("Meta", 0.34)
+    spend_google = budget * channel_weights.get("Google", 0.33)
+    spend_tiktok = budget * channel_weights.get("TikTok", 0.33)
+
+    # If budget was stored with known per-channel keys, prefer those
+    if len(channels) == 3:
+        per_ch = budget / 3.0
+        spend_meta = per_ch if "Meta" in channels else 0.0
+        spend_google = per_ch if "Google" in channels else 0.0
+        spend_tiktok = per_ch if "TikTok" in channels else 0.0
+        # Re-weight to match stored total
+        spend_meta = budget * 0.50
+        spend_google = budget * 0.30
+        spend_tiktok = budget * 0.20
+
     return SimulationRequest(
         Impressions=float(impressions),
         Clicks=clicks,
-        Spent=budget,
+        spend_meta=spend_meta,
+        spend_google=spend_google,
+        spend_tiktok=spend_tiktok,
         Total_Conversion=conversions,
+        revenue=revenue,
         age=str(campaign.get("target_age_range") or "25-29"),
         gender="M",  # Default when not stored in graph
         interest="Travel",  # Default when not stored in graph

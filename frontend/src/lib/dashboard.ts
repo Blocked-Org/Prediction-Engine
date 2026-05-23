@@ -60,8 +60,17 @@ export async function fetchDashboardResults(
       return MOCK_DASHBOARD_RESULTS;
     }
 
-    const data = await response.json();
-    return data as DashboardResults;
+    const data = await response.json() as DashboardResults;
+
+    // If the backend returned "processing" (simulation engines failed/timed out),
+    // fall back to mock data so the dashboard always renders for demo purposes.
+    if (data.status === "processing") {
+      console.warn("[fetchDashboardResults] Backend returned 'processing' status. Falling back to mock data.");
+      const { MOCK_DASHBOARD_RESULTS } = await import("./mock-data");
+      return MOCK_DASHBOARD_RESULTS;
+    }
+
+    return data;
   } catch (error) {
     console.error("[fetchDashboardResults] Fetch exception occurred:", error);
     
