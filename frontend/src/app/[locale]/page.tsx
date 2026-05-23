@@ -118,7 +118,7 @@ export default function LandingPage() {
           <div className="flex-1 px-4 flex items-center gap-3">
             <span className="text-zinc-400 font-medium whitespace-nowrap text-sm sm:text-base">{t('hero.monthly_spend_label')}</span>
             <div className="relative flex-1 flex items-center">
-              <span className="text-zinc-500 font-mono mr-1">$</span>
+              <span className="text-zinc-500 font-mono mr-1">৳</span>
               <input 
                 type="number" 
                 defaultValue={15000} 
@@ -541,7 +541,7 @@ export default function LandingPage() {
             <div className="flex flex-col gap-4 group">
               <div className="flex justify-between items-center text-sm">
                 <span className="font-semibold text-zinc-300 group-hover:text-white transition-colors">{t('simulator.meta_ads')}</span>
-                <span className="font-bold text-white font-mono bg-zinc-800/80 px-2.5 py-1 rounded-md border border-zinc-700">${metaBudget.toLocaleString()}</span>
+                <span className="font-bold text-white font-mono bg-zinc-800/80 px-2.5 py-1 rounded-md border border-zinc-700">৳{metaBudget.toLocaleString()}</span>
               </div>
               <Slider
                 value={[metaBudget]}
@@ -556,7 +556,7 @@ export default function LandingPage() {
             <div className="flex flex-col gap-4 group">
               <div className="flex justify-between items-center text-sm">
                 <span className="font-semibold text-zinc-300 group-hover:text-white transition-colors">{t('simulator.google_search')}</span>
-                <span className="font-bold text-white font-mono bg-zinc-800/80 px-2.5 py-1 rounded-md border border-zinc-700">${googleBudget.toLocaleString()}</span>
+                <span className="font-bold text-white font-mono bg-zinc-800/80 px-2.5 py-1 rounded-md border border-zinc-700">৳{googleBudget.toLocaleString()}</span>
               </div>
               <Slider
                 value={[googleBudget]}
@@ -571,7 +571,7 @@ export default function LandingPage() {
             <div className="flex flex-col gap-4 group">
               <div className="flex justify-between items-center text-sm">
                 <span className="font-semibold text-zinc-300 group-hover:text-white transition-colors">{t('simulator.tiktok_ads')}</span>
-                <span className="font-bold text-white font-mono bg-zinc-800/80 px-2.5 py-1 rounded-md border border-zinc-700">${tiktokBudget.toLocaleString()}</span>
+                <span className="font-bold text-white font-mono bg-zinc-800/80 px-2.5 py-1 rounded-md border border-zinc-700">৳{tiktokBudget.toLocaleString()}</span>
               </div>
               <Slider
                 value={[tiktokBudget]}
@@ -649,7 +649,7 @@ export default function LandingPage() {
                 <div className="flex flex-col gap-1.5 text-xs">
                   <div className="flex justify-between text-zinc-400">
                     <span className="font-medium text-white">Meta Ads</span>
-                    <span className="font-mono text-zinc-300 font-semibold">${simulationResults.optimal.meta.toLocaleString()} <span className="text-zinc-500 ml-1">(48%)</span></span>
+                    <span className="font-mono text-zinc-300 font-semibold">৳{simulationResults.optimal.meta.toLocaleString()} <span className="text-zinc-500 ml-1">(48%)</span></span>
                   </div>
                   <div className="w-full bg-zinc-950 h-2 rounded-full overflow-hidden border border-zinc-800/50">
                     <div className="bg-cyan-500 h-full rounded-full shadow-[0_0_10px_rgba(34,211,238,0.5)]" style={{ width: '48%' }} />
@@ -660,7 +660,7 @@ export default function LandingPage() {
                 <div className="flex flex-col gap-1.5 text-xs">
                   <div className="flex justify-between text-zinc-400">
                     <span className="font-medium text-white">Google Search</span>
-                    <span className="font-mono text-zinc-300 font-semibold">${simulationResults.optimal.google.toLocaleString()} <span className="text-zinc-500 ml-1">(32%)</span></span>
+                    <span className="font-mono text-zinc-300 font-semibold">৳{simulationResults.optimal.google.toLocaleString()} <span className="text-zinc-500 ml-1">(32%)</span></span>
                   </div>
                   <div className="w-full bg-zinc-950 h-2 rounded-full overflow-hidden border border-zinc-800/50">
                     <div className="bg-indigo-500 h-full rounded-full shadow-[0_0_10px_rgba(99,102,241,0.5)]" style={{ width: '32%' }} />
@@ -671,7 +671,7 @@ export default function LandingPage() {
                 <div className="flex flex-col gap-1.5 text-xs">
                   <div className="flex justify-between text-zinc-400">
                     <span className="font-medium text-white">TikTok Ads</span>
-                    <span className="font-mono text-zinc-300 font-semibold">${simulationResults.optimal.tiktok.toLocaleString()} <span className="text-zinc-500 ml-1">(20%)</span></span>
+                    <span className="font-mono text-zinc-300 font-semibold">৳{simulationResults.optimal.tiktok.toLocaleString()} <span className="text-zinc-500 ml-1">(20%)</span></span>
                   </div>
                   <div className="w-full bg-zinc-950 h-2 rounded-full overflow-hidden border border-zinc-800/50">
                     <div className="bg-purple-500 h-full rounded-full shadow-[0_0_10px_rgba(168,85,247,0.5)]" style={{ width: '20%' }} />

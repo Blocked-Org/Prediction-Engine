@@ -82,7 +82,7 @@
 >   by the genetic algorithm.
 > - **Markov Funnel Journey** — SVG visualisation of channel transition
 >   probabilities. Stroke width = P(i→j).
-> - **Saturation S-Curve** — Shows exactly where your next dollar stops
+> - **Saturation S-Curve** — Shows exactly where your next taka stops
 >   delivering returns.
 >
 > *[Toggle the LanguageSwitcher to বাংলা]*

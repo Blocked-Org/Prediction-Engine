@@ -22,7 +22,7 @@ Historically, advanced predictive capabilities like Bayesian Marketing Mix Model
 
 The system's success is measured by its ability to accurately forecast and improve specific metrics:
 - **Increasing Incremental Return on Ad Spend (iROAS):** Isolating revenue causally driven by advertising from organic base sales.
-- **Identifying Marginal Return on Investment (mROI):** Calculating the projected revenue from the next incremental dollar to identify the exact threshold of diminishing returns.
+- **Identifying Marginal Return on Investment (mROI):** Calculating the projected revenue from the next incremental taka to identify the exact threshold of diminishing returns.
 - **Reducing Customer Acquisition Cost (CAC):** Optimizing budget allocation via non-linear models.
 
 ## 4. Why AI is Required

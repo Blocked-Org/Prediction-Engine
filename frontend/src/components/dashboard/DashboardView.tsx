@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, CreditCard, Brain, ArrowRight, Sparkles, TrendingUp, Search, Activity, Clock, CheckCircle } from "lucide-react";
+import { DollarSign, CreditCard, Brain, ArrowRight, Sparkles, TrendingUp, Search, Clock, CheckCircle } from "lucide-react";
 import type { DashboardSimulationData } from "@/lib/dashboard";
 import type { ChannelAllocation } from "@/lib/types/contracts";
 
@@ -165,7 +165,7 @@ export function DashboardView({ data }: DashboardViewProps) {
                   </div>
                   <div className="text-xs font-bold text-emerald-400 flex items-center bg-emerald-500/10 px-2 py-1 rounded-full shadow-inner">
                     <TrendingUp className="w-3 h-3 mr-1" />
-                    +12.4%
+                    {totalSpend > 0 ? `+${((estimatedRevenue - totalSpend) / totalSpend * 100).toFixed(1)}%` : 'N/A'} ROI
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground mt-3 font-medium">
@@ -188,9 +188,8 @@ export function DashboardView({ data }: DashboardViewProps) {
                   <div className="text-3xl font-black font-tabular-nums tracking-tight text-white">
                     ৳{totalSpend.toLocaleString("bn-BD")}
                   </div>
-                  <div className="text-xs font-bold text-emerald-400 flex items-center bg-emerald-500/10 px-2 py-1 rounded-full shadow-inner">
-                    <TrendingUp className="w-3 h-3 mr-1" />
-                    +4.2%
+                  <div className="text-xs font-bold text-blue-400 flex items-center bg-blue-500/10 px-2 py-1 rounded-full shadow-inner">
+                    {optimization_result.optimized_allocations.length} Channels
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground mt-3 font-medium">
@@ -214,27 +213,58 @@ export function DashboardView({ data }: DashboardViewProps) {
                   </div>
                 </CardTitle>
              </CardHeader>
-             <CardContent className="flex-1 flex items-center justify-center relative">
-                {/* Decorative Chart Lines */}
-                <div className="absolute bottom-0 left-8 right-8 top-12 border-b border-l border-border/30 flex items-end justify-between px-8 pb-8">
-                   <div className="w-8 h-[30%] bg-blue-500/20 rounded-t-sm" />
-                   <div className="w-8 h-[45%] bg-blue-500/30 rounded-t-sm" />
-                   <div className="w-8 h-[40%] bg-blue-500/40 rounded-t-sm" />
-                   <div className="w-8 h-[65%] bg-blue-500/50 rounded-t-sm" />
-                   <div className="w-8 h-[80%] bg-blue-500/60 rounded-t-sm" />
-                   <div className="w-8 h-[95%] bg-blue-500/80 rounded-t-sm shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
-                   
-                   {/* Overlay Line */}
-                   <svg className="absolute inset-0 h-full w-full pointer-events-none" preserveAspectRatio="none">
-                      <path d="M 32 150 Q 150 120 300 80 T 550 20" fill="none" stroke="rgba(168,85,247,0.8)" strokeWidth="3" className="drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
-                   </svg>
-                </div>
-                
-                <div className="z-10 bg-background/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-border/50 shadow-xl flex items-center gap-3 animate-pulse">
-                   <Activity className="h-4 w-4 text-primary" />
-                   <span className="text-sm font-medium">Real-time simulation active...</span>
-                </div>
-             </CardContent>
+             <CardContent className="flex-1 flex flex-col justify-end relative pt-6 pb-4 px-6">
+                 {(() => {
+                   const channelColors: Record<string, { bg: string; border: string; glow: string; text: string }> = {
+                     meta: { bg: 'bg-blue-500/80', border: 'border-blue-400', glow: 'shadow-[0_0_15px_rgba(59,130,246,0.5)]', text: 'text-blue-400' },
+                     google: { bg: 'bg-emerald-500/80', border: 'border-emerald-400', glow: 'shadow-[0_0_15px_rgba(16,185,129,0.5)]', text: 'text-emerald-400' },
+                     tiktok: { bg: 'bg-amber-500/80', border: 'border-amber-400', glow: 'shadow-[0_0_15px_rgba(245,158,11,0.5)]', text: 'text-amber-400' },
+                   };
+                   const fallbackColor = { bg: 'bg-violet-500/80', border: 'border-violet-400', glow: 'shadow-[0_0_15px_rgba(139,92,246,0.5)]', text: 'text-violet-400' };
+                   const allocs = optimization_result.optimized_allocations;
+                   const maxSpend = Math.max(...allocs.map(a => a.spend), 1);
+
+                   return (
+                     <div className="flex items-end justify-around gap-6 h-[220px] w-full border-b border-l border-border/30 pl-2 pb-0 relative">
+                       {/* Y-axis guide lines */}
+                       <div className="absolute left-0 right-0 top-0 bottom-0 flex flex-col justify-between pointer-events-none py-2">
+                         {[...Array(4)].map((_, i) => (
+                           <div key={i} className="border-t border-border/10 w-full" />
+                         ))}
+                       </div>
+
+                       {allocs.map((alloc) => {
+                         const pct = (alloc.spend / maxSpend) * 100;
+                         const colors = channelColors[alloc.channel_name.toLowerCase()] || fallbackColor;
+                         const formatted = `৳${alloc.spend.toLocaleString('bn-BD')}`;
+                         return (
+                           <div key={alloc.channel_name} className="flex flex-col items-center gap-2 flex-1 z-10 group">
+                             {/* Amount label */}
+                             <span className={`text-xs font-bold ${colors.text} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}>
+                               {formatted}
+                             </span>
+                             {/* Bar */}
+                             <div className="w-full max-w-[72px] flex items-end" style={{ height: '170px' }}>
+                               <div
+                                 className={`w-full rounded-t-lg ${colors.bg} ${colors.glow} border-t-2 ${colors.border} transition-all duration-700 ease-out hover:brightness-125`}
+                                 style={{ height: `${Math.max(pct, 5)}%` }}
+                               />
+                             </div>
+                             {/* Channel name */}
+                             <span className="text-[11px] font-semibold text-muted-foreground capitalize tracking-wide">
+                               {alloc.channel_name}
+                             </span>
+                             {/* Spend below name */}
+                             <span className={`text-[10px] font-bold ${colors.text}`}>
+                               {formatted}
+                             </span>
+                           </div>
+                         );
+                       })}
+                     </div>
+                   );
+                 })()}
+              </CardContent>
           </Card>
 
           {/* Data Table */}

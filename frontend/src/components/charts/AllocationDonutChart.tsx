@@ -15,7 +15,7 @@ export function AllocationDonutChart({ allocations }: AllocationDonutChartProps)
     labels: allocations.map(a => a.channel_name.charAt(0).toUpperCase() + a.channel_name.slice(1)),
     datasets: [
       {
-        label: 'Optimized Spend ($)',
+        label: 'Optimized Spend (৳)',
         data: allocations.map(a => a.spend),
         backgroundColor: [
           'rgba(59, 130, 246, 0.8)', // blue-500
@@ -58,7 +58,7 @@ export function AllocationDonutChart({ allocations }: AllocationDonutChartProps)
               label += ': ';
             }
             if (context.parsed !== null) {
-              label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed);
+              label += new Intl.NumberFormat('bn-BD', { style: 'currency', currency: 'BDT', maximumFractionDigits: 0 }).format(context.parsed);
             }
             return label;
           }
