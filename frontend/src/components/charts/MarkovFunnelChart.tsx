@@ -273,7 +273,7 @@ export function MarkovFunnelChart({ data, height = 240 }: MarkovFunnelChartProps
   }
 
   return (
-    <div className="w-full overflow-x-auto" style={{ maxHeight: 320 }}>
+    <div className="w-full">
       <svg
         width="100%"
         viewBox={`0 0 ${svgWidth} ${svgHeight}`}
