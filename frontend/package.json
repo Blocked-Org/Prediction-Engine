@@ -27,6 +27,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "framer-motion": "^12.40.0",
     "lightweight-charts": "^5.2.0",
     "llamaindex": "^0.12.1",
     "lucide-react": "^1.14.0",
