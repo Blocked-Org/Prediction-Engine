@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useAuth } from "@clerk/nextjs"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, type FieldPath } from "react-hook-form"
-import { Loader2, Sparkles, Eye, MousePointer, DollarSign, Target, Brain, Rocket, Users, ChevronLeft, ChevronRight, Globe, Link } from "lucide-react"
+import { Loader2, Sparkles, Eye, MousePointer, Target, Brain, Rocket, Users, ChevronLeft, ChevronRight, Globe, Link } from "lucide-react"
 
 import { completeOnboarding } from "@/actions/onboarding"
 import {
@@ -56,6 +56,10 @@ const STEPS = [
     icon: Globe,
   },
 ]
+
+const TakaIcon = ({ className }: { className?: string }) => (
+  <span className={`font-bold ${className}`} style={{ fontSize: '1.1em', lineHeight: 1 }}>৳</span>
+)
 
 const EMPTY_DEFAULTS: Partial<SimulationWizardInput> = {
   Impressions: 0,
@@ -321,7 +325,7 @@ export function SimulationWizard({ locale }: { locale: string }) {
                     name="spend_meta"
                     label="Meta Ads Budget"
                     description="Historical Meta / Facebook ad spend."
-                    icon={DollarSign}
+                    icon={TakaIcon}
                     placeholder="e.g., 75000"
                     leftBorderColor="border-l-4 border-l-blue-600"
                   />
@@ -330,7 +334,7 @@ export function SimulationWizard({ locale }: { locale: string }) {
                     name="spend_google"
                     label="Google Ads Budget"
                     description="Historical Google Ads spend."
-                    icon={DollarSign}
+                    icon={TakaIcon}
                     placeholder="e.g., 50000"
                     leftBorderColor="border-l-4 border-l-red-500"
                   />
@@ -339,7 +343,7 @@ export function SimulationWizard({ locale }: { locale: string }) {
                     name="spend_tiktok"
                     label="TikTok Ads Budget"
                     description="Historical TikTok Ads spend."
-                    icon={DollarSign}
+                    icon={TakaIcon}
                     placeholder="e.g., 25000"
                     leftBorderColor="border-l-4 border-l-cyan-400"
                   />
@@ -352,7 +356,7 @@ export function SimulationWizard({ locale }: { locale: string }) {
                     name="revenue"
                     label="Historical Total Revenue"
                     description="Total revenue generated across all channels."
-                    icon={DollarSign}
+                    icon={TakaIcon}
                     placeholder="e.g., 500000"
                     leftBorderColor="border-l-4 border-l-emerald-500"
                   />
