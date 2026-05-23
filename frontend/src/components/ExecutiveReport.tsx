@@ -31,6 +31,7 @@ export function ExecutiveReport({ simulationData }: ExecutiveReportProps) {
   
   const { completion, complete, isLoading, error, stop } = useCompletion({
     api: '/api/report',
+    streamProtocol: 'text',
     body: {
       simulationData,
       locale,

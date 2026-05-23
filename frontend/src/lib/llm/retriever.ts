@@ -84,7 +84,7 @@ export async function retrieveGraphContext(campaignId: string, userQuery?: strin
     const contextLines = [
       `### Neo4j Knowledge Graph Context`,
       `- **Campaign Name**: ${record.get('campaign_name')}`,
-      `- **Budget**: $${record.get('budget')}`,
+      `- **Budget**: ৳${record.get('budget')}`,
       `- **Target Demographics**: ${record.get('target_clusters')?.join(', ') || 'None'}`,
       `- **Identified Competitors**: ${record.get('competitors')?.join(', ') || 'None'}`,
     ];

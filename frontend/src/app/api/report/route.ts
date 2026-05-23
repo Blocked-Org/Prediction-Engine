@@ -228,7 +228,7 @@ Rules:
 ${shapContext ? `${shapContext}\n` : ''}
 ${graphContext ? `${graphContext}\n` : ''}
 
-STRICT DIRECTIVE: You must mathematically ground all your recommendations in the provided SHAP values. Do not hallucinate financial metrics. Every percentage or dollar figure you cite must come from the data above.
+STRICT DIRECTIVE: You must mathematically ground all your recommendations in the provided SHAP values. Do not hallucinate financial metrics. Every percentage or taka figure you cite must come from the data above.
 `;
 
     const promptText = body.prompt || `Simulation Data Context:\n${JSON.stringify(simulationData, null, 2)}\n\nPlease generate the Executive Summary.`;
