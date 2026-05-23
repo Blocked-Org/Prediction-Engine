@@ -310,6 +310,63 @@
   background-size: 128px 128px;
 }
 
+/* ─── Chat Widget Animations ─── */
+
+@keyframes chatSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-chat-slide-up {
+  animation: chatSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes typingBounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+}
+
+.animate-typing-bounce {
+  animation: typingBounce 1.4s ease-in-out infinite;
+}
+
+@keyframes chatPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+  }
+}
+
+.animate-chat-pulse {
+  animation: chatPulse 2s ease-in-out infinite;
+}
+
+/* Scrollbar styling for chat message list */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: oklch(0.35 0.01 260);
+  border-radius: 9999px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in-up { opacity: 1; animation: none; }
   .animate-fade-in { opacity: 1; animation: none; }
@@ -317,4 +374,7 @@
   .card-hover-lift { transition: none; }
   .cinematic-mesh { animation: none !important; }
   .cinematic-grain { display: none; }
+  .animate-chat-slide-up { animation: none; opacity: 1; }
+  .animate-typing-bounce { animation: none; }
+  .animate-chat-pulse { animation: none; }
 }
