@@ -31,13 +31,27 @@ export default function PricingPage() {
       id: 'starter',
       name: t('tiers.starter.name'),
       description: t('tiers.starter.desc'),
-      monthlyPriceBDT: 2500,
-      monthlyPriceUSD: 30,
+      monthlyPriceBDT: 1750,
+      monthlyPriceUSD: 14,
       features: [
-        t('features.mmm'),
-        t('features.abm'),
-        t('features.markov'),
+        t('features.mmm_single'),
+        t('features.bkash'),
         t('features.support'),
+      ],
+      ctaText: t('get_started'),
+      isPopular: false,
+    },
+    {
+      id: 'growth',
+      name: t('tiers.growth.name'),
+      description: t('tiers.growth.desc'),
+      monthlyPriceBDT: 8000,
+      monthlyPriceUSD: 99,
+      features: [
+        t('features.mmm_multi'),
+        t('features.markov'),
+        t('features.rag'),
+        t('features.sim_runs'),
       ],
       ctaText: t('get_started'),
       isPopular: false,
@@ -46,15 +60,13 @@ export default function PricingPage() {
       id: 'professional',
       name: t('tiers.professional.name'),
       description: t('tiers.professional.desc'),
-      monthlyPriceBDT: 8000,
-      monthlyPriceUSD: 99,
+      monthlyPriceBDT: 42000,
+      monthlyPriceUSD: 499,
       features: [
-        t('features.mmm'),
-        t('features.abm_full'),
-        t('features.markov'),
+        t('features.unlimited_sims'),
         t('features.genetic'),
-        t('features.offline'),
-        t('features.support'),
+        t('features.shap'),
+        t('features.whitelabel'),
       ],
       ctaText: t('get_started'),
       isPopular: true,
@@ -63,25 +75,22 @@ export default function PricingPage() {
       id: 'enterprise',
       name: t('tiers.enterprise.name'),
       description: t('tiers.enterprise.desc'),
-      monthlyPriceBDT: 25000,
-      monthlyPriceUSD: 299,
+      monthlyPriceBDT: 0,
+      monthlyPriceUSD: 0,
       features: [
-        t('features.mmm'),
-        t('features.abm_full'),
-        t('features.markov'),
-        t('features.genetic'),
-        t('features.offline'),
-        t('features.rag'),
-        t('features.custom_nodes'),
-        t('features.support_priority'),
+        t('features.dedicated_infra'),
+        t('features.custom_calibration'),
+        t('features.api_access'),
+        t('features.unlimited_seats'),
       ],
       ctaText: t('contact_sales'),
       isPopular: false,
+      isCustomPrice: true,
     },
   ]
 
   return (
-    <div className="relative min-h-screen flex flex-col bg-background font-sans">
+    <div className="relative min-h-screen flex flex-col bg-background font-sans" suppressHydrationWarning>
       <Navbar />
 
       {/* Background Gradients */}
@@ -139,7 +148,7 @@ export default function PricingPage() {
         </div>
 
         {/* Pricing Cards Grid */}
-        <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+        <div className="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-center">
           {tiers.map((tier) => (
             <PricingCard
               key={tier.id}
@@ -154,12 +163,13 @@ export default function PricingPage() {
               currency={currency}
               ctaText={tier.ctaText}
               onCtaClick={() => handleCtaClick(tier.id)}
+              isCustomPrice={tier.isCustomPrice}
             />
           ))}
         </div>
 
         {/* Feature Comparison Matrix */}
-        <div className="mx-auto max-w-5xl mt-32">
+        <div className="mx-auto max-w-6xl mt-32">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-foreground">Compare Plans</h2>
             <p className="text-muted-foreground mt-2">Find the right capabilities for your modeling needs.</p>
@@ -169,27 +179,31 @@ export default function PricingPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr>
-                  <th className="p-4 border-b border-border/40 font-semibold text-foreground w-1/3">Features</th>
-                  <th className="p-4 border-b border-border/40 font-semibold text-foreground text-center">Starter</th>
-                  <th className="p-4 border-b border-border/40 font-semibold text-primary text-center bg-primary/5 rounded-t-xl border-t border-l border-r border-primary/20">Professional</th>
-                  <th className="p-4 border-b border-border/40 font-semibold text-foreground text-center">Enterprise</th>
+                  <th className="p-4 border-b border-border/40 font-semibold text-foreground w-1/4">Features</th>
+                  <th className="p-4 border-b border-border/40 font-semibold text-foreground text-center w-[15%]">Starter</th>
+                  <th className="p-4 border-b border-border/40 font-semibold text-foreground text-center w-[15%]">Growth</th>
+                  <th className="p-4 border-b border-border/40 font-semibold text-primary text-center bg-primary/5 rounded-t-xl border-t border-l border-r border-primary/20 w-[15%]">Professional</th>
+                  <th className="p-4 border-b border-border/40 font-semibold text-foreground text-center w-[15%]">Enterprise</th>
                 </tr>
               </thead>
               <tbody className="text-sm text-muted-foreground">
                 <tr className="hover:bg-muted/30 transition-colors">
                   <td className="p-4 border-b border-border/20 font-medium text-foreground">Bayesian MMM Forecasting</td>
-                  <td className="p-4 border-b border-border/20 text-center text-foreground">✓</td>
-                  <td className="p-4 border-b border-border/20 text-center text-primary bg-primary/5 border-l border-r border-primary/20">✓</td>
-                  <td className="p-4 border-b border-border/20 text-center text-foreground">✓</td>
+                  <td className="p-4 border-b border-border/20 text-center text-foreground">Single Channel</td>
+                  <td className="p-4 border-b border-border/20 text-center text-foreground">Multi Channel</td>
+                  <td className="p-4 border-b border-border/20 text-center text-primary bg-primary/5 border-l border-r border-primary/20">Multi Channel</td>
+                  <td className="p-4 border-b border-border/20 text-center text-foreground">Multi Channel</td>
                 </tr>
                 <tr className="hover:bg-muted/30 transition-colors">
                   <td className="p-4 border-b border-border/20 font-medium text-foreground">Mesa Agent Simulation</td>
-                  <td className="p-4 border-b border-border/20 text-center">100 Agents</td>
+                  <td className="p-4 border-b border-border/20 text-center">-</td>
+                  <td className="p-4 border-b border-border/20 text-center text-foreground">100 Agents</td>
                   <td className="p-4 border-b border-border/20 text-center font-medium bg-primary/5 border-l border-r border-primary/20">1,000 Agents</td>
                   <td className="p-4 border-b border-border/20 text-center font-medium text-foreground">Unlimited (Custom)</td>
                 </tr>
                 <tr className="hover:bg-muted/30 transition-colors">
                   <td className="p-4 border-b border-border/20 font-medium text-foreground">Markov Attribution Journey</td>
+                  <td className="p-4 border-b border-border/20 text-center">-</td>
                   <td className="p-4 border-b border-border/20 text-center text-foreground">✓</td>
                   <td className="p-4 border-b border-border/20 text-center text-primary bg-primary/5 border-l border-r border-primary/20">✓</td>
                   <td className="p-4 border-b border-border/20 text-center text-foreground">✓</td>
@@ -197,11 +211,20 @@ export default function PricingPage() {
                 <tr className="hover:bg-muted/30 transition-colors">
                   <td className="p-4 border-b border-border/20 font-medium text-foreground">NSGA-II Genetic Optimization</td>
                   <td className="p-4 border-b border-border/20 text-center">-</td>
+                  <td className="p-4 border-b border-border/20 text-center">-</td>
                   <td className="p-4 border-b border-border/20 text-center text-primary bg-primary/5 border-l border-r border-primary/20">✓</td>
                   <td className="p-4 border-b border-border/20 text-center text-foreground">✓</td>
                 </tr>
                 <tr className="hover:bg-muted/30 transition-colors">
+                  <td className="p-4 border-b border-border/20 font-medium text-foreground">Simulation Runs</td>
+                  <td className="p-4 border-b border-border/20 text-center text-foreground">3 / Month</td>
+                  <td className="p-4 border-b border-border/20 text-center text-foreground">5 / Month</td>
+                  <td className="p-4 border-b border-border/20 text-center text-primary bg-primary/5 border-l border-r border-primary/20">Unlimited</td>
+                  <td className="p-4 border-b border-border/20 text-center text-foreground">Unlimited</td>
+                </tr>
+                <tr className="hover:bg-muted/30 transition-colors">
                   <td className="p-4 border-b border-border/20 font-medium text-foreground">Local Offline LLM (Gemma 4)</td>
+                  <td className="p-4 border-b border-border/20 text-center">-</td>
                   <td className="p-4 border-b border-border/20 text-center">-</td>
                   <td className="p-4 border-b border-border/20 text-center text-primary bg-primary/5 border-l border-r border-primary/20">✓</td>
                   <td className="p-4 border-b border-border/20 text-center text-foreground">✓</td>
@@ -209,12 +232,21 @@ export default function PricingPage() {
                 <tr className="hover:bg-muted/30 transition-colors">
                   <td className="p-4 border-b border-border/20 font-medium text-foreground">Neo4j GraphRAG Integration</td>
                   <td className="p-4 border-b border-border/20 text-center">-</td>
-                  <td className="p-4 border-b border-border/20 text-center bg-primary/5 border-l border-r border-primary/20">-</td>
+                  <td className="p-4 border-b border-border/20 text-center text-foreground">✓</td>
+                  <td className="p-4 border-b border-border/20 text-center bg-primary/5 border-l border-r border-primary/20 text-primary">✓</td>
+                  <td className="p-4 border-b border-border/20 text-center text-foreground">✓</td>
+                </tr>
+                <tr className="hover:bg-muted/30 transition-colors">
+                  <td className="p-4 border-b border-border/20 font-medium text-foreground">SHAP Explainability</td>
+                  <td className="p-4 border-b border-border/20 text-center">-</td>
+                  <td className="p-4 border-b border-border/20 text-center">-</td>
+                  <td className="p-4 border-b border-border/20 text-center bg-primary/5 border-l border-r border-primary/20 text-primary">✓</td>
                   <td className="p-4 border-b border-border/20 text-center text-foreground">✓</td>
                 </tr>
                 <tr className="hover:bg-muted/30 transition-colors">
                   <td className="p-4 border-b border-border/20 font-medium text-foreground">Support Level</td>
                   <td className="p-4 border-b border-border/20 text-center">Community</td>
+                  <td className="p-4 border-b border-border/20 text-center">Email</td>
                   <td className="p-4 border-b border-border/20 text-center bg-primary/5 border-l border-r border-primary/20 border-b-primary/20 rounded-b-xl">Priority Email</td>
                   <td className="p-4 border-b border-border/20 text-center">24/7 Dedicated SLA</td>
                 </tr>

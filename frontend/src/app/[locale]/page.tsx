@@ -90,7 +90,7 @@ export default function LandingPage() {
   }, [metaBudget, googleBudget, tiktokBudget])
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground font-sans overflow-x-hidden">
+    <div className="relative min-h-screen bg-background text-foreground font-sans overflow-x-hidden" suppressHydrationWarning>
       
       {/* Cinematic Interactive Particle Background */}
       <CinematicBackground />
@@ -458,7 +458,7 @@ export default function LandingPage() {
                     <line x1="100" y1="50" x2="100" y2="90" stroke={selectedGraphNode === 'metric' ? '#818cf8' : '#27272a'} strokeWidth="1.5" className="transition-colors duration-300" />
                     
                     <circle cx="100" cy="50" r="12" fill="#312e81" stroke="#818cf8" strokeWidth="2" />
-                    <text x="100" y="53" fill="#ffffff" fontSize="6" fontWeight="bold" textAnchor="middle">InfinitySim</text>
+                    <text x="100" y="53" fill="#ffffff" fontSize="6" fontWeight="bold" textAnchor="middle">BrandOS</text>
 
                     <circle cx="40" cy="30" r="10" fill={selectedGraphNode === 'brand' ? '#1e1b4b' : '#18181b'} stroke={selectedGraphNode === 'brand' ? '#818cf8' : '#3f3f46'} strokeWidth="1.5" className="transition-colors duration-300" />
                     <text x="40" y="32" fill="#e4e4e7" fontSize="5" textAnchor="middle">Competitor</text>

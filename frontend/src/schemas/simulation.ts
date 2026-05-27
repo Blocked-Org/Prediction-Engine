@@ -17,7 +17,6 @@ export const simulationWizardSchema = z.object({
   interest: z.enum(INTERESTS),
   competitor_urls: z
     .string()
-    .default("")
     .describe("Comma-separated competitor URLs for Firecrawl scraping."),
 });
 

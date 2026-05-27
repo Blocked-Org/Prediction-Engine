@@ -15,13 +15,13 @@ function isLLMConfigured(provider: 'cloud' | 'offline'): boolean {
 }
 
 /**
- * Build the InfinitySim AI system prompt with injected simulation data
+ * Build the BrandOS AI system prompt with injected simulation data
  * and optional GraphRAG context.
  */
 function buildSystemPrompt(simulationData: unknown, graphContext: string): string {
   const dataBlock = JSON.stringify(simulationData, null, 2);
 
-  return `You are InfinitySim AI — an expert marketing analytics assistant for the Brand Simulation Engine platform. You help Bangladeshi SME marketers understand their campaign simulation results.
+  return `You are BrandOS AI — an expert marketing analytics assistant for the Brand Simulation Engine platform. You help Bangladeshi SME marketers understand their campaign simulation results.
 
 You have access to the user's complete simulation data below. Use it to answer questions accurately. All currency values are in BDT (৳).
 
@@ -58,7 +58,7 @@ function getLastUserText(messages: UIMessage[]): string {
 /**
  * POST /api/assistant
  *
- * Streaming chat endpoint for the InfinitySim AI chatbot widget.
+ * Streaming chat endpoint for the BrandOS AI chatbot widget.
  * Separate from /api/chat (Text-to-Cypher) — this route focuses on
  * conversational Q&A grounded in the user's simulation data.
  *

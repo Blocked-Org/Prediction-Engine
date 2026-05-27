@@ -13,357 +13,720 @@ export interface DocArticle {
 
 export const DOCS_DATA: DocArticle[] = [
   {
-    slug: 'getting-started',
-    category: 'getting_started',
+    slug: 'executive-summary',
+    category: 'litepaper',
     title: {
-      en: 'Getting Started',
-      bn: 'শুরু করা',
+      en: 'Executive Summary',
+      bn: 'এক্সিকিউটিভ সারসংক্ষেপ',
     },
     content: {
-      en: `
-# Getting Started with InfinitySim
+      en: `# Executive Summary & Foundations
 
-Welcome to the **InfinitySim (Brand Simulation Engine)**, a state-of-the-art, graph-augmented Bayesian simulation platform designed specifically for SME marketing intelligence in emerging markets like Bangladesh.
+**BrandOS** is the first causally rigorous, pre-launch campaign simulation system designed specifically for SME marketers in emerging markets like Bangladesh.
 
-## Resolving the Four Structural Blind Spots
+## The Problem
 
-Traditional marketing attribution models like Multi-Touch Attribution (MTA) fail in walled gardens. InfinitySim addresses these limits:
-1. **Cold-Start Failure**: Uses Transfer Learning and meta-learning neural networks to estimate parameters for new product lines without historical data.
-2. **Linear Scalability Fallacy**: Applies Hill S-Curves to predict exactly when scaling ad budgets hits diminishing returns.
-3. **Temporal Lag Neglect**: Models adstock memory retention and delay carries across consumer paths.
-4. **Walled Gardens**: Eliminates cookie-tracking using Top-Down Bayesian MMM coupled with bottom-up Agent-Based cohorts.
+Bangladesh's rapidly digitising SME sector now invests significant capital across Meta Ads, Google, and TikTok, yet **no predictive marketing intelligence service exists** for this market. Local brands operate exclusively with retrospective platform dashboards (like Meta Ads Manager or Google Analytics), allocating budgets through intuition and vanity metrics rather than mathematical simulation.
 
-## 6-Layer Architecture Stack
+Enterprise solutions from global providers — Google Meridian, Nielsen Marketing Cloud, Analytic Partners — are economically inaccessible and architecturally unsuitable. They are built on **Multi-Touch Attribution (MTA)** models that track individual user journeys via third-party cookies and tracking pixels. However, global privacy regulations (cookie deprecation) and walled gardens (siloed data within Meta or Google) have fractured user-level tracking. More fundamentally, MTA is descriptive rather than causal—it records the past but cannot simulate future budget changes.
 
-InfinitySim executes across a highly decoupled event-driven stack:
-- **Layer 1: Data Sources**: Endogenous (ad spends, impressions), Exogenous (competitor proxy indices scraped via Firecrawl & Crawl4AI), and Transactional sales data.
-- **Layer 2: Ingestion & Processing**: Message queues (Kafka, Redis Pub/Sub) and automated ETL processing (Airbyte/Fivetran).
-- **Layer 3: Storage**: Neo4j Graph Database (semantic nodes and edges), Pinecone/Weaviate (vector store for ad creative embeddings), and Postgres/BigQuery.
-- **Layer 4: AI & Simulation Engine**: Bayesian MMM via PyMC-Marketing, Agent-Based modeling via Mesa 3.0, NSGA-II Genetic algorithms (pymoo), and SHAP TreeExplainer.
-- **Layer 5: LLM Orchestration**: LlamaIndex GraphRAG translation, Claude 3.5 Sonnet / Gemini Flash, and local offline Ollama Qwen3-8B fallback (with Fast/Deep profiles).
-- **Layer 6: Application Layer**: Next.js 15 App Router, Clerk Auth, and dynamic charts (Lightweight Charts & Chart.js).
-      `,
-      bn: `
-# শুরু করা — ওরিয়েন্টেশন
+## Four Structural Blind Spots
 
-**InfinitySim (ব্র্যান্ড সিমুলেশন ইঞ্জিন)** প্ল্যাটফর্মে আপনাকে স্বাগতম। এটি একটি উন্নত, গ্রাফ-অগমেন্টেড বেসিয়ান সিমুলেশন প্ল্যাটফর্ম যা বাংলাদেশ সহ দক্ষিণ এশিয়ার বিকাশমান বাজারে ক্ষুদ্র ও মাঝারি উদ্যোক্তাদের (SME) মার্কেটিং বাজেট অপ্টিমাইজ করার উদ্দেশ্যে তৈরি করা হয়েছে।
+1. **Cold-Start Failure** — Regression models produce no predictions for entirely new products or campaigns with no historical interaction data.
+2. **Linear Scalability Fallacy** — Naïve models assume proportional returns (e.g., spending 10x more yields 10x more conversions). In reality, diminishing returns set in far earlier.
+3. **Temporal Lag Neglect** — A consumer who sees an ad today may not convert for two weeks. Models neglecting carryover effects systematically misattribute conversions.
+4. **Unquantified Creative Impact** — Standard models treat creative quality as a black box, despite it being a primary driver of performance variance.
 
-## ৪টি প্রধান স্ট্রাকচারাল ব্লাইন্ড স্পট সমাধান
+---
 
-প্রচলিত মাল্টি-টাচ অ্যাট্রিবিউশন (MTA) মডেলগুলি বর্তমান প্রাইভেসি রেগুলেশন ও কুঁকিহীন ব্রাউজিংয়ে অচল। InfinitySim এগুলো যেভাবে সমাধান করে:
-১. **কোল্ড-স্টার্ট ব্যর্থতা (Cold-Start)**: ট্রান্সফার লার্নিং ও মেটা-লার্নিং নিউরাল নেটওয়ার্ক ব্যবহার করে পূর্বের কোনো ইতিহাস ছাড়াই নতুন ক্যাম্পেইনের ফলাফল অনুমান করা।
-২. **লিনিয়ার স্কেলিং ফ্যালাসি (Linear Scale)**: হিল স্যাচুরেশন কার্ভ প্রয়োগ করে অতিরিক্ত বিজ্ঞাপন ব্যয়ের স্যাচুরেশন থ্রেশহোল্ড নির্ধারণ করা।
-৩. **টেম্পোরাল ল্যাগ অবহেলা (Temporal Lag)**: বিজ্ঞাপনের তাৎক্ষণিক প্রতিক্রিয়া ও সময়ের সাথে সাথে ব্র্যান্ড সচেতনতা কমে আসার গতি (Adstock) ট্র্যাক করা।
-৪. **ওয়াল্ড গার্ডেন (Walled Gardens)**: থার্ড-পার্টি কুঁকি ট্র্যাকিং বাদ দিয়ে সামষ্টিক বেসিয়ান স্ট্যাটিস্টিকস ও মেসা এজেন্ট সিমুলেশনের সমন্বয়।
+## Theoretical Foundations
 
-## ৬-স্তর বিশিষ্ট সিস্টেম আর্কিটেকচার
+To solve these challenges, BrandOS rejects user-level tracking and builds upon robust probabilistic modeling paradigms:
 
-InfinitySim সম্পূর্ণ ডিকাপলড স্ট্যাকের ওপর কাজ করে:
-- **স্তর ১: ডেটা সোর্স (Data Sources)**: কোম্পানির নিজস্ব এড বাজেট, উইন্ডো ক্রিয়েটিভস এবং ফায়ারক্রল (Firecrawl/Crawl4AI) দিয়ে সংগ্রহ করা প্রতিযোগীদের ডেটা।
-- **স্তর ২: ইনজেসশন (Ingestion)**: ফাস্ট এপিআই, কাফকা ও রেডিস পাব/সাব মেসেজ কিউ।
-- **স্তর ৩: স্টোরেজ (Storage)**: নিও ফোর জে (Neo4j Graph), উইভিয়েট (Weaviate Vector) এবং পোস্টগ্রেস।
-- **স্তর ৪: এআই ও সিমুলেশন (AI & Simulation)**: PyMC-Marketing চালিত বেসিয়ান এমএমএম, মেসা ৩.০ এজেন্ট সিমুলেশন এবং NSGA-II জেনেটিক অ্যালগরিদম।
-- **স্তর ৫: এলএলএম স্তর (LLM Orchestration)**: LlamaIndex গ্রাফ র‍্যাগ, জেমিনাই ফ্ল্যাশ এবং ইন্টারনেটবিহীন প্রত্যন্ত অঞ্চলের জন্য লোকাল ওলামা Qwen3-8B মডেল।
-- **স্তর ৬: অ্যাপ্লিকেশন স্তর (Application)**: নেক্সট জেএস ১৫ ফ্রন্টএন্ড, ক্লার্ক অথ এবং লাইটওয়েট চার্টস।
-      `,
+### 1. Marketing Mix Modelling (MMM)
+We decompose total sales into two econometric components:
+* **Base Sales:** Organic revenue generated by long-term brand equity, pricing, and distribution.
+* **Incremental Sales:** The causal revenue lift directly caused by short-term marketing stimuli.
+
+By isolating these, the engine computes **Incremental Return on Ad Spend (iROAS)**, preventing the misattribution of organic demand to ad spend.
+
+### 2. Agent-Based Modelling (ABM)
+MMM handles macro-allocation but lacks targeting nuance. We add a micro-simulation layer using **Mesa 3.0** (with vectorized \`AgentSet\` operations). Each simulated agent represents a consumer with unique demographics, geolocation, and brand loyalty, allowing us to model word-of-mouth diffusion and targeted campaign responses.
+
+### 3. Bayesian Inference
+Marketing data is often sparse, collinear (multiple channels funding simultaneously), and low-variance. Bayesian MMM incorporates **priors** (historical benchmarks and industry elasticity estimates) to regularize parameters, preventing overfitting and ensuring stable, generalizable forecasts.
+
+### Measurement Paradigms Comparison
+
+| Paradigm | Core Methodology | Strengths | Weaknesses |
+| :--- | :--- | :--- | :--- |
+| **MTA** | User-level tracking via cookies/pixels | Granular individual journey mapping | Vulnerable to privacy laws; ignores macro factors |
+| **MMM** | Bayesian multi-linear regression | Robust, privacy-safe ROI forecasting | Requires historical logs; lacks micro-targeting |
+| **ABM** | Algorithmic consumer agent simulation | Models emergent cohort behavior | Computationally intensive; calibration complexity |
+
+### 4. Solving the Cold-Start Problem
+* **Transfer & Meta-Learning:** For campaigns with no history, we leverage deep neural networks pre-trained on cross-industry demand physics. Using inverse propensity weighting, we transfer parameters from analogous past campaigns. Meta-learning adaptively refines weights as the first live signals trickle in.
+* **Synthetic Data:** When historical analogues are restricted, we generate synthetic transaction logs using **RetailSynth** (discrete choice models & utility theory), preserving the statistical distributions of real consumer behavior.
+
+### 5. Deterministic Explainability (SHAP)
+Before the LLM generates any narrative report, all simulation outputs pass through a **SHAP (SHapley Additive Explanations)** TreeExplainer. This guarantees that explanations are mathematically anchored to the model's actual behaviour, eliminating hallucinated justifications.
+
+### 6. Agentic Development Workflow
+The platform is built using an AI-native development paradigm:
+* **Claude Code:** Operates as a terminal-native autonomous agent for broad scaffolding, API routing, and graph DB connections.
+* **Cursor IDE:** Human-in-the-loop refinement for visual polish and complex state logic, condensing development timelines from months to hours.
+`,
+      bn: `# এক্সিকিউটিভ সারসংক্ষেপ ও তাত্ত্বিক ভিত্তি
+
+**BrandOS** হলো বাংলাদেশসহ উদীয়মান বাজারের SME মার্কেটারদের জন্য বিশেষভাবে ডিজাইন করা প্রথম কার্যকারণভিত্তিক (causally rigorous), প্রি-লঞ্চ ক্যাম্পেইন সিমুলেশন সিস্টেম।
+
+## সমস্যা
+
+বাংলাদেশের দ্রুত ডিজিটালাইজড হওয়া SME সেক্টর এখন Meta Ads, Google এবং TikTok-এ উল্লেখযোগ্য পুঁজি বিনিয়োগ করে, তবুও এই বাজারের জন্য **কোনো প্রেডিক্টিভ মার্কেটিং ইন্টেলিজেন্স সার্ভিস নেই**। স্থানীয় ব্র্যান্ডগুলো শুধুমাত্র রেট্রোস্পেক্টিভ প্ল্যাটফর্ম ড্যাশবোর্ড (যেমন Meta Ads Manager বা Google Analytics) ব্যবহার করে, গাণিতিক সিমুলেশনের বদলে অনুমানের উপর নির্ভর করে বাজেট বরাদ্দ করে।
+
+বৈশ্বিক এন্টারপ্রাইজ সমাধানগুলো (যেমন Google Meridian, Nielsen, Analytic Partners) অর্থনৈতিকভাবে নাগালের বাইরে এবং গঠনগতভাবে অনুপযোগী। এগুলো **মাল্টি-টাচ অ্যাট্রিবিউশন (MTA)** মডেলের উপর ভিত্তি করে তৈরি, যা ওয়াল্ড-গার্ডেন (walled-garden) ইকোসিস্টেম এবং প্রাইভেসি রেগুলেশন (কুকি বাতিলকরণ) এর কারণে অকার্যকর হয়ে পড়েছে। সবচেয়ে বড় কথা, MTA হলো বর্ণনামূলক, কার্যকারণভিত্তিক নয়—এটি কেবল অতীতকে রেকর্ড করে, ভবিষ্যতের বাজেট পরিবর্তনের সিমুলেশন করতে পারে না।
+
+## ৪টি স্ট্রাকচারাল ব্লাইন্ড স্পট
+
+১. **কোল্ড-স্টার্ট ব্যর্থতা (Cold-Start Failure)** — নতুন পণ্য বা ক্যাম্পেইনের জন্য কোনো ঐতিহাসিক ডেটা না থাকলে ট্র্যাডিশনাল রিগ্রেশন মডেল কাজ করতে পারে না।
+২. **লিনিয়ার স্কেলিং ফ্যালাসি (Linear Scalability Fallacy)** — বাজেট বাড়ালেই সমানুপাতিক রিটার্ন পাওয়ার ভুল ধারণা (যেমন: ১ হাজার টাকার ১০ গুণ বেশি সেলস হবে ১০ হাজারে)। বাস্তবে ক্রমহ্রাসমান রিটার্ন (diminishing returns) অনেক আগেই শুরু হয়।
+৩. **টেম্পোরাল ল্যাগ অবহেলা (Temporal Lag Neglect)** — বিজ্ঞাপনের তাৎক্ষণিক প্রতিক্রিয়া হয় না। আজ দেখা বিজ্ঞাপন থেকে কেউ দুই সপ্তাহ পরেও কিনতে পারে। সময়ের ব্যবধানকে উপেক্ষা করলে ভুল চ্যানেলে কৃতিত্ব চলে যায়।
+৪. **ক্রিয়েটিভ প্রভাবের অপরিমাণযোগ্যতা (Unquantified Creative Impact)** — একই বাজেটে ভিন্ন ভিন্ন ক্রিয়েটিভের কারণে ফলাফলের বিশাল তারতম্য ঘটে, যা প্রথাগত মডেলগুলো পরিমাপ করতে পারে না।
+
+---
+
+## তাত্ত্বিক ভিত্তি (Theoretical Foundations)
+
+এই সমস্যাগুলো সমাধানে BrandOS ব্যক্তিগত ট্র্যাকিং পরিহার করে তিনটি প্রধান প্যারাদাইমের সমন্বয় করেছে:
+
+### ১. মার্কেটিং মিক্স মডেলিং (MMM)
+আমরা মোট বিক্রিকে দুটি ভাগে বিভক্ত করি:
+* **বেস সেলস (Base Sales):** বিজ্ঞাপনের প্রভাব ছাড়াই দীর্ঘমেয়াদী ব্র্যান্ড ভ্যালু, মূল্য এবং ডিস্ট্রিবিউশনের মাধ্যমে অর্জিত অর্গানিক রেভেনিউ।
+* **ইনক্রিমেন্টাল সেলস (Incremental Sales):** সরাসরি বিজ্ঞাপনের উদ্দীপনায় উৎপন্ন অতিরিক্ত সেলস লিফট।
+
+এর মাধ্যমে ইঞ্জিনটি প্রকৃত **ইনক্রিমেন্টাল রিটার্ন অন অ্যাড স্পেন্ড (iROAS)** গণনা করে।
+
+### ২. এজেন্ট-বেসড মডেলিং (ABM)
+ম্যাক্রো-লেভেল বাজেট বণ্টনের বাইরে গিয়ে মাইক্রো-লেভেল সিমুলেশনের জন্য আমরা **Mesa 3.0** ব্যবহার করি। এখানে প্রতিটি এজেন্ট হলো একজন কাল্পনিক ক্রেতা যার নিজস্ব বয়স, লিঙ্গ, অবস্থান এবং ব্র্যান্ড আনুগত্য রয়েছে, যার মাধ্যমে মুখফোড়া প্রচার (word-of-mouth) ও আচরণ সিমুলেট করা হয়।
+
+### ৩. বেসিয়ান ইনফারেন্স (Bayesian Inference)
+মার্কেটিং ডেটাতে ডেটা স্বল্পতা, মাল্টিকোলিনিয়ারিটি এবং কম বৈচিত্র্যের সমস্যা থাকে। বেসিয়ান MMM-এ আমরা **পriors** (ঐতিহাসিক বেঞ্চমার্ক) ব্যবহার করি, যা ওভারফিটিং প্রতিরোধ করে এবং পূর্বাভাসকে বাস্তবসম্মত রাখে।
+
+### পরিমাপের প্যারাদাইমসমূহের তুলনা
+
+| প্যারাদাইম | মূল কার্যপদ্ধতি | সবল দিক | দুর্বল দিক |
+| :--- | :--- | :--- | :--- |
+| **MTA** | কুকিজ/পিক্সেল দিয়ে ব্যবহারকারী ট্র্যাকিং | ব্যক্তিগত যাত্রা সুনির্দিষ্ট ম্যাপিং | প্রাইভেসির কারণে বাধাগ্রস্ত; বাহ্যিক প্রভাব উপেক্ষা করে |
+| **MMM** | বেসিয়ান মাল্টি-লিনিয়ার রিগ্রেশন | নির্ভরযোগ্য ও প্রাইভেসি-সুরক্ষিত ROI | ঐতিহাসিক ডেটা প্রয়োজন; মাইক্রো-টার্গেটিং নেই |
+| **ABM** | ক্রেতা এজেন্টের অ্যালগরিদমিক সিমুলেশন | নতুন দলের আচরণ ও ভাইরাল বিস্তার মডেলিং | কম্পিউটেশনাল খরচ বেশি; ক্যালিব্রেশন জটিল |
+
+### ৪. কোল্ড-স্টার্ট সমস্যার সমাধান
+* **ট্রান্সফার ও মেটা-লার্নিং (Transfer & Meta-Learning):** ডেটাবিহীন নতুন ক্যাম্পেইনের জন্য আমরা ক্রস-ইন্ডাস্ট্রি ডেটাসেটে প্রাক-প্রশিক্ষিত ডিপ নিউরাল নেটওয়ার্কের সাহায্য নিই। ইনভার্স প্রোপেনসিটি ওয়েইটিং দ্বারা সাদৃশ্যপূর্ণ অতীত ক্যাম্পেইনের প্যারামিটার ট্রান্সফার করে সিমুলেশন শুরু করা হয় এবং প্রাথমিক লাইভ সিগন্যাল পাওয়ার সাথে সাথে মেটা-লার্নিং এর মাধ্যমে টিউন করা হয়।
+* **সিন্থেটিক ডেটা জেনারেশন:** প্রাইভেসির সীমাবদ্ধতা থাকলে আমরা **RetailSynth** ফ্রেমওয়ার্ক ব্যবহার করে বাস্তব ক্রেতা আচরণের ডিস্ট্রিবিউশন বজায় রেখে কৃত্রিম ট্রানজ্যাকশন ডেটা তৈরি করি।
+
+### ৫. ডিটারমিনিস্টিক ব্যাখ্যামূলকতা (SHAP Explainability)
+LLM কোনো ন্যারেটিভ রিপোর্ট তৈরি করার আগে সমস্ত সিমুলেশন আউটপুট একটি **SHAP (SHapley Additive Explanations)** TreeExplainer-এর মাধ্যমে পাস করা হয়। এটি নিশ্চিত করে যে সমস্ত ব্যাখ্যা গাণিতিকভাবে প্রমাণিত এবং হ্যালুসিনেশনমুক্ত।
+
+### ৬. এজেন্টিক ডেভেলপমেন্ট ওয়ার্কফ্লো (Agentic Development Workflow)
+প্ল্যাটফর্মটি একটি AI-নেটিভ ডেভেলপমেন্ট প্যারাডাইম ব্যবহার করে তৈরি:
+* **Claude Code:** টার্মিনাল-নেটিভ অটোনোমাস এজেন্ট হিসেবে স্ক্যাফোল্ডিং, API রাউটিং এবং গ্রাফ DB কানেকশন পরিচালনা করে।
+* **Cursor IDE:** ভিজ্যুয়াল পলিশ এবং জটিল স্টেট লজিক সমাধানের জন্য হিউম্যান-ইন-দ্য-লুপ রিফাইনমেন্ট, যা ডেভেলপমেন্টের সময়কে কয়েক মাস থেকে কয়েক ঘণ্টায় নামিয়ে আনে।
+`,
     },
   },
   {
-    slug: 'installation',
-    category: 'getting_started',
+    slug: 'architecture-overview',
+    category: 'litepaper',
     title: {
-      en: 'Installation Guide',
-      bn: 'ইন্সটলেশন গাইড',
+      en: 'Architecture Overview',
+      bn: 'আর্কিটেকচার ওভারভিউ',
     },
     content: {
-      en: `
-# Installation Guide
+      en: `# Architecture & Technical Transformations
 
-Follow these steps to set up the Brand Simulation Engine locally in your environment.
+BrandOS operates on a highly decoupled **six-layer architecture** combined with mathematical transformations of consumer behavior.
 
-## Prerequisites
+## Mathematical Transformations
 
-- **Docker Compose** v2+ (Required for PostgreSQL, Redis, Neo4j, and Weaviate DBs).
-- **Node.js** v20+.
-- **Python** v3.11+ (Required for PyMC and Mesa simulation environments).
-- **Ollama** (Optional, for running local Qwen3-8B fallback model).
+### 1. Adstock Transformation (Temporal Lag)
+We model the memory retention and decay of advertising exposure using an autoregressive process:
 
-## Step-by-Step Setup
-
-### 1. Database Provisioning
-Run docker compose to initialize database containers in the background:
-\`\`\`bash
-docker compose up -d
 \`\`\`
-
-### 2. Dependency Setup
-Run the automated installation script to configure Python virtual environments and install Next.js dependencies:
-\`\`\`bash
-# For Unix systems
-./install.sh
-
-# For Windows systems
-.\\install.ps1
+A[t] = X[t] + λ * A[t-1]
 \`\`\`
-
-### 3. Neo4j Constrains and Seeding
-Create constraints and load initial marketing domain nodes:
-\`\`\`bash
-python scripts/create_neo4j_indexes.py
-python scripts/seed_neo4j.py
-\`\`\`
-
-### 4. Running Backend and Frontend
-Initialize FastAPI backend and background celery worker threads:
-\`\`\`bash
-.\\start_backend.ps1
-\`\`\`
-And boot up Next.js:
-\`\`\`bash
-cd frontend
-npm run dev
-\`\`\`
-      `,
-      bn: `
-# ইন্সটলেশন গাইড
-
-InfinitySim লোকাল সার্ভারে ডেভেলপমেন্ট মুডে রান করার ধাপসমূহ।
-
-## পূর্বশর্ত
-
-- **ডকার কম্পোজ** v২ বা তার বেশি (পোস্টগ্রেস, রেডিস, নিও ফোর জে এবং উইভিয়েট চালু করতে)।
-- **নোড জেএস** v২০ বা তদূর্ধ্ব।
-- **পাইথন** v৩.১১ বা তদূর্ধ্ব (সিমুলেশন এবং গণনার জন্য)।
-- **ওলামা (Ollama)** (লোকাল Qwen3-8B রান করার জন্য)।
-
-## সেটআপ প্রসেস
-
-### ১. ডাটাবেস কন্টেইনার চালু করা
-ডকারের মাধ্যমে ব্যাকগ্রাউন্ড সার্ভিস সমূহ প্রোভিশন করুন:
-\`\`\`bash
-docker compose up -d
-\`\`\`
-
-### ২. ভার্চুয়াল এনভায়রনমেন্ট ও প্যাকেজ ইন্সটলেশন
-পাইথন ভার্চুয়াল এনভায়রনমেন্ট ও প্যাকেজ অটোমেটিক সেটআপ করতে চালান:
-\`\`\`bash
-# লিনাক্স বা ম্যাকের জন্য
-./install.sh
-
-# উইন্ডোজের জন্য
-.\\install.ps1
-\`\`\`
-
-### ৩. নিও ফোর জে ইনডেক্সিং ও সিডিং
-ডাটাবেস রিলেশনশিপ নোডগুলো ইনিশিয়ালাইজ করতে রান করুন:
-\`\`\`bash
-python scripts/create_neo4j_indexes.py
-python scripts/seed_neo4j.py
-\`\`\`
-
-### ৪. লোকাল সার্ভার চালুকরণ
-ফাস্ট এপিআই এবং সেলারি ব্যাকএন্ড চালু করুন:
-\`\`\`bash
-.\\start_backend.ps1
-\`\`\`
-সবশেষে নেক্সট জেএস ফ্রন্টএন্ড রান করুন:
-\`\`\`bash
-cd frontend
-npm run dev
-\`\`\`
-      `,
-    },
-  },
-  {
-    slug: 'bayesian-mmm',
-    category: 'simulation',
-    title: {
-      en: 'Bayesian MMM',
-      bn: 'বেসিয়ান এমএমএম (MMM)',
-    },
-    content: {
-      en: `
-# Bayesian Marketing Mix Modeling (MMM)
-
-Marketing Mix Modeling (MMM) estimates the macro impact of marketing spend on outcome metrics like revenue or registrations. 
-
-## Adstock Transformation (Temporal Lag)
-
-Advertising effects decay over time. We model memory carryover using an autoregressive decay process:
-
-$$A_t = X_t + \\lambda \\, A_{t-1}$$
 
 Where:
-- $\\lambda \\in [0, 1]$ represents the *decay rate* (retention factor).
-- $X_t$ is the raw media investment.
-- Higher $\\lambda$ values (e.g. $0.7$ to $0.9$) correspond to top-of-funnel brand building campaigns (TV, Display).
-- Lower $\\lambda$ values (e.g. $0.1$ to $0.2$) represent lower-funnel search campaigns that decay almost immediately.
+* **A[t]** is the transformed Adstock value at time \$t\$.
+* **X[t]** is the raw media spend or exposure.
+* **λ** (lambda) \$\\in [0,1]\$ is the decay rate (retention parameter). Higher-funnel brand TV campaigns sustain high memory retention (\$\\lambda \\approx 0.7\\text{--}0.9\$), while lower-funnel search ads decay rapidly (\$\\lambda \\approx 0.1\\text{--}0.2\$).
 
-## Hill Saturation Curve (Diminishing Returns)
+### 2. The Hill Function (Diminishing Returns)
+To represent non-linear saturation curves, we transform Adstocked media spend \$x\$ using the Hill equation:
 
-To model diminishing returns, we transform the adstocked spend into a non-linear S-curve using the Hill function:
-
-$$f(x) = \\frac{x^S}{K^S + x^S}$$
+\`\`\`
+f(x) = x^S / (K^S + x^S)
+\`\`\`
 
 Where:
-- $K$ is the *half-saturation parameter*, specifying the exact spend level that achieves 50% of the channel's maximum efficiency.
-- $S$ is the *shape parameter* controlling the slope curvature.
-- Spend levels exceeding $K$ enter the zone of diminishing returns.
+* **S** is the shape parameter determining the slope acceleration.
+* **K** is the half-saturation parameter (spend level achieving 50% max potential efficiency). The engine extracts unique \$(S, K)\$ coefficients per channel to prevent budget over-scaling.
 
-## Bayesian Prior Isolation
+### 3. Markov Chain Micro-Funnels
+We construct a transition probability matrix **P** where states represent marketing touchpoints:
 
-marketing data suffers from high multicollinearity and sparsity. The engine solves this by incorporating historical A/B tests and industry elasticity benchmarks as Prior distributions inside the PyMC sampler, preventing overfitting.
+\`\`\`
+P = [
+  [ p11, p12, ..., p1n ],
+  [ p21, p22, ..., p2n ],
+  ...
+  [ pn1, pn2, ..., pnn ]
+]  where Σ_j p_ij = 1
+\`\`\`
+
+Using the **Removal Effect** (excluding a node and recomputing transition probabilities), the engine quantifies each channel's causal contribution to conversions.
+
+---
+
+## The Six-Layer Architecture
+
+### Layer 1 — Data Sources
+* **Endogenous:** Ad spend, impressions, CPC, CRM records, base pricing.
+* **Exogenous:** Inflation, competitor share of voice, seasonality, weather.
+* **Transactional:** Revenue logs, conversions, AOV, CAC, LTV.
+
+### Layer 2 — Ingestion & Processing
+* Batch ETL managed securely by **Airbyte / Fivetran**.
+* Real-time scrape queues powered by **Kafka / Redis Pub/Sub**.
+* Competitor extraction using **Firecrawl** (protected domains) and **Crawl4AI** (high-volume targets).
+
+### Layer 3 — Storage & Knowledge Base
+* **Neo4j Graph Database:** Primary relationship mapper linking campaigns, audiences, and outcomes.
+* **Pinecone / Weaviate Vector Store:** Semantic embeddings of copy and competitor creatives.
+* **BigQuery / Snowflake:** Cold-storage data lake for raw historical logs.
+
+### Layer 4 — AI & Simulation Engine (FastAPI / Celery)
+* **Macro-Simulation:** Bayesian MMM via PyMC-Marketing.
+* **Micro-Simulation:** Agent-Based Modeling via Mesa 3.0.
+* **Optimization:** NSGA-II Genetic Algorithm (via \`pymoo\` library) maps the multi-objective **Pareto frontier** of budget allocations across steps:
+  1. *Initialisation:* Generates random budget chromosomes.
+  2. *Evaluation:* Computes fitness (ROI & revenue) via MMM.
+  3. *Selection:* Selects top performers for crossovers.
+  4. *Mutation:* Identifies random variations to avoid local optima.
+* **SHAP Explainability:** TreeExplainer guarantees deterministic feature attribution prior to generating textual recommendations.
+
+### Layer 5 — LLM Orchestration
+* **LlamaIndex** coordinates the GraphRAG pipeline.
+* Cloud inference leverages Claude 3.5 Sonnet / Gemini Flash.
+* Local fallback uses **Gemma 4** via Ollama with *Fast* and *Deep* profiles for offline edge processing.
+
+### Layer 6 — Application Layer
+* **Next.js 15 App Router** with React Server Components (RSC).
+* Visualizations rendered via Canvas-based **Lightweight Charts** and **Chart.js**.
+* Namespaced localization via **next-intl**.
+
+---
+
+## GraphRAG & Retrieval Architecture
+
+Unlike vanilla vector RAG, BrandOS uses GraphRAG powered by **Neo4j** to resolve multi-hop causal queries.
+
+### Neo4j Knowledge Graph Schema
+
+| Component | Type | Description / Example |
+| :--- | :--- | :--- |
+| **Nodes** | Entities | Campaign, Channel, Product, Competitor, Outcome |
+| **Properties** | Quantitative metrics | Ad\\_Spend, Price, Saturation\\_Point, Inflation\\_Rate |
+| **Causal Edges** | Causal relations | \`Competitor\` -[SUPPRESSES]-> \`Campaign\`, \`Ad\` -[INFLUENCES]-> \`AOV\` |
+| **Structural Edges** | Hierarchy mappings | \`Campaign\` -[TARGETS]-> \`AgentCluster\`, \`Channel\` -[ALLOCATED_TO]-> \`Budget\` |
+
+* **Community Detection:** LlamaIndex clusters graph regions hierarchically. The LLM pre-summarizes these communities, enabling both broad global search and granular local neighborhood traversals.
+* **Hybrid Retrieval:** At query time, a text-to-Cypher translator generates graph queries dynamically, combining vector search and graph traversal to guarantee auditable recommendations with explicit provenance.
+
+---
+
+## Bangladesh-Specific NLP & Localisation
+To ensure mass adoption among SME marketers, the platform natively understands local linguistic realities, including code-mixed "Banglish":
+* **csebuetnlp/banglabert:** Processes noisy, code-mixed Bengali/English text for sentiment analysis and creative extraction.
+* **BAAI/bge-m3:** Multi-vector embedding model preserving semantic meaning of Banglish without losing local context.
+* **next-intl:** Implements locale-based sub-path routing with server-side JSON dictionaries.
+
+## Low-Bandwidth Edge Optimisation
+Designed for 2G/3G mobile infrastructure in rural areas with high latency:
+1. **Font Subsetting:** Generates subset files for Bangla unicode ranges, reducing payloads from ~600KB to <50KB.
+2. **ISR (Incremental Static Regeneration):** Caches reports on Vercel's Edge Network for <100ms load times.
+3. **Selective Prefetching:** Disables aggressive Next.js background prefetching to save metered mobile data.
+4. **Dynamic Imports:** Heavy visual libraries lazy-load to minimize Time to Interactive (TTI).
+
+## Offline / Rural Fallback Mode
+For users with intermittent connectivity, the architecture falls back to an offline local LLM profile:
+* Uses **Gemma 4** via **Ollama** natively on the user's device.
+* **Fast Profile** for concise, low-latency explanations.
+* **Deep Profile** for complex scenario ideation when hardware permits.
+`,
+      bn: `# আর্কিটেকচার ও কারিগরি ট্রান্সফরমেশন
+
+BrandOS একটি অত্যন্ত ডিকাপল্ড **ছয়-স্তর বিশিষ্ট আর্কিটেকচার** এবং ক্রেতা আচরণের গাণিতিক রূপান্তরের উপর ভিত্তি করে কাজ করে।
+
+## গাণিতিক রূপান্তরসমূহ (Mathematical Transformations)
+
+### ১. অ্যাডস্টক রূপান্তর (সময় ব্যবধান মডেলিং)
+বিজ্ঞাপনের প্রভাবের মানসিক স্থায়িত্ব এবং এর অবক্ষয়কে আমরা একটি অটো-রিগ্রেসিভ প্রক্রিয়া দ্বারা মডেল করি:
+
+\`\`\`
+A[t] = X[t] + λ * A[t-1]
+\`\`\`
+
+এখানে:
+* **A[t]** হলো সময় \$t\$-এ রূপান্তরিত অ্যাডস্টক মান।
+* **X[t]** হলো সময় \$t\$-এ বিজ্ঞাপনের মূল বাজেট বা এক্সপোজার।
+* **λ** (lambda) \$\\in [0,1]\$ হলো অবক্ষয়ের হার (decay rate)। ব্র্যান্ড-বিল্ডিং টিভি বিজ্ঞাপনের ক্ষেত্রে এর স্মৃতি দীর্ঘস্থায়ী হয় (\$\\lambda \\approx ০.৭\\text{--}০.৯\$), অন্যদিকে সার্চ বিজ্ঞাপনের প্রভাব দ্রুত বিলুপ্ত হয় (\$\\lambda \\approx ০.১\\text{--}০.২\$)।
+
+### ২. হিল ফাংশন (ক্রমহ্রাসমান রিটার্ন)
+নন-লিনিয়ার স্যাচুরেশন কার্ভ বা S-কার্ভ মডেল করতে আমরা অ্যাডস্টকড বাজেট \$x\$-কে হিল ইকুয়েশন দিয়ে রূপান্তরিত করি:
+
+\`\`\`
+f(x) = x^S / (K^S + x^S)
+\`\`\`
+
+এখানে:
+* **S** হলো কার্ভের ঢাল বা আকৃতি নির্দেশক প্যারামিটার।
+* **K** হলো অর্ধ-স্যাচুরেশন প্যারামিটার (যে বাজেট স্তরে সর্বোচ্চ সম্ভাব্য দক্ষতার ৫০% অর্জিত হয়)। অতিরিক্ত বাজেট অপচয় রোধে ইঞ্জিনটি প্রতিটি চ্যানেলের জন্য পৃথক \$(S, K)\$ সহগ গণনা করে।
+
+### ৩. মার্কভ চেইন মাইক্রো-ফানেল
+আমরা একটি ট্রানজিশন প্রবাবিলিটি ম্যাট্রিক্স **P** তৈরি করি যেখানে প্রতিটি নোড এক একটি মার্কেটিং টাচপয়েন্টকে নির্দেশ করে:
+
+\`\`\`
+P = [
+  [ p11, p12, ..., p1n ],
+  [ p21, p22, ..., p2n ],
+  ...
+  [ pn1, pn2, ..., pnn ]
+]  যেখানে Σ_j p_ij = 1
+\`\`\`
+
+কোনো চ্যানেল নোডকে গ্রাফ থেকে সরিয়ে ফানেলের সামগ্রিক সাফল্যের তারতম্য পরিমাপ করার মাধ্যমে (যা **রিমুভাল ইফেক্ট** নামে পরিচিত) প্রতিটি চ্যানেলের আসল অবদান বের করা হয়।
+
+---
+
+## Modulating The Six-Layer Architecture
+
+### স্তর ১ — ডেটা সোর্স
+* **এন্ডোজেনাস:** বিজ্ঞাপন বাজেট, ইম্প্রেশন, CPC, CRM রেকর্ড, পণ্যের মূল্য।
+* **এক্সোজেনাস:** মূল্যস্ফীতি, প্রতিযোগী কোম্পানির ক্রিয়াকলাপ (Share of Voice), ঋতুভিত্তিক পরিবর্তন, আবহাওয়া।
+* **ট্রানজ্যাকショナル:** রেভেনিউ লগ, কনভার্সন কাউন্ট, AOV, CAC, LTV।
+
+### স্তর ২ — ইনজেসশন ও প্রসেসিং
+* **Airbyte / Fivetran** দ্বারা ব্যাচ ETL প্রসেসিং।
+* **Kafka / Redis Pub/Sub** দ্বারা রিয়েল-টাইম স্ক্র্যাপিং কিউ নিয়ন্ত্রণ।
+* **Firecrawl** (জটিল সাইটের জন্য) এবং **Crawl4AI** (সাধারণ ও উচ্চ-ভলিউমের জন্য) দ্বারা প্রতিযোগী সাইট স্ক্র্যাপিং।
+
+### স্তর ৩ — স্টোরেজ ও নলেজ বেস
+* **Neo4j গ্রাফ ডাটাবেস:** ক্যাম্পেইন, দর্শক দল এবং ফলাফলের মধ্যকার সম্পর্ক ম্যাপিং।
+* **Pinecone / Weaviate ভেক্টর স্টোর:** বিজ্ঞাপনের ক্রিয়েটিভ ও টেক্সটের সেমান্টিক এমবেডিংস।
+* **BigQuery / Snowflake:** ঐতিহাসিক কাঁচা লগের কোল্ড-স্টোরেজ ডেটা লেক।
+
+### স্তর ৪ — AI ও সিমুলেশন ইঞ্জিন (FastAPI / Celery)
+* **ম্যাক্রো-সিমুলেশন:** PyMC-Marketing লাইব্রেরি ব্যবহার করে বেসিয়ান MMM।
+* **মাইক্রো-সিমুলেশন:** Mesa 3.0 দ্বারা এজেন্ট-বেসড মডেলিং এবং মার্কভ চেইন।
+* **অপ্টিমাইজেশন:** NSGA-II জেনেটিক অ্যালগরিদম (যা \`pymoo\` লাইব্রেরি দিয়ে চালিত) বাজেটের **প্যারেটো ফ্রন্টিয়ার (Pareto frontier)** তৈরি করে:
+  ১. *ইনিশিয়ালাইজেশন:* দৈবচয়নে বাজেটের ক্রোমোজোম তৈরি।
+  ২. *মূল্যায়ন:* MMM দিয়ে প্রতিটি কম্বিনেশনের ROI ও রেভেনিউ পরিমাপ।
+  ৩. *বাছাইকরণ:* সেরা পারফর্মারদের পরবর্তী ক্রসিংয়ের জন্য নির্বাচন।
+  ৪. *মিউটেশন:* লোকাল মিনিমাতে আটকে পড়া রোধে বাজেটে আংশিক পরিবর্তন আনয়ন।
+* **SHAP ব্যাখ্যাযোগ্যতা:** TreeExplainer দ্বারা হ্যালুসিনেশনমুক্ত ও ডিটারমিনিস্টিক ব্যাখ্যার নিশ্চয়তা প্রদান।
+
+### স্তর ৫ — LLM অর্কেস্ট্রেশন
+* **LlamaIndex** দিয়ে GraphRAG পাইপলাইন নিয়ন্ত্রণ।
+* ক্লাউড ইনফারেন্স: Claude 3.5 Sonnet / Gemini Flash।
+* অফলাইন ইনফারেন্স: Ollama-এর মাধ্যমে লোকালি রান হওয়া **Gemma 4** (ফাস্ট ও ডিপ প্রোফাইলসহ)।
+
+### স্তর ৬ — অ্যাপ্লিকেশন স্তর
+* React Server Components (RSC) সহ **Next.js 15 App Router**।
+* ক্যানভাস-ভিত্তিক **Lightweight Charts** এবং **Chart.js** দিয়ে ভিজ্যুয়ালাইজেশন।
+* **next-intl** এর মাধ্যমে লোকাল ফাইল-ভিত্তিক স্থানীয়করণ।
+
+---
+
+## GraphRAG ও রিট্রিভাল আর্কিটেকচার
+
+সাধারণ ভেক্টর সার্চের সীমাবদ্ধতা কাটিয়ে উঠতে BrandOS Neo4j-চালিত GraphRAG ব্যবহার করে, যা জটিল বহুধাপী (multi-hop) ক্যোয়ারী সমাধান করতে পারে।
+
+### Neo4j নলেজ গ্রাফ স্কিমা
+
+| উপাদান | ধরন | বর্ণনা / উদাহরণ |
+| :--- | :--- | :--- |
+| **নোড** | এনটিটি | ক্যাম্পেইন, চ্যানেল, প্রোডাক্ট, প্রতিযোগী, ফলাফল |
+| **প্রোপার্টি** | পরিমাপক মেট্রিক | বাজেট, মূল্য, স্যাচুরেশন সীমা, মূল্যস্ফীতি সূচক |
+| **কজাল এজ** | কার্যকারণ সম্পর্ক | \\\`প্রতিযোগী\\\` -[বাধা দেয়]-> \\\`ক্যাম্পেইন\\\`, \\\`বিজ্ঞাপন\\\` -[প্রভাবিত করে]-> \\\`AOV\\\` |
+| **স্ট্রাকচারাল এজ** | গঠনগত সম্পর্ক | \\\`ক্যাম্পেইন\\\` -[টার্গেট করে]-> \\\`ক্রেতা দল\\\`, \\\`চ্যানেল\\\` -[বরাদ্দকৃত]-> \\\`বাজেট\\\` |
+
+* **কমিউনিটি ডিটেকশন:** LlamaIndex গ্রাফের বিভিন্ন অংশকে ক্লাস্টার করে রাখে। LLM আগে থেকেই এই ক্লাস্টারগুলোর সামারি তৈরি করে রাখে, ফলে গ্লোবাল ও লোকাল সার্চ দ্রুত সম্পন্ন হয়।
+* **হাইব্রিড রিট্রিভাল:** প্রশ্ন করার সাথে সাথে একটি টেক্সট-টু-সাইফার (text-to-Cypher) মডিউল ডায়নামিকালি গ্রাফ কুয়েরি তৈরি করে ভেক্টর সার্চ ও গ্রাফ ট্রাভার্সালের সমন্বয় ঘটায়, যা অত্যন্ত নির্ভুল রেফারেন্সসহ রিপোর্ট তৈরি করে।
+
+---
+
+## বাংলাদেশ-ভিত্তিক NLP ও স্থানীয়করণ
+SME মার্কেটারদের কাছে সহজে পৌঁছানোর জন্য এই প্ল্যাটফর্মটি স্থানীয় ভাষা, বিশেষ করে "বাংলিশ"-এর বাস্তবতাকে বুঝতে পারে:
+* **csebuetnlp/banglabert:** বাংলা ও ইংরেজির মিশ্রিত বাক্যের সেন্টিমেন্ট অ্যানালাইসিস এবং ক্রিয়েটিভ এক্সট্রাকশন করতে সক্ষম।
+* **BAAI/bge-m3:** মাল্টি-ভেক্টর এমবেডিং মডেল যা বাংলিশের অর্থ বুঝতে পারে।
+* **next-intl:** সার্ভার-সাইড JSON ডিকশনারির মাধ্যমে লোকাল রাউটিং নিশ্চিত করে।
+
+## লো-ব্যান্ডউইথ এজ অপ্টিমাইজেশন (Low-Bandwidth Edge Optimisation)
+গ্রামাঞ্চলের 2G/3G মোবাইল নেটওয়ার্কের জন্য বিশেষভাবে তৈরি:
+১. **ফন্ট সাবসেটিং:** শুধুমাত্র বাংলার প্রয়োজনীয় ইউনিকোড রেঞ্জের ফন্ট লোড করে, ফলে সাইজ ৬০০KB থেকে কমে ৫০KB-এর নিচে নেমে আসে।
+২. **ISR:** Vercel Edge Network-এ রিপোর্ট ক্যাশ করে রাখা হয়, যা ১০০ms-এর কম সময়ে লোড হয়।
+৩. **সিলেক্টিভ প্রিফেচিং:** ব্যাকগ্রাউন্ড ডেটা খরচ কমাতে Next.js-এর ডিফল্ট প্রিফেচিং বন্ধ করে শুধু ইউজারের ইন্টারঅ্যাকশনে ডেটা ফেচ করা হয়।
+৪. **ডায়নামিক ইম্পোর্টস:** ভারী চার্ট লাইব্রেরিগুলো শুধু প্রয়োজনের সময় লোড হয়।
+
+## অফলাইন / রুরাল ফলব্যাক মোড (Offline / Rural Fallback Mode)
+ইন্টারনেট সংযোগ বিচ্ছিন্ন থাকলে বা দুর্বল নেটওয়ার্কে সিস্টেমটি স্থানীয় অফলাইন LLM ব্যবহার করে:
+* ইউজারের ডিভাইসে **Ollama**-র মাধ্যমে **Gemma 4** রান হয়।
+* দ্রুত উত্তরের জন্য **Fast Profile** এবং জটিল ব্যাখ্যার জন্য **Deep Profile** সাপোর্ট করে।
+`,
+    },
+  },
+  {
+    slug: 'business-model',
+    category: 'litepaper',
+    title: {
+      en: 'Business Model',
+      bn: 'ব্যবসায়িক মডেল',
+    },
+    content: {
+      en: `# Business Model & Commercialisation Strategy
+
+The mathematical rigor of BrandOS is paired with a highly optimized, sustainable commercialization architecture designed for emerging markets.
+
+## Value Proposition & Commercial Moat
+BrandOS's core differentiator is its **proprietary, multi-engine simulation stack**. While competitors repackage open-source MMM libraries with basic wrapper UIs or rely on standard single-paradigm regression, BrandOS integrates Bayesian MMM, Agent-Based Modelling, Markov funnels, and NSGA-II genetic optimization within a unified, Neo4j-backed GraphRAG engine. This allows SME brands to run pre-launch "what-if" simulations, increasing client ROAS within 90 days.
+
+---
+
+## Tiered SaaS Pricing Architecture
+
+| Tier | Target Segment | Monthly Price | Key Inclusions |
+| :--- | :--- | :--- | :--- |
+| **Starter** | F-commerce micro-merchants | ৳1,500 - ৳2,000 (~\$14-18) | Single-channel MMM, basic dashboard, Bangla UI, bKash billing |
+| **Growth** | SMEs (\$5k - \$50k spend) | \$99 - \$299 / month | Multi-channel MMM + ABM, Markov attribution, GraphRAG, 5 sim runs/mo |
+| **Professional** | Mid-market (\$50k - \$500k spend) | \$499 - \$999 / month | Unlimited simulations, NSGA-II optimization, SHAP analysis, White-labeling |
+| **Enterprise** | Large brands (\$500k+ spend) | Custom annual contract | Dedicated infrastructure, custom calibration, raw API access, SLA support |
+
+* **Starter Tier Pricing:** Adjusted for purchasing-power parity in Bangladesh, targeting the 300,000+ F-commerce micro-merchants.
+* **Usage Expansion:** Extra simulation runs beyond tier quotas are billed as modular add-ons (e.g. promotional depth optimization billed at 25% base fee).
+
+---
+
+## Infrastructure Cost Optimization
+Our serverless stack is split to achieve high gross margins and scale to zero:
+* **CPU-Bound Compute (RSC, Ingestion, API Gateway):** Runs on **AWS Lambda** utilizing ARM (Graviton) processors, generating up to 36% cost savings compared to x86.
+* **GPU-Bound Compute (Bayesian PyMC MCMC loops, NSGA-II runs):** Runs on **Modal's** serverless GPU infrastructure. Compute runs dynamically on-demand and spins down to absolute zero between queries, delivering 12-20% cost savings over reserved instances.
+
+---
+
+## Go-to-Market: White-Label Agency Distribution
+Direct B2B sales cycles are long and expensive. BrandOS scales capital-efficiently through a **White-Label Partnership Programme** for digital marketing agencies:
+1. **Wholesale Arbitrage:** Agencies purchase wholesale bulk licenses (\$49-\$99/account/mo) and rebrand the dashboard.
+2. **Retail Markup:** Agencies package the simulations as their proprietary analytical advantage and resell to SMB clients at \$197-\$497/mo, capturing massive high-margin software revenues.
+3. **Operational Leverage:** The agency bears the customer acquisition (CAC), training, and support costs, while BrandOS scales software infrastructure in the background.
+
+---
+
+## Emerging Market Penetration: The Bangladesh Playbook
+1. **Hyper-Local Billing:** Integrated directly with **bKash Auto Pay** (70M+ active users) for seamless BDT recurring cardless billing, bypassing failing international credit card rails. Secondary integrations include **SSLCommerz**, **Nagad**, and **Portwallet**.
+2. **Strategic Partnerships:** Alignment with **e-CAB** (e-Commerce Association of Bangladesh) and **BASIS** (Bangladesh Association of Software and Information Services) provides direct distribution to thousands of registered digital brands and smart economy subsidies.
+3. **Limit Pricing for Entry Deterrence:** Initial margins are set deliberately low to deter fast-follower copycats from entering the space, protecting long-term market capture.
+
+---
+
+## Target Unit Economics
+
+| Metric | Target | Strategic Context |
+| :--- | :--- | :--- |
+| **Gross Margin** | 75% - 85% | Supported by bifurcated serverless compute scaling to zero. |
+| **LTV:CAC Ratio** | > 5:1 | Driven down by white-label agencies absorbing marketing costs. |
+| **Payback Period** | < 90 days | Fast conversion because of direct attribution to client ROAS lift. |
+| **Net Revenue Retention** | > 120% | Fueled by usage-based expansion and modular competitor feed add-ons. |
+`,
+      bn: `# ব্যবসায়িক মডেল ও বাণিজ্যিকীকরণ কৌশল
+
+BrandOS-এর গাণিতিক কার্যকারিতা উদীয়মান বাজারের জন্য একটি অত্যন্ত অপ্টিমাইজড ও টেকসই বাণিজ্যিক কাঠামোর সাথে যুক্ত।
+
+## মূল্য প্রস্তাবনা ও বাণিজ্যিক সুবিধা
+প্রজেক্টের মূল চালিকাশক্তি হলো এর **স্বকীয় মাল্টি-ইঞ্জিন সিমুলেশন স্ট্যাক**। সাধারণ MMM লাইব্রেরি বা রিগ্রেশন মডেলের বাইরে গিয়ে BrandOS বেসিয়ান MMM, Mesa-ভিত্তিক ABM, মার্কভ চেইন এবং NSGA-II জেনেটিক অপ্টিমাইজেশনকে একটি Neo4j চালিত GraphRAG ইঞ্জিনের সাথে সংযুক্ত করেছে। এর ফলে SME ব্র্যান্ডগুলো আসল বাজেট খরচের আগেই সিমুলেশন করতে পারে, যা ৯০ দিনের মধ্যে তাদের বিজ্ঞাপনের কার্যকারিতা (ROAS) বৃদ্ধি করে।
+
+---
+
+## টায়ার্ড SaaS মূল্য কাঠামো (Pricing Architecture)
+
+| টায়ার | টার্গেট কাস্টমার | মাসিক মূল্য | প্রধান অন্তর্ভুক্তি |
+| :--- | :--- | :--- | :--- |
+| **স্টার্টার** | F-কমার্স মার্চেন্ট | ৳১,৫০০ - ৳২,০০০ | সিঙ্গেল-চ্যানেল MMM, সাধারণ ড্যাশবোর্ড, বাংলা UI, বিকাশ বিলিং |
+| **গ্রোথ** | SME (\$৫k - \$৫০k বাজেট) | \$৯৯ - \$২৯৯ / মাস | মাল্টি-চ্যানেল MMM + ABM, মার্কভ মডেল, GraphRAG, ৫টি রান/মাস |
+| **প্রফেশনাল** | মিড-মার্কেট (\$৫০k - \$৫০০k বাজেট) | \$৪৯৯ - \$৯৯৯ / মাস | আনলিমিটেড সিমুলেশন, NSGA-II অপ্টিমাইজেশন, SHAP বিশ্লেষণ, হোয়াইট-লেবেল |
+| **এন্টারপ্রাইজ** | বড় ব্র্যান্ড (\$৫০০k+ বাজেট) | কাস্টম বার্ষিক চুক্তি | ডেডিকেটেড ইনফ্রাস্ট্রাকচার, কাস্টম ক্যালিব্রেশন, সরাসরি API অ্যাক্সেস, SLA সাপোর্ট |
+
+* **স্টার্টার টায়ার মূল্য নির্ধারণ:** বাংলাদেশের ৩ লক্ষাধিক F-কমার্স মার্চেন্টের ক্রয়ক্ষমতা ও পার্টনারশিপ বিবেচনে মূল্য নির্ধারণ করা হয়েছে।
+* **ব্যবহারভিত্তিক প্রসারণ:** কোটার অতিরিক্ত সিমুলেশন রানগুলোর জন্য মডুলার বিলিং করা হয় (যেমন প্রোমোショナル অপ্টিমাইজেশন অ্যাড-অন বেস ফি-এর ২৫% মূল্যে যুক্ত হয়)।
+
+---
+
+## ইনফ্রাস্ট্রাকচার খরচ অপ্টিমাইজেশন
+compute খরচ সর্বনিম্নে রাখতে এবং কোডকে জিরো-তে স্কেল করতে সার্ভারলেস স্ট্যাকটি দ্বিধাবিভক্ত করা হয়েছে:
+* **CPU-নির্ভর প্রসেস (RSC, Ingestion, API Gateway):** এটি ARM (Graviton) প্রসেসরযুক্ত **AWS Lambda**-তে চলে, যা প্রথাগত x86 এর তুলনায় ৩৬% পর্যন্ত খরচ সাশ্রয় করে।
+* **GPU-নির্ভর প্রসেস (PyMC MMM মডেলার, NSGA-II রান):** এগুলো **Modal**-এর সার্ভারলেস GPU কাঠামোর মাধ্যমে চলে। কম্পিউটটি কেবল সিমুলেশন চলাকালীন চলে এবং অন্য সময়ে সম্পূর্ণ জিরো-তে নেমে আসে, যা রিজার্ভড সার্ভারের তুলনায় ১২-২০% খরচ বাঁচায়।
+
+---
+
+## Go-to-Market: হোয়াইট-লেবেল এজেন্সি ডিস্ট্রিবিউশন
+সরাসরি ব্র্যান্ডের কাছে সফটওয়্যার বিক্রি করা দীর্ঘমেয়াদী ও ব্যয়বহুল। BrandOS ডিজিটাল এজেন্সিদের জন্য **হোয়াইট-লেবেল পার্টনারশিপ প্রোগ্রাম**-এর মাধ্যমে স্কেল করে:
+১. **পাইকারি আরবিট্রেজ (Wholesale Arbitrage):** এজেন্সিরা পাইকারি মূল্যে (\$৪৯-\$৯৯/অ্যাকাউন্ট/মাস) ব্র্যান্ড ও লাইসেন্স কিনে নেয় এবং নিজেদের ব্র্যান্ড নেমে ড্যাশবোর্ড সাজায়।
+২. **রিটেল মার্কআপ:** এজেন্সিরা এই সিমুলেটর ড্যাশবোর্ডকে তাদের নিজস্ব প্রযুক্তি দাবি করে তাদের ক্লায়েন্টদের কাছে \$১৯৭-\$৪৯৭/মাস মূল্যে রিসেল করে বিশাল প্রফিট অর্জন করে।
+৩. **অপারেশনাল লিভারেজ:** ক্লায়েন্ট সংগ্রহ (CAC), ট্রেইনিং ও ফার্স্ট-টায়ার সাপোর্ট পার্টনার এজেন্সিরাই বহন করে, আর BrandOS ব্যাকএন্ডে সফটওয়্যার ইনফ্রা নিয়ন্ত্রণ করে।
+
+---
+
+## উদীয়মান বাজারের বিস্তার: বাংলাদেশ প্লেবুক
+১. **স্থানীয় পেমেন্ট বিলিং:** কার্ডলেস BDT রিকারিং পেমেন্ট সচল রাখতে সরাসরি **বিকাশ অটো পে (bKash Auto Pay)** (৭০ মিলিয়নের বেশি সক্রিয় ব্যবহারকারী) ব্যবহার করা হয়েছে। সহায়ক গেটওয়ে হিসেবে **SSLCommerz**, **Nagad** এবং **Portwallet** ইন্টিগ্রেশন রয়েছে।
+২. **কৌশলগত অংশীদারিত্ব:** **ই-ক্যাব (e-CAB)** এবং **বেসিস (BASIS)**-এর সাথে অংশীদারিত্বের মাধ্যমে Smart Bangladesh প্রজেক্টের আওতায় হাজার হাজার নিবন্ধিত ব্র্যান্ডের কাছে সরাসরি সফটওয়্যারটি পৌঁছে দেওয়া হচ্ছে।
+৩. **লিমিট প্রাইসিং (Limit Pricing):** সম্ভাব্য প্রতিযোগী বা কপিরাইট এড়াতে প্রাথমিক সার্ভিস ফি তুলনামূলক কম রাখা হয়েছে, যা নতুন প্রতিযোগীদের প্রবেশের আগ্রহকে নিরুৎসাহিত করে।
+
+---
+
+## লক্ষ্যমাত্রা ইউনিট ইকোনমিক্স
+
+| মেট্রিক | লক্ষ্যমাত্রা | কৌশলগত প্রেক্ষাপট |
+| :--- | :--- | :--- |
+| **গ্রস মার্জিন** | ৭৫% - ৮৫% | দ্বিধাবিভক্ত সার্ভারলেস কম্পিউটের মাধ্যমে অপচয়হীন ও সস্তা অপারেশন। |
+| **LTV:CAC অনুপাত** | > ৫:১ | হোয়াইট-লেবেল এজেন্সিরা ক্লায়েন্ট সংগ্রহের সমস্ত খরচ বহন করায় CAC অত্যন্ত কম। |
+| **পেব্যাক পিরিয়ড** | < ৯০ দিন | সরাসরি ক্লায়েন্টের ROAS বৃদ্ধিতে সহায়তা করায় দ্রুত পেব্যাক নিশ্চিত হয়। |
+| **NRR (Net Revenue Retention)** | > ১২০% | ব্যবহারভিত্তিক প্রসারণ এবং প্রতিযোগী ইন্টেলিজেন্স ফিডের মডুলার অ্যাড-অন বিক্রির মাধ্যমে অর্জিত। |
+`,
+    },
+  },
+  // ═══════════════════════════════════════════════════════════════════════
+  // USER MANUAL
+  // ═══════════════════════════════════════════════════════════════════════
+  {
+    slug: 'dashboard-guide',
+    category: 'user_manual',
+    title: {
+      en: 'Dashboard Guide',
+      bn: 'ড্যাশবোর্ড গাইড',
+    },
+    content: {
+      en: `
+# Dashboard Guide
+
+The BrandOS Dashboard is your central command centre for understanding campaign performance through the lens of causal simulation rather than retrospective analytics.
+
+## Key Metrics
+
+### Estimated Revenue
+The total projected revenue calculated by the Bayesian MMM model, combining base organic sales with incremental revenue driven by advertising. Displayed with a **95% confidence interval** to communicate forecast uncertainty.
+
+### iROAS (Incremental Return on Ad Spend)
+The most critical metric in the system. Unlike standard ROAS, iROAS isolates the revenue **directly caused** by advertising, net of baseline organic sales. An iROAS of 2.5x means every ৳1 spent on ads generated ৳2.50 in *incremental* revenue.
+
+### Total Spend (Optimized)
+The aggregate budget across all active channels after NSGA-II Genetic Algorithm optimisation. This represents the Pareto-optimal allocation.
+
+## Visualisation Components
+
+### Saturation S-Curve
+Rendered with Lightweight Charts, this visualises the Hill function per channel. The curve shows:
+- **Rapid growth zone**: Where each additional taka generates strong returns
+- **Half-saturation point (K)**: Where 50% of max channel efficiency is achieved
+- **Diminishing returns zone**: Where further spend produces marginal gains
+
+### Budget Allocation Chart
+Displays the capital distribution from the Genetic Algorithm's Pareto-optimal output. Each channel's share is shown as a percentage with absolute values.
+
+### iROAS & ROI Tracking
+A time-series line chart showing incremental return over time with a 90% Bayesian credible interval band. The amber line marks the break-even threshold (iROAS = 1.0).
+
+### Micro-Funnel Journey (Markov Chain)
+A multi-node graph representing transition probabilities between marketing touchpoints (Organic Search → Social Ad → Email → Retargeting → Conversion). Edge width encodes P(i→j). The Removal Effect for each channel is annotated.
+
+## AI Recommendations
+The system generates actionable recommendations based on simulation outputs, SHAP feature importance, and GraphRAG context. Each recommendation is grounded in mathematical evidence.
       `,
       bn: `
-# বেসিয়ান মার্কেটিং মিক্স মডেলিং (MMM)
+# ড্যাশবোর্ড গাইড
 
-মার্কেটিং মিক্স মডেলিং (MMM) বিজ্ঞাপনের বাজেট ব্যয়ের সাথে ব্যবসায়িক আয়ের সম্পর্ক নির্ণয়ের একটি গাণিতিক পদ্ধতি।
+BrandOS ড্যাশবোর্ড হলো আপনার কেন্দ্রীয় কমান্ড সেন্টার যেখানে রেট্রোস্পেক্টিভ অ্যানালিটিক্সের বদলে কজাল সিমুলেশনের মাধ্যমে ক্যাম্পেইন পারফরম্যান্স বোঝা যায়।
 
-## অ্যাডস্টক ট্রান্সফরমেশন (Adstock)
+## প্রধান মেট্রিক্স
 
-বিজ্ঞাপনের প্রভাব তাৎক্ষণিকভাবে শেষ হয়ে যায় না, বরং গ্রাহকের স্মৃতিতে কিছুদিন থাকে। এটিকে অটো-রিগ্রেসিভ ডিকম্পজিশন প্রক্রিয়ার মাধ্যমে প্রকাশ করা যায়:
+### আনুমানিক আয়
+বেসিয়ান MMM মডেল দ্বারা গণনা করা মোট প্রত্যাশিত আয়। বেস অর্গানিক সেলস এবং বিজ্ঞাপনজনিত ইনক্রিমেন্টাল রেভেনিউ মিলিয়ে প্রদর্শিত হয়। **৯৫% কনফিডেন্স ইন্টারভাল** সহ।
 
-$$A_t = X_t + \\lambda \\, A_{t-1}$$
+### iROAS (ইনক্রিমেন্টাল রিটার্ন অন অ্যাড স্পেন্ড)
+সিস্টেমের সবচেয়ে গুরুত্বপূর্ণ মেট্রিক। সাধারণ ROAS এর বিপরীতে, iROAS বিজ্ঞাপন দ্বারা **সরাসরি সৃষ্ট** রেভেনিউ আলাদা করে।
 
-এখানে:
-- $\\lambda \\in [0, 1]$ হল ডিকম্পজিশন বা ক্ষয় ফ্যাক্টর (রিটেনশন ফ্যাক্টর)।
-- $X_t$ হল বিজ্ঞাপনের ব্যয়।
-- $\\lambda$ এর মান বেশি (যেমন ০.৭ থেকে ০.৯) হলে বিজ্ঞাপনটির দীর্ঘমেয়াদী প্রভাব থাকে (যেমন ব্র্যান্ডিং বিজ্ঞাপন)।
-- $\\lambda$ এর মান কম (যেমন ০.১ থেকে ০.২) হলে বিজ্ঞাপনটির প্রভাব দ্রুত শেষ হয়ে যায় (যেমন সার্চ বিজ্ঞাপন)।
+### ভিজ্যুয়ালাইজেশন কম্পোনেন্ট
 
-## হিল স্যাচুরেশন কার্ভ (Hill Saturation)
-
-বিজ্ঞাপনের বাজেট বাড়ালেই যে আয় সমানুপাতিকভাবে বাড়বে না, এই লিনিয়ার ফ্যালাসি এড়াতে হিল ফাংশন ব্যবহার করা হয়:
-
-$$f(x) = \\frac{x^S}{K^S + x^S}$$
-
-এখানে:
-- $K$ হল অর্ধ-স্যাচুরেশন বিন্দু (যে ব্যয়সীমায় ৫০% রেসপন্স পাওয়া যায়)।
-- $S$ স্যাচুরেশন কার্ভের ঢাল বা বাঁক নির্ধারণ করে।
-- ব্যয় যখন $K$ বিন্দু অতিক্রম করে, তখন স্যাচুরেশন পয়েন্ট শুরু হয় এবং রেট অফ রিটার্ন হ্রাস পায়।
-
-## বেসিয়ান প্রাওরস (Bayesian Priors)
-
-মার্কেটিং ডেটাতে বহুবিধ কো-লিনিয়ারিটি এবং স্পার্সিটি থাকে। এই সমস্যা সমাধানে পূর্বের A/B টেস্ট রেজাল্ট এবং ইন্ডাস্ট্রি বেঞ্চমার্ক প্রাওরস (Priors) হিসেবে PyMC স্যাম্পলারে যোগ করা হয়।
+- **স্যাচুরেশন S-কার্ভ**: হিল ফাংশন — দ্রুত বৃদ্ধি জোন, অর্ধ-স্যাচুরেশন পয়েন্ট, ক্রমহ্রাসমান রিটার্ন জোন
+- **বাজেট বণ্টন চার্ট**: NSGA-II এর প্যারেটো-অপ্টিমাল আউটপুট
+- **iROAS ট্র্যাকিং**: ৯০% বেসিয়ান ক্রেডিবল ইন্টারভাল সহ টাইম-সিরিজ
+- **মার্কভ ফানেল**: টাচপয়েন্ট ট্রানজিশন প্রবাবিলিটি গ্রাফ
       `,
     },
   },
   {
-    slug: 'agent-based-simulation',
-    category: 'simulation',
+    slug: 'running-simulations',
+    category: 'user_manual',
     title: {
-      en: 'Agent-Based Simulation',
-      bn: 'এজেন্ট-বেসড সিমুলেশন (ABM)',
+      en: 'Running Simulations',
+      bn: 'সিমুলেশন চালানো',
     },
     content: {
       en: `
-# Agent-Based Simulation (ABM)
+# Running Simulations
 
-While Marketing Mix Modeling (MMM) calculates macro trends, the **Agent-Based Simulation (ABM)** module (implemented using **Mesa 3.0** with vectorized Cohorts) models micro-level human behaviors.
+The What-If Simulator is the core interaction point of BrandOS. It lets you test budget allocation scenarios before committing real capital.
 
-## Consumer Agent Profiles
+## How It Works
 
-We simulate 1,024 distinct agent profiles with unique demographic variables:
-- **Disposable Income**: Controls individual purchasing power thresholds.
-- **Brand Loyalty Index**: Determines resistance to competitor discounts.
-- **Media Affinity**: Dictates exposure rates to Facebook, Google Search, and TikTok.
+1. **Set Channel Budgets** — Use the sliders to allocate spend across Meta Ads, Google Search, TikTok, and other active channels.
+2. **Submit Scenario** — Click "Run What-If Simulation" to send the allocation to the backend.
+3. **Processing** — The backend runs your scenario through the full simulation pipeline:
+   - Adstock transformation applies temporal lag decay (λ) per channel
+   - Hill function computes non-linear saturation for each budget level
+   - Bayesian MMM calculates macro-level revenue projections
+   - Mesa ABM simulates 1,000+ consumer agents with demographic profiles
+   - NSGA-II runs multi-objective optimisation across the allocation space
+4. **Results** — The dashboard updates with projected revenue, iROAS, agent conversions, and the Pareto-optimal allocation recommendation.
 
-## Transition State Machine
+## Understanding Outputs
 
-Consumer agents move through distinct cognitive states:
-1. **Awareness**: Stimulated by ad impressions.
-2. **Consideration**: Evaluated against brand loyalty and product pricing.
-3. **Conversion**: Transaction purchase triggered.
+### Adstock Decay
+Each channel has a unique decay rate (λ):
+- **TV / Display** (λ = 0.7–0.9): Long residual brand awareness tails
+- **Paid Search** (λ = 0.1–0.2): Decays almost immediately
+- **Social Media** (λ = 0.4–0.6): Moderate carryover
 
-## Word-of-Mouth (WOM) Cascades
+### Hill Saturation
+The S-curve shows exactly when additional budget stops producing proportional returns. The **half-saturation point (K)** is where 50% of maximum channel efficiency is achieved — spend beyond K enters diminishing returns.
 
-Successful conversions within the simulation trigger Word-of-Mouth (WOM) events. Converted agents interact with neighboring nodes in their social and geographic networks, propagating organic brand awareness.
+### Pareto Frontier
+The Genetic Algorithm outputs a mathematically verified set of budget allocations where no single channel's performance can be improved without degrading another. The system recommends the allocation point that maximises overall iROAS.
+
+## Tips for Effective Simulations
+
+- Start with your current budget, then test ±20% reallocations to find efficiency gains
+- Compare flighted (pulsed) vs always-on schedules using different decay rates
+- Test scenarios with competitor intelligence enabled for realistic market pressure modelling
       `,
       bn: `
-# এজেন্ট-বেসড সিমুলেশন (ABM)
+# সিমুলেশন চালানো
 
-ম্যাক্রো ট্রেন্ডের পাশাপাশি ব্যক্তিগত বা মাইক্রো স্তরে গ্রাহকদের আচরণ মডেল করতে পাইথনের **Mesa 3.0** ব্যবহার করে তৈরি হয়েছে **এজেন্ট-বেসড সিমুলেশন (ABM)**।
+ওয়াট-ইফ সিমুলেটর হলো BrandOS-এর মূল ইন্টারেকশন পয়েন্ট। এটি আপনাকে প্রকৃত পুঁজি ব্যয়ের আগে বাজেট বণ্টন পরিস্থিতি পরীক্ষা করতে দেয়।
 
-## গ্রাহক এজেন্ট প্রোফাইল
+## কীভাবে কাজ করে
 
-সিস্টেমে ১০২৪+ কাস্টম এজেন্ট সিমুলেট করা হয় যারা নিম্নোক্ত বৈশিষ্ট্য বহন করে:
-- **ব্যয়যোগ্য আয় (Disposable Income)**: গ্রাহকের ক্রয়ের ক্ষমতা নির্ধারণ করে।
-- **ব্র্যান্ড লয়্যালটি সূচক**: প্রতিযোগীদের ডিসকাউন্টের বিরুদ্ধে গ্রাহকের বিশ্বস্ততা পরিমাপ করে।
-- **মিডিয়া পছন্দ**: ফেসবুক, গুগল বা টিকটক বিজ্ঞাপনে এক্সপোজার রেট নিয়ন্ত্রণ করে।
+1. **চ্যানেল বাজেট সেট করুন** — স্লাইডার ব্যবহার করে Meta, Google, TikTok জুড়ে ব্যয় বণ্টন করুন
+2. **সিনারিও সাবমিট করুন** — "ওয়াট-ইফ সিমুলেশন চালান" বোতামে ক্লিক করুন
+3. **প্রসেসিং** — ব্যাকএন্ড পূর্ণ সিমুলেশন পাইপলাইন চালায়:
+   - অ্যাডস্টক ট্রান্সফরমেশন — টেম্পোরাল ল্যাগ ডিকে
+   - হিল ফাংশন — নন-লিনিয়ার স্যাচুরেশন
+   - বেসিয়ান MMM — ম্যাক্রো রেভেনিউ প্রজেকশন
+   - Mesa ABM — ১,০০০+ কনজিউমার এজেন্ট সিমুলেশন
+   - NSGA-II — মাল্টি-অবজেক্টিভ অপ্টিমাইজেশন
+4. **ফলাফল** — ড্যাশবোর্ড আপডেট হয় প্রত্যাশিত আয়, iROAS, কনভার্সন এবং প্যারেটো-অপ্টিমাল সুপারিশ সহ
 
-## এজেন্ট স্টেট ট্রানজিশন
+## কার্যকর সিমুলেশনের টিপস
 
-গ্রাহক এজেন্টরা ক্রমান্বয়ে ৩টি মানসিক অবস্থা অতিক্রম করে:
-১. **সচেতনতা (Awareness)**: বিজ্ঞাপন দেখার মাধ্যমে ব্র্যান্ড সম্পর্কে জানা।
-২. **বিবেচনা (Consideration)**: ব্র্যান্ডের মূল্য ও সুবিধা বিবেচনা করা।
-৩. **রূপান্তর (Conversion)**: কেনাকাটা বা ট্রানজ্যাকশন সম্পন্ন করা।
-
-## মুখে মুখে প্রচারের তরঙ্গ (Word-of-Mouth Cascade)
-
-যখন কোনো এজেন্ট কেনাকাটা সম্পন্ন করে, তখন তার আশেপাশের সামাজিক বা ভৌগলিক নোডগুলোতে এটি প্রচার করে, যা অর্গানিক কাস্টমার অ্যাকুইজিশনে সাহায্য করে।
+- বর্তমান বাজেট দিয়ে শুরু করুন, তারপর ±২০% রিঅ্যালোকেশন পরীক্ষা করুন
+- ফ্লাইটেড বনাম অলওয়েজ-অন শিডিউল তুলনা করুন
+- বাস্তবসম্মত মার্কেট প্রেশার মডেলিংয়ের জন্য প্রতিযোগী ইন্টেলিজেন্স সক্রিয় করুন
       `,
     },
   },
   {
-    slug: 'attribution-graphrag',
-    category: 'attribution',
+    slug: 'reports-export',
+    category: 'user_manual',
     title: {
-      en: 'Attribution & GraphRAG',
-      bn: 'অ্যাট্রিবিউশন ও গ্রাফ র‍্যাগ',
+      en: 'Reports & Export',
+      bn: 'রিপোর্ট ও এক্সপোর্ট',
     },
     content: {
       en: `
-# Markov Chain Attribution & GraphRAG
+# Reports & Export
 
-InfinitySim resolves attribution gaps and report Generation using graph databases and probability theory.
+BrandOS generates executive-grade reports that translate complex mathematical outputs into actionable business intelligence.
 
-## Markov Chain Touchpoint Attribution
+## AI Executive Report
 
-We model user conversion pathways as state transition paths. The incremental contribution of each marketing channel is calculated using the **Removal Effect**:
+The Executive Report is generated by the LLM Orchestration layer (Layer 5) and is grounded in deterministic SHAP analysis:
 
-$$Removal\\ Effect(c) = 1 - \\frac{P(Conversion \\ | \\ \\text{channel } c \\text{ removed})}{P(Conversion \\ | \\ \\text{baseline})}$$
+1. **SHAP TreeExplainer** first computes the exact marginal contribution of every input feature (budget level, audience segment, platform, competitor index) to the final prediction
+2. These mathematical coefficients are injected into the LLM context window
+3. The LLM (Gemini Flash or local Gemma 4) synthesises a natural-language narrative that is **anchored to the model's actual behaviour**
 
-This calculates how the removal of any channel degrades the transition probability matrix $\\mathbf{P}$, highlighting multi-hop dependencies (e.g. display ads feeding search intent).
+This guarantees that every claim in the report can be traced back to a specific mathematical computation — eliminating hallucinated justifications.
 
-## Neo4j GraphRAG Structure
+### Generation Modes
 
-Quantitative parameters, campaigns, audience cohorts, and competitor actions are indexed inside **Neo4j** as semantic networks:
-- **Graph Schema**: Nodes include \`Campaign\`, \`Channel\`, \`Product\`, \`AgentCluster\`, and \`Competitor\` linked by \`INFLUENCES\`, \`SUPPRESSES\`, and \`CANNIBALIZES\` edges.
-- **Context Injection**: Queries traverse 2-hop entity relationships and fetch community summaries via LlamaIndex to feed grounded data to the LLM, preventing hallucinations.
+- **Cloud Mode (Gemini)**: Uses Gemini Flash via the Vercel AI SDK for fastest generation with highest quality
+- **Offline Mode (Gemma 4)**: Runs locally via Ollama for complete data privacy. Supports:
+  - *Fast Profile*: Concise, low-latency explanations for routine reports
+  - *Deep Profile*: Extended reasoning for complex scenario ideation
 
-## Optimization & Explainability
+## Cached Reporting (ISR)
 
-- **NSGA-II Genetic Optimizer**: Evaluates thousands of budget allocations using the \`pymoo\` library, converging on the Pareto frontier representing optimal ROI versus risk variance.
-- **SHAP TreeExplainer**: Quantifies exact input features contributing to the forecast, providing deterministic backing for executive reports.
-- **Bangla NLP**: Incorporates \`csebuetnlp/banglabert\` for processing Banglish copy and \`BAAI/bge-m3\` multi-vector embeddings for robust multilingual search.
+Standard reporting views and historical Pareto frontiers are pre-computed using **Incremental Static Regeneration** and cached on Vercel's global Edge Network. These serve in under 100ms from geographically proximate nodes.
+
+## Key Financial Metrics
+
+| Metric | Definition | Strategic Value |
+|--------|-----------|-----------------|
+| **ROI** | Total revenue / total cost | Macro-level profitability view |
+| **iROAS** | Revenue directly caused by advertising, net of baseline | True causal marketing impact |
+| **mROI** | Revenue from the *next* incremental dollar | Identifies diminishing-return thresholds |
+| **Probability Distributions** | Confidence intervals on forecasts | Risk quantification for CFOs |
+
+## Bilingual Output
+
+All reports support full Bangla rendering via the \`csebuetnlp/banglabert\` NLP pipeline and \`next-intl\` framework. Reports adapt terminology and formatting based on the user's locale setting.
       `,
       bn: `
-# মার্কভ অ্যাট্রিবিউশন ও গ্রাফ র‍্যাগ (GraphRAG)
+# রিপোর্ট ও এক্সপোর্ট
 
-InfinitySim গ্রাফ ডাটাবেস ও প্রোবাবিলিটি থিওরি ব্যবহার করে অ্যাট্রিবিউশন গ্যাপ দূর করে এবং নির্ভুল রিপোর্ট তৈরি করে।
+BrandOS এক্সিকিউটিভ-গ্রেড রিপোর্ট তৈরি করে যা জটিল গাণিতিক আউটপুটকে কার্যকর ব্যবসায়িক বুদ্ধিমত্তায় রূপান্তর করে।
 
-## মার্কভ চেইন অ্যাট্রিবিউশন
+## AI এক্সিকিউটিভ রিপোর্ট
 
-আমরা গ্রাহকের বিজ্ঞাপন দেখার যাত্রাকে স্টেট ট্রানজিশন ডায়াগ্রামের মাধ্যমে ম্যাপিং করি। কোনো চ্যানেলের কার্যকারিতা পরিমাপে **রিমুভাল ইফেক্ট (Removal Effect)** হিসেব করা হয়:
+এক্সিকিউটিভ রিপোর্ট LLM অর্কেস্ট্রেশন স্তর দ্বারা তৈরি হয় এবং ডিটারমিনিস্টিক SHAP বিশ্লেষণে ভিত্তি করে:
 
-$$Removal\\ Effect(c) = 1 - \\frac{P(Conversion \\ | \\ \\text{channel } c \\text{ removed})}{P(Conversion \\ | \\ \\text{baseline})}$$
+1. **SHAP TreeExplainer** প্রতিটি ইনপুট ফিচারের সঠিক অবদান গণনা করে
+2. এই গাণিতিক সহগুলো LLM কনটেক্সট উইন্ডোতে ইনজেক্ট করা হয়
+3. LLM একটি প্রাকৃতিক-ভাষা বিবরণী তৈরি করে যা **মডেলের প্রকৃত আচরণে নোঙ্গরকৃত**
 
-এটি গণনা করে যে একটি চ্যানেল বাদ দিলে সম্পূর্ণ ট্রানজিশন ম্যাট্রিক্স $\\mathbf{P}$ এ কেমন প্রভাব পড়ে।
+### জেনারেশন মোড
 
-## Neo4j GraphRAG আর্কিটেকচার
+- **ক্লাউড মোড (Gemini)**: Vercel AI SDK দিয়ে দ্রুততম জেনারেশন
+- **অফলাইন মোড (Gemma 4)**: সম্পূর্ণ ডেটা প্রাইভেসির জন্য Ollama দিয়ে লোকালি রান হয়
+  - *ফাস্ট প্রোফাইল*: রুটিন রিপোর্টের জন্য সংক্ষিপ্ত ব্যাখ্যা
+  - *ডিপ প্রোফাইল*: জটিল সিনারিওর জন্য বিস্তারিত বিশ্লেষণ
 
-সব ক্যাম্পেইন, অ্যাট্রিবিউশন প্রবাবিলিটি এবং প্রতিযোগীদের ডেটা **Neo4j** গ্রাফ ডাটাবেসে রিলেশনাল নোড হিসেবে সেভ থাকে:
-- **গ্রাফ স্কিমা**: নোডগুলির মধ্যে রয়েছে \`Campaign\`, \`Channel\`, \`Product\`, \`AgentCluster\`, \`Competitor\` যা পরস্পর \`INFLUENCES\`, \`SUPPRESSES\` এবং \`CANNIBALIZES\` এজ দ্বারা যুক্ত।
-- **কনটেক্সট ইনজেকশন**: LlamaIndex ২-ধাপ পর্যন্ত গ্রাফ কুয়েরি করে প্রয়োজনীয় তথ্য প্রম্পটে যুক্ত করে, ফলে এআই কোনো মনগড়া বা মিথ্যা রিপোর্ট দেয় না।
+## প্রধান আর্থিক মেট্রিক্স
 
-## অপ্টিমাইজেশন ও ব্যাখ্যাযোগ্যতা
+| মেট্রিক | সংজ্ঞা | কৌশলগত মূল্য |
+|---------|--------|--------------|
+| **ROI** | মোট আয় / মোট খরচ | সামগ্রিক লাভজনকতা |
+| **iROAS** | বিজ্ঞাপনজনিত ইনক্রিমেন্টাল রেভেনিউ | প্রকৃত কজাল মার্কেটিং প্রভাব |
+| **mROI** | পরবর্তী ইনক্রিমেন্টাল টাকার রিটার্ন | ডিমিনিশিং রিটার্ন থ্রেশহোল্ড |
 
-- **NSGA-II জেনেটিক অ্যালগরিদম**: \`pymoo\` লাইব্রেরির মাধ্যমে হাজার হাজার বাজেট বণ্টনের কম্বিনেশন ইভল্যুশন ঘটিয়ে সর্বোত্তম প্যারেটো বাউন্ডারি (Pareto frontier) খুঁজে বের করে।
-- **SHAP TreeExplainer**: কোন ফিচারটি ফলাফলে কী ভূমিকা রেখেছে তার গাণিতিক প্রমান দেয়।
-- **বাংলা এনএলপি**: ব্যাংলিশ টেক্সট প্রসেসিংয়ের জন্য \`csebuetnlp/banglabert\` এবং মাল্টি-লিঙ্গুয়াল সার্চের জন্য \`BAAI/bge-m3\` এম্বেডিং মডেল ব্যবহৃত হয়েছে।
+## দ্বিভাষিক আউটপুট
+
+সমস্ত রিপোর্ট \`csebuetnlp/banglabert\` NLP পাইপলাইন এবং \`next-intl\` ফ্রেমওয়ার্কের মাধ্যমে সম্পূর্ণ বাংলা রেন্ডারিং সমর্থন করে।
       `,
     },
   },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // API REFERENCE
+  // ═══════════════════════════════════════════════════════════════════════
   {
     slug: 'api-reference',
     category: 'api_reference',
@@ -375,82 +738,202 @@ $$Removal\\ Effect(c) = 1 - \\frac{P(Conversion \\ | \\ \\text{channel } c \\tex
       en: `
 # API Reference
 
-The Prediction Engine backend exposes REST API endpoints for external automation and dashboard synchronization.
+The BrandOS backend exposes REST API endpoints via FastAPI for external automation, dashboard synchronisation, and programmatic simulation execution.
 
-## Endpoint Overview
+## Authentication
 
-### 1. Initialize Campaign Graph
+All endpoints require a valid JWT bearer token obtained via the Clerk authentication flow:
+
 \`\`\`http
-POST /api/v1/simulate/init
 Authorization: Bearer <JWT_TOKEN>
-Content-Type: application/json
 \`\`\`
 
-### 2. Trigger Full Simulation Job
+## Endpoints
+
+### 1. Initialize Campaign Graph
+
+Creates the initial Neo4j knowledge graph nodes for a new campaign, linking channels, audience segments, and competitor entities.
+
+\`\`\`http
+POST /api/v1/simulate/init
+Content-Type: application/json
+
+{
+  "brand_name": "MyBrand",
+  "channels": ["Facebook", "Google", "TikTok"],
+  "monthly_budget": 50000,
+  "target_segments": ["urban_millennials", "rural_smb"]
+}
+\`\`\`
+
+**Response**: \`201 Created\` with \`campaign_id\`
+
+### 2. Trigger Full Simulation
+
+Submits a budget allocation scenario to the Celery task queue. The backend processes it through the complete 6-layer pipeline.
+
 \`\`\`http
 POST /api/v1/simulate
-Authorization: Bearer <JWT_TOKEN>
 Content-Type: application/json
 
 {
   "campaign_id": "uuid",
   "budget_overrides": {
-    "Facebook": 5000,
-    "YouTube": 3000
+    "Facebook": 25000,
+    "Google": 15000,
+    "TikTok": 10000
   }
 }
 \`\`\`
-Returns a \`task_id\` representing the Celery background worker process.
+
+**Response**: \`202 Accepted\` with \`task_id\` for the Celery background worker
 
 ### 3. Check Task Status
+
+Poll the status of a running simulation job.
+
 \`\`\`http
 GET /api/v1/task/{task_id}
 \`\`\`
 
-### 4. Fetch iROAS Analytics
+**Response**: \`{ "status": "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED", "result": { ... } }\`
+
+### 4. Fetch Analytics
+
+Retrieve computed iROAS, revenue projections, and optimised allocations.
+
 \`\`\`http
 GET /api/v1/analytics/roi/{campaign_id}
 \`\`\`
+
+### 5. Generate Executive Report
+
+Trigger LLM-powered report generation with SHAP-grounded explanations.
+
+\`\`\`http
+POST /api/v1/report/generate
+Content-Type: application/json
+
+{
+  "campaign_id": "uuid",
+  "provider": "cloud" | "offline",
+  "locale": "en" | "bn"
+}
+\`\`\`
+
+### 6. GraphRAG Query
+
+Execute a natural-language query against the Neo4j knowledge graph via the LlamaIndex retriever.
+
+\`\`\`http
+POST /api/v1/graph/query
+Content-Type: application/json
+
+{
+  "campaign_id": "uuid",
+  "query": "Which campaigns targeting urban millennials overlapped with competitor promotions?"
+}
+\`\`\`
+
+## Rate Limits
+
+| Tier | Simulation Runs | API Calls/hr |
+|------|----------------|--------------|
+| Starter | 3/month | 100 |
+| Growth | 5/month | 500 |
+| Professional | Unlimited | 2,000 |
+| Enterprise | Unlimited | Custom |
       `,
       bn: `
-# এপিআই রেফারেন্স (API Reference)
+# এপিআই রেফারেন্স
 
-প্রেডিকশন ইঞ্জিনের ব্যাকএন্ড ড্যাশবোর্ড সিনক্রোনাইজেশন এবং বাহ্যিক অটোমেশনের জন্য REST API এন্ডপয়েন্ট সরবরাহ করে।
+BrandOS ব্যাকএন্ড FastAPI এর মাধ্যমে REST API এন্ডপয়েন্ট সরবরাহ করে।
+
+## অথেন্টিকেশন
+
+সমস্ত এন্ডপয়েন্টে Clerk অথ ফ্লো থেকে প্রাপ্ত JWT বেয়ারার টোকেন প্রয়োজন:
+
+\`\`\`http
+Authorization: Bearer <JWT_TOKEN>
+\`\`\`
 
 ## এন্ডপয়েন্ট সমূহ
 
 ### ১. ক্যাম্পেইন গ্রাফ ইনিশিয়ালাইজ করা
+
 \`\`\`http
 POST /api/v1/simulate/init
-Authorization: Bearer <JWT_TOKEN>
 Content-Type: application/json
+
+{
+  "brand_name": "MyBrand",
+  "channels": ["Facebook", "Google", "TikTok"],
+  "monthly_budget": 50000,
+  "target_segments": ["urban_millennials", "rural_smb"]
+}
 \`\`\`
 
-### ২. সিমুলেশন শুরু করা
+### ২. সম্পূর্ণ সিমুলেশন ট্রিগার করা
+
 \`\`\`http
 POST /api/v1/simulate
-Authorization: Bearer <JWT_TOKEN>
 Content-Type: application/json
 
 {
   "campaign_id": "uuid",
   "budget_overrides": {
-    "Facebook": 5000,
-    "YouTube": 3000
+    "Facebook": 25000,
+    "Google": 15000,
+    "TikTok": 10000
   }
 }
 \`\`\`
-অনুরোধটি সম্পন্ন হলে ব্যাকএন্ডে সেলারি জবের জন্য একটি \`task_id\` প্রদান করা হয়।
 
-### ৩. সিমুলেশন জবের বর্তমান অবস্থা দেখা
+### ৩. টাস্ক স্ট্যাটাস চেক করা
+
 \`\`\`http
 GET /api/v1/task/{task_id}
 \`\`\`
 
-### ৪. আইআরওএএস (iROAS) এনালিটিক্স নিয়ে আসা
+### ৪. এনালিটিক্স ফেচ করা
+
 \`\`\`http
 GET /api/v1/analytics/roi/{campaign_id}
 \`\`\`
+
+### ৫. এক্সিকিউটিভ রিপোর্ট জেনারেট করা
+
+\`\`\`http
+POST /api/v1/report/generate
+Content-Type: application/json
+
+{
+  "campaign_id": "uuid",
+  "provider": "cloud" | "offline",
+  "locale": "en" | "bn"
+}
+\`\`\`
+
+### ৬. GraphRAG কুয়েরি
+
+\`\`\`http
+POST /api/v1/graph/query
+Content-Type: application/json
+
+{
+  "campaign_id": "uuid",
+  "query": "কোন ক্যাম্পেইনগুলো প্রতিযোগীদের প্রোমোশনের সাথে ওভারল্যাপ করেছে?"
+}
+\`\`\`
+
+## রেট লিমিট
+
+| টায়ার | সিমুলেশন রান | API কল/ঘণ্টা |
+|--------|-------------|-------------|
+| স্টার্টার | ৩/মাস | ১০০ |
+| গ্রোথ | ৫/মাস | ৫০০ |
+| প্রফেশনাল | আনলিমিটেড | ২,০০০ |
+| এন্টারপ্রাইজ | আনলিমিটেড | কাস্টম |
       `,
     },
   },

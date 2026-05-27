@@ -142,7 +142,7 @@ export function ChatWidget({ simulationData }: ChatWidgetProps) {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white tracking-tight">
-                  InfinitySim AI
+                  BrandOS AI
                 </h3>
                 <p className="text-[10px] text-zinc-400 font-medium">
                   Ask about your campaign performance

@@ -26,8 +26,8 @@ const notoSansBengali = Noto_Sans_Bengali({
 })
 
 export const metadata: Metadata = {
-  title: 'Simulation Engine',
-  description: 'Predictive MMM and ABM engine for optimizing marketing spend.',
+  title: 'BrandOS — Predictive Marketing Intelligence',
+  description: 'A Graph-Augmented Bayesian Simulation Engine for SME marketing intelligence. Simulate campaigns, optimize budgets, and predict causal outcomes.',
 }
 
 import { TooltipProvider } from '@/components/ui/tooltip'

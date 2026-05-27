@@ -18,6 +18,7 @@ interface PricingCardProps {
   currency: 'BDT' | 'USD'
   ctaText: string
   onCtaClick: () => void
+  isCustomPrice?: boolean
 }
 
 export function PricingCard({
@@ -32,6 +33,7 @@ export function PricingCard({
   currency,
   ctaText,
   onCtaClick,
+  isCustomPrice = false,
 }: PricingCardProps) {
   const t = useTranslations('PricingPage')
 
@@ -63,7 +65,9 @@ export function PricingCard({
           {/* Price display */}
           <div className="flex items-baseline gap-1 text-foreground">
             <span className="text-4xl md:text-5xl font-black tracking-tight">
-              {displayPrice === 0 ? (
+              {isCustomPrice ? (
+                'Custom'
+              ) : displayPrice === 0 ? (
                 'Free'
               ) : (
                 <>
@@ -72,13 +76,13 @@ export function PricingCard({
                 </>
               )}
             </span>
-            {displayPrice !== 0 && (
+            {!isCustomPrice && displayPrice !== 0 && (
               <span className="text-sm font-semibold text-muted-foreground">
                 {billingLabel}
               </span>
             )}
           </div>
-          {isAnnual && displayPrice > 0 && (
+          {!isCustomPrice && isAnnual && displayPrice > 0 && (
             <p className="text-xs text-amber-500 font-semibold mt-1">
               {t('save_20')}
             </p>

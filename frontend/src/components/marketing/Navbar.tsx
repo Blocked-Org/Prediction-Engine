@@ -22,7 +22,7 @@ export function Navbar() {
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tight text-foreground hover:opacity-90">
           <Activity className="h-6 w-6 text-primary animate-pulse" />
-          <span>Infinity<span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Sim</span></span>
+          <span>Brand<span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">OS</span></span>
         </Link>
 
         {/* Desktop Navigation Links */}

@@ -18,7 +18,7 @@ export function Footer() {
           <div className="flex flex-col gap-3 md:col-span-2">
             <Link href="/" className="flex items-center gap-2 font-bold text-lg tracking-tight text-foreground">
               <Activity className="h-5 w-5 text-primary" />
-              <span>Infinity<span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Sim</span></span>
+              <span>Brand<span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">OS</span></span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-sm">
               {t('tagline')}
@@ -58,7 +58,7 @@ export function Footer() {
         {/* Divider & Copyright */}
         <div className="border-t border-border/20 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground">
-            &copy; {currentYear} InfinitySim. {t('rights')}
+            &copy; {currentYear} BrandOS. {t('rights')}
           </p>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span>Built for Infinity AI BuildFest 2026</span>

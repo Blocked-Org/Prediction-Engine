@@ -8,6 +8,7 @@ import { Navbar } from '@/components/marketing/Navbar'
 import { Footer } from '@/components/marketing/Footer'
 import { DOCS_DATA, DocArticle } from '@/lib/docs-data'
 import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { Search, BookOpen, ChevronRight, Menu, X, Terminal } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -23,13 +24,12 @@ export default function DocsPage() {
 
   // Resolve slug from route parameters
   const slugArray = params.slug as string[] | undefined
-  const activeSlug = slugArray?.[0] || 'getting-started'
+  const activeSlug = slugArray?.[0] || 'executive-summary'
 
   // Categories list for grouping
   const categories = [
-    { id: 'getting_started', label: t('categories.getting_started') },
-    { id: 'simulation', label: t('categories.simulation') },
-    { id: 'attribution', label: t('categories.attribution') },
+    { id: 'litepaper', label: t('categories.litepaper') },
+    { id: 'user_manual', label: t('categories.user_manual') },
     { id: 'api_reference', label: t('categories.api_reference') },
   ]
 
@@ -149,7 +149,7 @@ export default function DocsPage() {
   )
 
   return (
-    <div className="relative min-h-screen flex flex-col bg-background font-sans selection:bg-primary/30">
+    <div className="relative min-h-screen flex flex-col bg-background font-sans selection:bg-primary/30" suppressHydrationWarning>
       <Navbar />
 
       <main className="z-10 flex-grow max-w-screen-2xl w-full mx-auto px-4 md:px-8 pt-24 pb-20 flex flex-col lg:flex-row gap-8">
@@ -187,7 +187,40 @@ export default function DocsPage() {
         <article className="flex-1 max-w-4xl lg:px-6 min-w-0">
           <div className="prose prose-invert prose-slate max-w-none animate-in fade-in slide-in-from-bottom-4 duration-700">
             <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
               components={{
+                table: ({ children }) => (
+                  <div className="overflow-x-auto my-8">
+                    <table className="w-full text-left border-collapse text-sm">
+                      {children}
+                    </table>
+                  </div>
+                ),
+                thead: ({ children }) => (
+                  <thead className="border-b border-border/50 bg-muted/50">
+                    {children}
+                  </thead>
+                ),
+                tbody: ({ children }) => (
+                  <tbody className="divide-y divide-border/30">
+                    {children}
+                  </tbody>
+                ),
+                tr: ({ children }) => (
+                  <tr className="hover:bg-muted/30 transition-colors">
+                    {children}
+                  </tr>
+                ),
+                th: ({ children }) => (
+                  <th className="px-4 py-3 font-semibold text-foreground border-b border-border/50">
+                    {children}
+                  </th>
+                ),
+                td: ({ children }) => (
+                  <td className="px-4 py-3 text-muted-foreground align-top">
+                    {children}
+                  </td>
+                ),
                 h1: ({ children }) => (
                   <h1 className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight mb-8 pb-4 border-b border-border/20">
                     {children}

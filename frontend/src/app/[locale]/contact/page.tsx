@@ -54,7 +54,7 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="relative min-h-screen flex flex-col bg-background font-sans overflow-x-hidden">
+    <div className="relative min-h-screen flex flex-col bg-background font-sans overflow-x-hidden" suppressHydrationWarning>
       <Navbar />
 
       {/* Background Gradients */}

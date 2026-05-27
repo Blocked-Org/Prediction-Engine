@@ -1,6 +1,6 @@
 {
   "HomePage": {
-    "title": "Predictive Brand Simulation Engine",
+    "title": "BrandOS — Predictive Marketing Intelligence",
     "description": "A high-performance Graph-Augmented Bayesian Simulation platform. Optimize marketing spend with predictive MMM, multi-agent frameworks, and advanced deterministic metrics.",
     "top_badge": "Version 1.0 is live",
     "get_started": "Enter Dashboard",
@@ -79,7 +79,7 @@
     "docs": "Docs",
     "contact": "Contact",
     "dashboard": "Dashboard",
-    "logo": "InfinitySim"
+    "logo": "BrandOS"
   },
   "Footer": {
     "rights": "All rights reserved.",
@@ -101,28 +101,44 @@
     "tiers": {
       "starter": {
         "name": "Starter",
-        "desc": "Perfect for small local brands beginning their optimization journey."
+        "desc": "For F-commerce micro-merchants starting their optimization journey with single-channel insights."
+      },
+      "growth": {
+        "name": "Growth",
+        "desc": "For SMEs with $5K–50K ad spend requiring multi-channel simulation and attribution."
       },
       "professional": {
         "name": "Professional",
-        "desc": "For scaling brands requiring comprehensive MMM and simulation capabilities."
+        "desc": "For mid-market brands with $50K–500K spend needing unlimited simulations and white-label reporting."
       },
       "enterprise": {
         "name": "Enterprise",
-        "desc": "Custom models, dedicated nodes, and deep Neo4j GraphRAG integration."
+        "desc": "For brands with $500K+ spend. Dedicated infrastructure, custom model calibration, and SLA."
       }
     },
     "features": {
       "mmm": "Bayesian MMM Forecasting",
-      "abm": "Agent-Based Simulation (100 synthetic agents)",
-      "abm_full": "Full Mesa ABM (1,000+ synthetic agents)",
+      "mmm_single": "Single-Channel MMM",
+      "mmm_multi": "Multi-Channel MMM + ABM",
+      "abm": "Agent-Based Simulation (100 agents)",
+      "abm_full": "Full Mesa ABM (1,000+ agents)",
       "markov": "Markov Attribution Journey",
-      "genetic": "Genetic Budget Optimization",
-      "rag": "Neo4j GraphRAG Reports",
-      "offline": "Local Offline LLM Support",
-      "support": "Email Support",
-      "support_priority": "Priority 24/7 Support",
-      "custom_nodes": "Custom Simulation Nodes"
+      "genetic": "NSGA-II Genetic Optimization",
+      "rag": "Neo4j GraphRAG Insights",
+      "offline": "Local Offline LLM (Gemma 4)",
+      "support": "Community Support",
+      "support_email": "Email Support",
+      "support_priority": "24/7 Dedicated SLA",
+      "custom_nodes": "Custom Simulation Nodes",
+      "shap": "SHAP Explainability Reports",
+      "whitelabel": "White-Label Reporting",
+      "bkash": "bKash / Bangla UI",
+      "sim_runs": "5 Simulation Runs / Month",
+      "unlimited_sims": "Unlimited Simulations",
+      "dedicated_infra": "Dedicated Infrastructure",
+      "api_access": "Full API Access",
+      "unlimited_seats": "Unlimited Seats",
+      "custom_calibration": "Custom Model Calibration"
     }
   },
   "FeaturesPage": {
@@ -156,13 +172,12 @@
     }
   },
   "DocsPage": {
-    "title": "Developer Documentation",
-    "subtitle": "Integrate and run the Prediction Engine platform.",
+    "title": "Documentation",
+    "subtitle": "Everything you need to understand, deploy, and use BrandOS.",
     "search_placeholder": "Search documentation...",
     "categories": {
-      "getting_started": "Getting Started",
-      "simulation": "Simulation Engine",
-      "attribution": "Attribution & GraphRAG",
+      "litepaper": "Litepaper",
+      "user_manual": "User Manual",
       "api_reference": "API Reference"
     }
   },
@@ -179,7 +194,7 @@
   },
   "ContactPage": {
     "title": "Get in Touch",
-    "subtitle": "Have questions about InfinitySim? Let's connect.",
+    "subtitle": "Have questions about BrandOS? Let's connect.",
     "name": "Full Name",
     "email": "Email Address",
     "message": "Message / Inquiry",
@@ -221,7 +236,7 @@
     },
     "bento": {
       "title": "Solving 4 Structural Blind Spots",
-      "subtitle": "Traditional attribution models fail in walled gardens. Here is how InfinitySim fixes it.",
+      "subtitle": "Traditional attribution models fail in walled gardens. Here is how BrandOS fixes it.",
       "spot1_title": "1. Cold-Start Problem",
       "spot1_desc": "Uses Transfer Learning to estimate curves for new products with no historical data.",
       "spot2_title": "2. Linear Scale Fallacy",
