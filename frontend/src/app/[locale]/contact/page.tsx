@@ -1,6 +1,6 @@
 'use client'
 
-import { useTranslations, useLocale } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { Navbar } from '@/components/marketing/Navbar'
 import { Footer } from '@/components/marketing/Footer'
@@ -12,7 +12,6 @@ import { CheckCircle2, Send, Globe2, Zap, Shield, Clock } from 'lucide-react'
 
 export default function ContactPage() {
   const t = useTranslations('ContactPage')
-  const locale = useLocale()
 
   const [formData, setFormData] = useState({ name: '', email: '', message: '' })
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -81,35 +80,35 @@ export default function ContactPage() {
           {/* Left Column: Trust Markers */}
           <div className="flex flex-col gap-10 animate-in fade-in slide-in-from-left-8 duration-1000 delay-150">
             <div className="flex flex-col gap-4">
-              <h2 className="text-3xl font-bold text-foreground">Why talk to us?</h2>
+              <h2 className="text-3xl font-bold text-foreground">{t('why_title')}</h2>
               <p className="text-muted-foreground leading-relaxed max-w-md">
-                Whether you need a custom LLM fine-tuning setup, dedicated Neo4j graphs, or simply have questions about how our Bayesian models perform in your industry, our simulation engineers are here to help.
+                {t('why_desc')}
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="flex flex-col gap-2 p-4 rounded-2xl bg-card/40 border border-border/40 backdrop-blur-sm">
                 <Clock className="h-6 w-6 text-primary mb-1" />
-                <h4 className="font-semibold text-foreground">Fast Turnaround</h4>
-                <p className="text-sm text-muted-foreground">Average response time is under 2 hours.</p>
+                <h4 className="font-semibold text-foreground">{t('card_fast_title')}</h4>
+                <p className="text-sm text-muted-foreground">{t('card_fast_desc')}</p>
               </div>
               
               <div className="flex flex-col gap-2 p-4 rounded-2xl bg-card/40 border border-border/40 backdrop-blur-sm">
                 <Shield className="h-6 w-6 text-emerald-500 mb-1" />
-                <h4 className="font-semibold text-foreground">Privacy First</h4>
-                <p className="text-sm text-muted-foreground">We never share your ad spend data or model states.</p>
+                <h4 className="font-semibold text-foreground">{t('card_privacy_title')}</h4>
+                <p className="text-sm text-muted-foreground">{t('card_privacy_desc')}</p>
               </div>
 
               <div className="flex flex-col gap-2 p-4 rounded-2xl bg-card/40 border border-border/40 backdrop-blur-sm">
                 <Globe2 className="h-6 w-6 text-blue-500 mb-1" />
-                <h4 className="font-semibold text-foreground">Global Scale</h4>
-                <p className="text-sm text-muted-foreground">Serving models across 15+ emerging markets.</p>
+                <h4 className="font-semibold text-foreground">{t('card_scale_title')}</h4>
+                <p className="text-sm text-muted-foreground">{t('card_scale_desc')}</p>
               </div>
 
               <div className="flex flex-col gap-2 p-4 rounded-2xl bg-card/40 border border-border/40 backdrop-blur-sm">
                 <Zap className="h-6 w-6 text-amber-500 mb-1" />
-                <h4 className="font-semibold text-foreground">Custom Solutions</h4>
-                <p className="text-sm text-muted-foreground">Need more than 1,000 agents? Let's scale up.</p>
+                <h4 className="font-semibold text-foreground">{t('card_solutions_title')}</h4>
+                <p className="text-sm text-muted-foreground">{t('card_solutions_desc')}</p>
               </div>
             </div>
           </div>
@@ -138,7 +137,7 @@ export default function ContactPage() {
                   className="mt-6 rounded-full px-8 h-12"
                   variant="outline"
                 >
-                  Send Another Message
+                  {t('send_another')}
                 </Button>
               </div>
             ) : (

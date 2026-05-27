@@ -79,7 +79,9 @@
     "docs": "Docs",
     "contact": "Contact",
     "dashboard": "Dashboard",
-    "logo": "BrandOS"
+    "logo": "Brand<os>OS</os>",
+    "en": "EN",
+    "bn": "বাং"
   },
   "Footer": {
     "rights": "All rights reserved.",
@@ -202,6 +204,17 @@
     "sending": "Sending...",
     "success_title": "Message Sent!",
     "success_desc": "Thank you for reaching out. Our team will get back to you shortly.",
+    "send_another": "Send Another Message",
+    "why_title": "Why talk to us?",
+    "why_desc": "Whether you need a custom LLM fine-tuning setup, dedicated Neo4j graphs, or simply have questions about how our Bayesian models perform in your industry, our simulation engineers are here to help.",
+    "card_fast_title": "Fast Turnaround",
+    "card_fast_desc": "Average response time is under 2 hours.",
+    "card_privacy_title": "Privacy First",
+    "card_privacy_desc": "We never share your ad spend data or model states.",
+    "card_scale_title": "Global Scale",
+    "card_scale_desc": "Serving models across 15+ emerging markets.",
+    "card_solutions_title": "Custom Solutions",
+    "card_solutions_desc": "Need more than 1,000 agents? Let's scale up.",
     "errors": {
       "name": "Name must be at least 2 characters.",
       "email": "Please enter a valid email address.",
