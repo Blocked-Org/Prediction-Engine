@@ -23,7 +23,15 @@ export function Navbar() {
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tight text-foreground hover:opacity-90">
           <Activity className="h-6 w-6 text-primary animate-pulse" />
-          <span>Brand<span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">OS</span></span>
+          <span>
+            {t.rich('logo', {
+              os: (chunks) => (
+                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  {chunks}
+                </span>
+              )
+            })}
+          </span>
         </Link>
 
         {/* Desktop Navigation Links */}
@@ -53,7 +61,7 @@ export function Navbar() {
               prefetch={false}
               className={`px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 ${locale === 'en' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
             >
-              EN
+              {t('en')}
             </Link>
             <Link
               href={pathname}
@@ -61,7 +69,7 @@ export function Navbar() {
               prefetch={false}
               className={`px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 ${locale === 'bn' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
             >
-              বাং
+              {t('bn')}
             </Link>
           </div>
 
