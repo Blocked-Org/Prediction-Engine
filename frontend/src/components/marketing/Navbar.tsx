@@ -1,15 +1,16 @@
 'use client'
 
 import { useTranslations, useLocale } from 'next-intl'
-import { Link } from '@/i18n/routing'
+import { Link, usePathname } from '@/i18n/routing'
 import { SignInButton, UserButton, Show } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
-import { Activity, Globe, Menu, X } from 'lucide-react'
+import { Activity, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 
 export function Navbar() {
   const t = useTranslations('Navbar')
   const locale = useLocale()
+  const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
 
   const dashboardUrl = `/${locale}/dashboard`
@@ -47,7 +48,7 @@ export function Navbar() {
           {/* Language Switcher */}
           <div className="flex items-center gap-1 bg-muted/60 border border-border/50 rounded-full p-1">
             <Link
-              href="/"
+              href={pathname}
               locale="en"
               prefetch={false}
               className={`px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 ${locale === 'en' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
@@ -55,7 +56,7 @@ export function Navbar() {
               EN
             </Link>
             <Link
-              href="/"
+              href={pathname}
               locale="bn"
               prefetch={false}
               className={`px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 ${locale === 'bn' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
