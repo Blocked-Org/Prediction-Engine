@@ -119,6 +119,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     tags: ['Backend Engineer', 'Database Architect', 'Scraper Engineer', 'Business Analyst', 'Data Scientist', 'Communication Lead'],
     tagsBn: ['ব্যাকএন্ড ইঞ্জিনিয়ার', 'ডাটাবেস আর্কিটেক্ট', 'স্ক্র্যাপার ইঞ্জিনিয়ার', 'বিজনেস অ্যানালিস্ট', 'ডেটা সায়েন্টিস্ট', 'কমিউনিকেশন লিড'],
     image: '/team/jonayet.jpg',
+    email: 'jonayet_hossain@hotmail.com',
     isLeader: true,
   },
   {
@@ -130,6 +131,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     tags: ['Backend Engineer', 'Frontend Developer', 'AI Engineer', 'UI/UX Designer'],
     tagsBn: ['ব্যাকএন্ড ইঞ্জিনিয়ার', 'ফ্রন্টএন্ড ডেভেলপার', 'এআই ইঞ্জিনিয়ার', 'UI/UX ডিজাইনার'],
     image: '/team/meheraj.jpg',
+    email: 'maharajmd7@gmail.com',
     isLeader: false,
   },
   {
