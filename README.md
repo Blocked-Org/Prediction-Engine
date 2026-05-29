@@ -11,7 +11,7 @@ The system is organized as a 6-layer stack:
 3. Storage and knowledge layer: PostgreSQL + TimescaleDB for time-series, Neo4j graph, vector storage, and analytics-ready datasets.
 4. Simulation engine: Bayesian MMM, agent-based simulation, attribution, optimization, and explainability.
 5. LLM orchestration: report generation over structured simulation outputs.
-6. Application layer: Next.js bilingual dashboard and API routes.
+6. Application layer: Next.js bilingual dashboard, API routes, and a Live `/docs` Module with a dynamic YC-style Pitch Deck.
 
 ## Repository Structure
 
@@ -88,6 +88,9 @@ ollama run gemma4:26b
 - `GET /api/v1/analytics/roi/{campaign_id}` : Returns a 26-week iROAS time-series with 90% credible intervals, derived from the Bayesian simulation engine. Results are cached in Redis (`SimulationCache`) for instant demo reloads.
 - `GET /api/v1/analytics/markov/{campaign_id}` : Returns the Markov funnel transition graph (nodes + edges with real transition probabilities from the ABM → Markov attribution pipeline). Redis-cached.
 - `POST /api/v1/forecast` : Triggers predictive forecasting via Celery.
+- `GET /api/v1/public/metrics` : Aggregates platform-wide live statistics (Active Tenants, Users, Orgs) safely for public display in the Pitch Deck.
+- `GET /api/v1/public/docs/config` : Retrieves the public YC Pitch Deck configuration, live team profiles, and docs scheduling.
+- `PUT /api/v1/admin/docs/config` : Updates Pitch Deck settings and overrides docs schedule. Allowed roles: `owner`, `admin`.
 
 ### Role-Based Access Control (RBAC)
 
@@ -100,6 +103,7 @@ The backend enforces robust Role-Based Access Control using Clerk's `org_role` c
 | `GET /api/v1/simulate/results/{id}` | owner, admin, analyst, viewer | Everyone can view analytical results |
 | `GET /api/v1/analytics/roi/{id}` | owner, admin, analyst, viewer | Everyone can view ROI analytics |
 | `GET /api/v1/analytics/markov/{id}` | owner, admin, analyst, viewer | Everyone can view Markov funnel data |
+| `PUT /api/v1/admin/docs/config` | owner, admin | Restricts public documentation content changes to core admins |
 
 *The `GET /api/v1/simulate/status/{id}` endpoint remains fully public for read-only polling.*
 
