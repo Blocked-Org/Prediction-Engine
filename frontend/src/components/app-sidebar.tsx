@@ -45,6 +45,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     { title: t('title'), url: "/dashboard", icon: LayoutDashboard, iconColor: "text-blue-400" },
     { title: t('advanced_visualizations'), url: "/dashboard/analytics", icon: BarChart3, iconColor: "text-emerald-400", hasNotification: true },
     { title: t('reporting'), url: "/dashboard/reporting", icon: FileText, iconColor: "text-violet-400" },
+    { title: t('docs_admin') || 'Docs Admin', url: "/dashboard/docs-admin", icon: FileText, iconColor: "text-amber-400" },
     { title: t('settings'), url: "/dashboard/settings", icon: Settings, iconColor: "text-zinc-400" },
   ];
 

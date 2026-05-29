@@ -126,3 +126,16 @@ def get_db_session(
         db.close()
         # Reset the context variable to its previous state to prevent bleed-over
         tenant_context.reset(token)
+
+def get_global_db() -> Generator[Session, None, None]:
+    """
+    FastAPI dependency that yields a database session WITHOUT injecting
+    tenant context. This should only be used for global operations
+    (like public docs config) that are not tenant-scoped.
+    """
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+

@@ -45,7 +45,8 @@
     "ctr": "সিটিআর",
     "cpc": "সিপিসি (৳)",
     "toggle_language": "ভাষা পরিবর্তন করুন",
-    "reporting": "রিপোর্টিং"
+    "reporting": "রিপোর্টিং",
+    "docs_admin": "ডকস অ্যাডমিন"
   },
   "Simulation": {
     "title": "ওয়াট-ইফ সিমুলেশন",

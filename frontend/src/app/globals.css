@@ -378,3 +378,33 @@
   .animate-typing-bounce { animation: none; }
   .animate-chat-pulse { animation: none; }
 }
+
+/* ─── Print Styles for PDF Export ─── */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .print\:hidden {
+    display: none !important;
+  }
+  a[href]:after {
+    content: " (" attr(href) ") ";
+    font-size: 0.8em;
+    color: #666;
+  }
+  .docs-section {
+    page-break-inside: avoid;
+  }
+  .bg-card {
+    background: transparent !important;
+    border: 1px solid #ddd !important;
+  }
+  .cinematic-mesh-container, .cinematic-grain {
+    display: none !important;
+  }
+  .card-hover-lift {
+    box-shadow: none !important;
+    transform: none !important;
+  }
+}

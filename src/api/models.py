@@ -329,3 +329,28 @@ class ApiKey(Base):
 
     # relationships
     tenant: Mapped["Tenant"] = relationship(back_populates="api_keys")
+
+
+# ── 10. Platform Docs Settings (Global) ─────────────────────────────
+class PlatformDocsSettings(Base):
+    """Global configuration for the /docs YC pitch deck and tech docs."""
+    __tablename__ = "platform_docs_settings"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    # Schedule
+    is_enabled: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
+    start_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    end_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    override_active: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    
+    # JSON content
+    team_members: Mapped[Any] = mapped_column(JSON, default=list, server_default="'[]'::jsonb")
+    pitch_sections: Mapped[Any] = mapped_column(JSON, default=list, server_default="'[]'::jsonb")
+    
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+    updated_by: Mapped[Optional[str]] = mapped_column(String(255))
+
