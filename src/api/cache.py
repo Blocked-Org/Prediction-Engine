@@ -25,7 +25,7 @@ import logging
 import os
 from typing import Any
 
-import redis
+import redis.asyncio as aioredis
 
 logger = logging.getLogger(__name__)
 
@@ -65,12 +65,12 @@ class SimulationCache:
             "REDIS_URL", "redis://localhost:6379/0"
         ))
         self._ttl = default_ttl
-        self._client: redis.Redis | None = None
+        self._client: aioredis.Redis | None = None
 
     # ── Lazy connection ─────────────────────────────────────────────────
-    def _get_client(self) -> redis.Redis:
+    def _get_client(self) -> aioredis.Redis:
         if self._client is None:
-            self._client = redis.from_url(
+            self._client = aioredis.from_url(
                 self._url,
                 decode_responses=True,
                 socket_connect_timeout=2,
