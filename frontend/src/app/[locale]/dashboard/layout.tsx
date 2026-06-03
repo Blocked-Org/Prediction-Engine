@@ -30,6 +30,7 @@ export default async function DashboardLayout({
 
   return (
     <>
+    <div className="dark">
       <SidebarProvider>
         <AppSidebar />
         <main className="flex flex-1 min-w-0 flex-col min-h-screen transition-all duration-300 ease-in-out">
@@ -49,6 +50,7 @@ export default async function DashboardLayout({
           </div>
         </main>
       </SidebarProvider>
+    </div>
 
       {/* Floating AI Chatbot — renders independently of page layout */}
       <ChatWidgetWrapper simulationData={simulationData} />

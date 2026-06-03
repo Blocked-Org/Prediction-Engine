@@ -20,7 +20,7 @@ export function FAQAccordion() {
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      <h2 className="text-3xl font-extrabold text-center text-foreground mb-8 tracking-tight">
+      <h2 className="text-display text-[#0A0A0A] text-center mb-12" style={{ fontSize: 'clamp(2rem, 5vw, 4rem)' }}>
         {t('title')}
       </h2>
       <Accordion type="single" collapsible className="space-y-4">
@@ -28,12 +28,12 @@ export function FAQAccordion() {
           <AccordionItem
             key={item.value}
             value={item.value}
-            className="border border-border/40 bg-card/50 backdrop-blur-sm rounded-xl px-5 py-2.5 transition-colors hover:border-primary/20"
+            className="border border-[#E5E5E5] bg-white rounded-xl px-6 py-3 transition-colors hover:border-[#0A0A0A]"
           >
-            <AccordionTrigger className="text-base font-semibold text-foreground hover:no-underline py-3 text-left">
+            <AccordionTrigger className="text-base font-bold text-[#0A0A0A] hover:no-underline py-3 text-left uppercase tracking-tight">
               {item.q}
             </AccordionTrigger>
-            <AccordionContent className="text-sm text-muted-foreground leading-relaxed pt-2 pb-4">
+            <AccordionContent className="text-sm text-[#6B6B6B] leading-relaxed pt-2 pb-4">
               {item.a}
             </AccordionContent>
           </AccordionItem>

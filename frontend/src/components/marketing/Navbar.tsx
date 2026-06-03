@@ -4,7 +4,6 @@ import { useTranslations, useLocale } from 'next-intl'
 import { Link, usePathname } from '@/i18n/routing'
 import { SignInButton, UserButton, Show } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
-import { Activity, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 
 export function Navbar() {
@@ -17,49 +16,46 @@ export function Navbar() {
   const onboardingUrl = `/${locale}/onboarding`
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 w-full border-b border-border/40 bg-background/60 backdrop-blur-md transition-all duration-300">
-      <div className="mx-auto flex max-w-7xl items-center justify-between p-4 md:px-8">
+    <nav className="fixed top-0 left-0 right-0 z-50 w-full bg-white/80 backdrop-blur-sm border-b border-[#E5E5E5] transition-all duration-300">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 md:px-8 py-4">
         
         {/* Brand Logo */}
-        <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tight text-foreground hover:opacity-90">
-          <Activity className="h-6 w-6 text-primary animate-pulse" />
-          <span>
-            {t.rich('logo', {
-              os: (chunks) => (
-                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  {chunks}
-                </span>
-              )
-            })}
-          </span>
+        <Link href="/" className="font-display text-xl font-black tracking-tight text-[#0A0A0A] uppercase hover:opacity-70 transition-opacity">
+          {t.rich('logo', {
+            os: (chunks) => (
+              <span className="text-[#0A0A0A]">
+                {chunks}
+              </span>
+            )
+          })}
         </Link>
 
-        {/* Desktop Navigation Links */}
-        <div className="hidden md:flex items-center gap-8">
-          <Link href="/features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            {t('features')}
+        {/* Desktop Navigation — Parenthesized Links */}
+        <div className="hidden md:flex items-center gap-2">
+          <Link href="/features" className="nav-link-paren px-3 py-1.5">
+            ( {t('features')} )
           </Link>
-          <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            {t('pricing')}
+          <Link href="/pricing" className="nav-link-paren px-3 py-1.5">
+            ( {t('pricing')} )
           </Link>
-          <Link href="/docs" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            {t('docs')}
+          <Link href="/docs" className="nav-link-paren px-3 py-1.5">
+            ( {t('docs')} )
           </Link>
-          <Link href="/contact" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            {t('contact')}
+          <Link href="/contact" className="nav-link-paren px-3 py-1.5">
+            ( {t('contact')} )
           </Link>
         </div>
 
-        {/* Actions (Language Switcher, Auth, Mobile Toggle) */}
+        {/* Actions */}
         <div className="flex items-center gap-4">
           
-          {/* Language Switcher */}
-          <div className="flex items-center gap-1 bg-muted/60 border border-border/50 rounded-full p-1">
+          {/* Language Switcher — Minimal Pill */}
+          <div className="flex items-center gap-0.5 bg-[#F5F5F0] border border-[#E5E5E5] rounded-full p-0.5">
             <Link
               href={pathname}
               locale="en"
               prefetch={false}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 ${locale === 'en' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 ${locale === 'en' ? 'bg-[#0A0A0A] text-white shadow-sm' : 'text-[#6B6B6B] hover:text-[#0A0A0A]'}`}
             >
               {t('en')}
             </Link>
@@ -67,7 +63,7 @@ export function Navbar() {
               href={pathname}
               locale="bn"
               prefetch={false}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 ${locale === 'bn' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 ${locale === 'bn' ? 'bg-[#0A0A0A] text-white shadow-sm' : 'text-[#6B6B6B] hover:text-[#0A0A0A]'}`}
             >
               {t('bn')}
             </Link>
@@ -77,7 +73,7 @@ export function Navbar() {
           <div className="hidden sm:flex items-center gap-3">
             <Show when="signed-in">
               <Link href="/dashboard" prefetch={false}>
-                <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-foreground">
+                <Button size="sm" className="rounded-full bg-[#0A0A0A] text-white hover:bg-[#333] text-xs font-semibold uppercase tracking-wide px-4">
                   {t('dashboard')}
                 </Button>
               </Link>
@@ -85,72 +81,73 @@ export function Navbar() {
             </Show>
             <Show when="signed-out">
               <SignInButton mode="modal" forceRedirectUrl={dashboardUrl} signUpForceRedirectUrl={onboardingUrl}>
-                <Button size="sm" variant="outline" className="border-primary/20 hover:bg-primary/10">
+                <Button size="sm" className="rounded-full bg-[#0A0A0A] text-white hover:bg-[#333] text-xs font-semibold uppercase tracking-wide px-4">
                   {t('dashboard')}
                 </Button>
               </SignInButton>
             </Show>
           </div>
 
-          {/* Mobile Menu Toggle */}
+          {/* Mobile Menu Toggle — "+ MENU" style */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 text-muted-foreground hover:text-foreground focus:outline-none"
+            className="md:hidden flex items-center gap-1.5 text-[#0A0A0A] font-semibold text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
             aria-label="Toggle menu"
           >
-            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            <span className="text-lg leading-none">{isOpen ? '−' : '+'}</span>
+            <span>{isOpen ? 'CLOSE' : 'MENU'}</span>
           </button>
 
         </div>
       </div>
 
-      {/* Mobile Menu Drawer */}
+      {/* Mobile Menu — Full overlay */}
       {isOpen && (
-        <div className="md:hidden border-b border-border/40 bg-background/95 backdrop-blur-lg animate-in fade-in slide-in-from-top duration-200">
-          <div className="flex flex-col gap-4 p-6">
+        <div className="md:hidden fixed inset-0 top-[65px] bg-white z-40 animate-fade-in">
+          <div className="flex flex-col gap-0 p-8">
             <Link
               href="/features"
               onClick={() => setIsOpen(false)}
-              className="text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className="py-4 border-b border-[#E5E5E5] text-2xl font-black uppercase tracking-tight text-[#0A0A0A] hover:text-[#6B6B6B] transition-colors"
             >
               {t('features')}
             </Link>
             <Link
               href="/pricing"
               onClick={() => setIsOpen(false)}
-              className="text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className="py-4 border-b border-[#E5E5E5] text-2xl font-black uppercase tracking-tight text-[#0A0A0A] hover:text-[#6B6B6B] transition-colors"
             >
               {t('pricing')}
             </Link>
             <Link
               href="/docs"
               onClick={() => setIsOpen(false)}
-              className="text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className="py-4 border-b border-[#E5E5E5] text-2xl font-black uppercase tracking-tight text-[#0A0A0A] hover:text-[#6B6B6B] transition-colors"
             >
               {t('docs')}
             </Link>
             <Link
               href="/contact"
               onClick={() => setIsOpen(false)}
-              className="text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className="py-4 border-b border-[#E5E5E5] text-2xl font-black uppercase tracking-tight text-[#0A0A0A] hover:text-[#6B6B6B] transition-colors"
             >
               {t('contact')}
             </Link>
 
-            {/* Mobile Auth Actions */}
-            <div className="border-t border-border/40 pt-4 flex flex-col gap-3">
+            {/* Mobile Auth */}
+            <div className="pt-8 flex flex-col gap-3">
               <Show when="signed-in">
                 <Link href="/dashboard" prefetch={false} onClick={() => setIsOpen(false)}>
-                  <Button size="default" className="w-full">
+                  <button className="pill-btn w-full justify-center">
                     {t('dashboard')}
-                  </Button>
+                  </button>
                 </Link>
               </Show>
               <Show when="signed-out">
                 <SignInButton mode="modal" forceRedirectUrl={dashboardUrl} signUpForceRedirectUrl={onboardingUrl}>
-                  <Button size="default" className="w-full">
+                  <button className="pill-btn w-full justify-center">
                     {t('dashboard')}
-                  </Button>
+                  </button>
                 </SignInButton>
               </Show>
             </div>

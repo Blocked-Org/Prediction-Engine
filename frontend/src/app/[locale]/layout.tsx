@@ -49,7 +49,7 @@ export default async function RootLayout({
 
   return (
     <ClerkProvider>
-      <html lang={locale} className={`dark ${geistSans.variable} ${geistMono.variable} ${notoSansBengali.variable} h-full antialiased`} suppressHydrationWarning>
+      <html lang={locale} className={`${geistSans.variable} ${geistMono.variable} ${notoSansBengali.variable} h-full antialiased`} suppressHydrationWarning>
         <body className={`min-h-full flex flex-col font-sans ${locale === 'bn' ? 'font-noto-bengali' : ''}`} suppressHydrationWarning>
           <NextIntlClientProvider messages={messages}>
             <TooltipProvider>
