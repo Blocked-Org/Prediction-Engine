@@ -37,7 +37,7 @@ export function BackendHealthBanner() {
   return (
     <div
       role="alert"
-      className="flex items-center justify-between gap-4 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+      className="flex items-center justify-between gap-4 rounded-lg border border-[#EF4444]/40 bg-[#EF4444]/10 px-4 py-3 text-sm text-[#EF4444]"
     >
       <div className="flex items-center gap-2">
         {/* Warning icon */}
@@ -70,7 +70,7 @@ export function BackendHealthBanner() {
         <button
           onClick={() => setDismissed(true)}
           aria-label="Dismiss"
-          className="rounded p-1 hover:bg-destructive/20"
+          className="rounded p-1 hover:bg-[#EF4444]/20"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

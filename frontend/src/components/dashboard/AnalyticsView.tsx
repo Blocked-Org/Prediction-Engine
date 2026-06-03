@@ -356,17 +356,17 @@ export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
     <div className="flex flex-col gap-6 animate-fade-in-up">
       {/* Page header */}
       <div className="flex flex-col gap-1">
-        <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+        <div className="text-xs text-[#6B6B6B] font-semibold uppercase tracking-wider">
           Dashboard &gt; Analytics
         </div>
         <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold tracking-tight font-noto-bengali bg-gradient-to-r from-blue-400 via-indigo-400 to-violet-500 bg-clip-text text-transparent pb-1">
+          <h1 className="text-3xl font-black tracking-tight font-noto-bengali text-[#0A0A0A] uppercase">
             {t("advanced_visualizations")}
           </h1>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-400 border border-emerald-500/20">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0A0A0A] px-2.5 py-0.5 text-xs font-bold text-white">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FACC15] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FACC15]"></span>
             </span>
             Live
           </span>
@@ -383,17 +383,17 @@ export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
 
       {/* ── Simulation status feedback ────────────────────────────────── */}
       {simulationError && (
-        <div className={`rounded-lg border px-4 py-3 text-sm ${
+        <div className={`rounded-xl border px-4 py-3 text-sm ${
           simulationError.includes("client-side estimate") || simulationError.includes("temporarily unavailable")
-            ? "border-amber-500/30 bg-amber-500/10 text-amber-300"
-            : "border-destructive/30 bg-destructive/10 text-destructive"
+            ? "border-[#FACC15] bg-[#FACC15]/10 text-[#0A0A0A]"
+            : "border-[#EF4444]/30 bg-[#EF4444]/10 text-[#EF4444]"
         }`}>
           {simulationError.includes("client-side estimate") ? "⚡ " : ""}{simulationError}
         </div>
       )}
 
       {isSimulating && (
-        <div className="rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-4 py-3 text-sm text-indigo-300">
+        <div className="rounded-xl border border-[#E5E5E5] bg-[#F5F5F0] px-4 py-3 text-sm text-[#0A0A0A]">
           ⏳ Simulation is running… Charts will update automatically when
           results are ready.
         </div>
@@ -401,7 +401,7 @@ export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
 
       {/* ── Row 1: Allocation + Saturation (existing) ───────────────────── */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="card-hover-lift hover:border-indigo-500/30 hover:ring-1 hover:ring-indigo-500/20 duration-300 animate-fade-in">
+        <Card className="border border-[#E5E5E5] bg-white shadow-sm rounded-2xl transition-all duration-300 hover:shadow-md hover:-translate-y-1 animate-fade-in">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="font-noto-bengali">
@@ -427,7 +427,7 @@ export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
           </CardContent>
         </Card>
 
-        <Card className="card-hover-lift hover:border-indigo-500/30 hover:ring-1 hover:ring-indigo-500/20 duration-300 animate-fade-in">
+        <Card className="border border-[#E5E5E5] bg-white shadow-sm rounded-2xl transition-all duration-300 hover:shadow-md hover:-translate-y-1 animate-fade-in">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="font-noto-bengali">
@@ -459,10 +459,10 @@ export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
       </div>
 
       {/* Gradient Separator */}
-      <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-border to-transparent" />
+      <div className="h-[1px] w-full bg-[#E5E5E5]" />
 
       {/* ── Row 2: ROI / iROAS tracking (NEW — Day 3) ───────────────────── */}
-      <Card className="card-hover-lift hover:border-indigo-500/30 hover:ring-1 hover:ring-indigo-500/20 duration-300 animate-fade-in">
+      <Card className="border border-[#E5E5E5] bg-white shadow-sm rounded-2xl transition-all duration-300 hover:shadow-md hover:-translate-y-1 animate-fade-in">
         <CardHeader>
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -486,24 +486,22 @@ export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
               </CardDescription>
             </div>
             {/* iROAS KPI badge */}
-            <div className={`shrink-0 rounded-lg border px-4 py-2 text-center transition-all duration-300 animate-pulse ${
+            <div className={`shrink-0 rounded-xl border px-4 py-2 text-center transition-all duration-300 ${
               latestIROAS >= 1.0 
-                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
-                : "bg-rose-500/10 border-rose-500/20 text-rose-400"
+                ? "bg-[#FACC15]/10 border-[#FACC15] text-[#0A0A0A]" 
+                : "bg-[#EF4444]/10 border-[#EF4444] text-[#EF4444]"
             }`}>
-              <p className={`text-xs font-semibold uppercase tracking-wide ${
-                latestIROAS >= 1.0 ? "text-emerald-500" : "text-rose-500"
-              }`}>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#6B6B6B]">
                 iROAS
               </p>
               <div className="flex items-center justify-center gap-1 mt-1">
-                <span className="text-2xl font-bold font-sans">
+                <span className="text-2xl font-black font-sans text-[#0A0A0A]">
                   {isLoadingROI ? "—" : `${latestIROAS.toFixed(2)}×`}
                 </span>
                 {!isLoadingROI && (
                   latestIROAS >= 1.0 
-                    ? <TrendingUp className="h-5 w-5 text-emerald-500" />
-                    : <TrendingDown className="h-5 w-5 text-rose-500" />
+                    ? <TrendingUp className="h-5 w-5 text-[#0A0A0A]" />
+                    : <TrendingDown className="h-5 w-5 text-[#EF4444]" />
                 )}
               </div>
             </div>
@@ -525,7 +523,7 @@ export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
       <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-border to-transparent" />
 
       {/* ── Row 3: Markov Funnel Journey (NEW — Day 3) ──────────────────── */}
-      <Card className="card-hover-lift hover:border-indigo-500/30 hover:ring-1 hover:ring-indigo-500/20 duration-300 animate-fade-in">
+      <Card className="border border-[#E5E5E5] bg-white shadow-sm rounded-2xl transition-all duration-300 hover:shadow-md hover:-translate-y-1 animate-fade-in">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">

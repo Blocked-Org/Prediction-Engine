@@ -144,20 +144,20 @@ export function SaturationCurveChart({
       },
     });
 
-    // ── Baseline series (blue solid line) ──────────────────────────────
+    // ── Baseline series (black solid line) ──────────────────────────────
     const baselineSeries = chart.addSeries(LineSeries, {
-      color: '#2563eb', // blue-600
+      color: '#0A0A0A', // black
       lineWidth: 3,
       crosshairMarkerVisible: true,
       lastValueVisible: false,
       priceLineVisible: false,
     });
 
-    // ── Override area series (violet translucent fill) ─────────────────
+    // ── Override area series (yellow translucent fill) ─────────────────
     const overrideSeries = chart.addSeries(AreaSeries, {
-      topColor: 'rgba(139, 92, 246, 0.35)',    // violet-500 @ 35%
-      bottomColor: 'rgba(139, 92, 246, 0.05)', // violet-500 @ 5%
-      lineColor: '#8b5cf6',                     // violet-500
+      topColor: 'rgba(250, 204, 21, 0.35)',    // yellow @ 35%
+      bottomColor: 'rgba(250, 204, 21, 0.05)', // yellow @ 5%
+      lineColor: '#FACC15',                     // yellow
       lineWidth: 2,
       crosshairMarkerVisible: false,
       lastValueVisible: false,
@@ -166,7 +166,7 @@ export function SaturationCurveChart({
 
     // ── Override marker line (dashed-feel thin accent) ─────────────────
     const overrideMarker = chart.addSeries(LineSeries, {
-      color: '#8b5cf6',
+      color: '#FACC15', // yellow
       lineWidth: 1,
       lineStyle: 2, // dashed
       crosshairMarkerVisible: false,

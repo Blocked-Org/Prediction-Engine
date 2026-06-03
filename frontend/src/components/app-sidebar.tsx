@@ -42,11 +42,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
 
   const navMain = [
-    { title: t('title'), url: "/dashboard", icon: LayoutDashboard, iconColor: "text-blue-400" },
-    { title: t('advanced_visualizations'), url: "/dashboard/analytics", icon: BarChart3, iconColor: "text-emerald-400", hasNotification: true },
-    { title: t('reporting'), url: "/dashboard/reporting", icon: FileText, iconColor: "text-violet-400" },
-    { title: t('docs_admin') || 'Docs Admin', url: "/dashboard/docs-admin", icon: FileText, iconColor: "text-amber-400" },
-    { title: t('settings'), url: "/dashboard/settings", icon: Settings, iconColor: "text-zinc-400" },
+    { title: t('title'), url: "/dashboard", icon: LayoutDashboard, iconColor: "text-[#0A0A0A]" },
+    { title: t('advanced_visualizations'), url: "/dashboard/analytics", icon: BarChart3, iconColor: "text-[#0A0A0A]", hasNotification: true },
+    { title: t('reporting'), url: "/dashboard/reporting", icon: FileText, iconColor: "text-[#0A0A0A]" },
+    { title: t('docs_admin') || 'Docs Admin', url: "/dashboard/docs-admin", icon: FileText, iconColor: "text-[#6B6B6B]" },
+    { title: t('settings'), url: "/dashboard/settings", icon: Settings, iconColor: "text-[#6B6B6B]" },
   ];
 
   /** Prefetch a locale-aware route on hover/touch intent */
@@ -60,22 +60,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar
       {...props}
-      className="bg-sidebar/85 backdrop-blur-md relative border-r border-r-indigo-500/10 shadow-xl after:absolute after:right-0 after:top-0 after:h-full after:w-[1px] after:bg-gradient-to-b after:from-transparent after:via-indigo-500/40 after:to-transparent after:content-[''] transition-all duration-300"
+      className="bg-white border-r border-[#E5E5E5] transition-all duration-300"
     >
-      <SidebarHeader className="border-b border-sidebar-border/50 pb-4">
+      <SidebarHeader className="border-b border-[#E5E5E5] pb-4">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild className="hover:bg-transparent">
               <Link href="/" prefetch={false} className="flex items-center gap-3">
-                <div className="flex aspect-square size-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 text-white shadow-md shadow-indigo-500/10 transition-all duration-300 hover:scale-105">
+                <div className="flex aspect-square size-9 items-center justify-center rounded-xl bg-[#0A0A0A] text-white shadow-sm transition-all duration-300 hover:scale-105">
                   <Home className="size-4" />
                 </div>
                 <div className="flex flex-col gap-1 leading-none">
-                  <div className="flex items-center gap-1">
-                    <span className="font-normal text-foreground">Brand</span>
-                    <span className="font-extrabold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Sim</span>
+                  <div className="flex items-center gap-0.5">
+                    <span className="font-normal text-[#0A0A0A]">Brand</span>
+                    <span className="font-extrabold text-[#0A0A0A]">OS</span>
                   </div>
-                  <span className="text-[10px] font-medium text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded-full w-fit">v1.0</span>
+                  <span className="text-[10px] font-semibold text-[#6B6B6B] bg-[#F5F5F0] px-1.5 py-0.5 rounded-full w-fit border border-[#E5E5E5]">v1.0</span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -84,7 +84,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="font-noto-bengali">{t('menu')}</SidebarGroupLabel>
+          <SidebarGroupLabel className="font-noto-bengali text-[#6B6B6B] text-xs font-semibold uppercase tracking-wider">{t('menu')}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navMain.map((item) => {
@@ -96,8 +96,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       isActive={isActive}
                       className={`relative transition-all duration-200 hover:translate-x-1 group/btn ${
                         isActive
-                          ? "bg-sidebar-accent/60 font-medium text-sidebar-accent-foreground border-l-2 border-indigo-500 pl-[6px]"
-                          : "hover:bg-sidebar-accent/30"
+                          ? "bg-[#0A0A0A] text-white font-medium rounded-lg"
+                          : "text-[#0A0A0A] hover:bg-[#F5F5F0] rounded-lg"
                       }`}
                     >
                       <Link
@@ -107,14 +107,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         onTouchStart={() => handlePrefetch(item.url)}
                         className="flex items-center justify-between w-full"
                       >
-                        <div className="flex items-center gap-2">
-                          <item.icon className={`size-4 transition-colors duration-200 ${item.iconColor} ${isActive ? "scale-105" : "opacity-80 group-hover/btn:opacity-100"}`} />
-                          <span className="font-noto-bengali">{item.title}</span>
+                        <div className="flex items-center gap-2.5">
+                          <item.icon className={`size-4 transition-colors duration-200 ${isActive ? "text-white" : item.iconColor}`} />
+                          <span className="font-noto-bengali text-sm">{item.title}</span>
                         </div>
                         {item.hasNotification && (
                           <span className="relative flex h-2 w-2 mr-1">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FACC15] opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FACC15]"></span>
                           </span>
                         )}
                       </Link>
@@ -126,22 +126,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t border-sidebar-border/50 pt-4">
+      <SidebarFooter className="border-t border-[#E5E5E5] pt-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <div className="flex items-center justify-between w-full px-2 py-1.5 rounded-lg hover:bg-sidebar-accent/30 transition-all duration-200">
+            <div className="flex items-center justify-between w-full px-2 py-1.5 rounded-lg hover:bg-[#F5F5F0] transition-all duration-200">
               <div className="flex items-center gap-2">
                 <Show when="signed-in">
                   <UserButton showName appearance={{
                     elements: {
                       userButtonBox: "hover:opacity-90 transition-opacity",
-                      userButtonOuterIdentifier: "text-xs text-muted-foreground font-medium"
+                      userButtonOuterIdentifier: "text-xs text-[#6B6B6B] font-medium"
                     }
                   }} />
                 </Show>
               </div>
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-400 uppercase tracking-wider leading-none animate-pulse">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[#F5F5F0] border border-[#E5E5E5] text-[9px] font-bold text-[#0A0A0A] uppercase tracking-wider leading-none">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#22c55e]" />
                 Online
               </div>
             </div>

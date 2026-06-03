@@ -13,16 +13,16 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { 
-  ArrowRight, 
-  Activity, 
-  Layers, 
-  Brain, 
-  GitBranch, 
-  Users, 
-  TrendingUp, 
-  Cpu, 
-  ShieldCheck, 
+import {
+  ArrowRight,
+  Activity,
+  Layers,
+  Brain,
+  GitBranch,
+  Users,
+  TrendingUp,
+  Cpu,
+  ShieldCheck,
   Workflow,
   Sparkles
 } from 'lucide-react'
@@ -45,7 +45,7 @@ const MARQUEE_ITEMS = [
 
 export default function LandingPage() {
   const t = useTranslations('LandingPage')
-  
+
   // Interactive Simulator States
   const [metaBudget, setMetaBudget] = useState(5000)
   const [googleBudget, setGoogleBudget] = useState(3000)
@@ -68,13 +68,13 @@ export default function LandingPage() {
     const metaRev = 14500 * hillMeta
     const googleRev = 8800 * hillGoogle
     const tiktokRev = 5500 * hillTiktok
-    
+
     // 3. Base Organic Revenue
     const organicBase = 3500
 
     const totalSpend = metaBudget + googleBudget + tiktokBudget
     const totalRevenue = metaRev + googleRev + tiktokRev + organicBase
-    
+
     // 4. iROAS (Incremental Return on Ad Spend)
     const incrementalRevenue = totalRevenue - organicBase
     const iroas = totalSpend > 0 ? (incrementalRevenue / totalSpend) : 0
@@ -111,7 +111,7 @@ export default function LandingPage() {
 
   return (
     <div className="relative min-h-screen bg-white text-[#0A0A0A] font-sans overflow-x-hidden" suppressHydrationWarning>
-      
+
       <Navbar />
 
       {/* ═══════════════════════════════════════════════════════════════════ */}
@@ -125,7 +125,7 @@ export default function LandingPage() {
 
       {/* Hero Content */}
       <section className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-16 md:py-24">
-        
+
         {/* Parallax Background Text */}
         <div className="absolute inset-0 flex items-center overflow-hidden pointer-events-none" aria-hidden="true">
           <ParallaxText text="FORECASTS" className="opacity-[0.03]" />
@@ -159,7 +159,7 @@ export default function LandingPage() {
             </div>
 
             <div className="flex flex-col gap-4 max-w-xl">
-              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-[#6B6B6B]">FIND TRENDS</span>
+              {/* <span className="text-xs font-semibold uppercase tracking-[0.15em] text-[#6B6B6B]">FIND TRENDS</span> */}
               <p className="text-base md:text-lg text-[#6B6B6B] leading-relaxed">
                 {t('hero.subtitle')}
               </p>
@@ -195,7 +195,7 @@ export default function LandingPage() {
 
       <section className="relative z-10 bg-[#F5F5F0] py-20 md:py-28">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          
+
           {/* Section Header */}
           <div className="text-center mb-16 section-reveal">
             <h2 className="text-display text-[#0A0A0A] mb-4" style={{ fontSize: 'clamp(2.5rem, 6vw, 5rem)' }}>
@@ -207,7 +207,7 @@ export default function LandingPage() {
           </div>
 
           <div id="bento-grid" className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
-            
+
             {/* Card 1: Cold Start Problem (Wide) */}
             <div className="bento-card md:col-span-8 editorial-card rounded-2xl p-8 flex flex-col justify-between gap-6 group">
               <div className="flex flex-col gap-3">
@@ -293,7 +293,7 @@ export default function LandingPage() {
 
       <section className="relative z-10 py-20 md:py-28 border-t border-[#E5E5E5]">
         <div className="max-w-5xl mx-auto px-4 md:px-8">
-          
+
           <div className="text-center mb-16 section-reveal">
             <div className="inline-flex items-center gap-2 badge-pill mb-4">
               <Workflow className="h-3.5 w-3.5" />
@@ -324,17 +324,15 @@ export default function LandingPage() {
                     key={step.id}
                     type="button"
                     onClick={() => setActiveStep(step.id)}
-                    className={`text-left p-4 rounded-xl border transition-all duration-300 flex items-start gap-4 ${
-                      isActive
+                    className={`text-left p-4 rounded-xl border transition-all duration-300 flex items-start gap-4 ${isActive
                         ? 'bg-[#0A0A0A] border-[#0A0A0A] text-white shadow-lg'
                         : 'bg-white border-[#E5E5E5] text-[#6B6B6B] hover:border-[#0A0A0A]'
-                    }`}
+                      }`}
                   >
-                    <span className={`h-7 w-7 rounded-lg font-bold text-xs flex items-center justify-center shrink-0 border transition-all duration-300 ${
-                      isActive
+                    <span className={`h-7 w-7 rounded-lg font-bold text-xs flex items-center justify-center shrink-0 border transition-all duration-300 ${isActive
                         ? 'bg-[#FACC15] border-[#FACC15] text-[#0A0A0A]'
                         : 'bg-[#F5F5F0] border-[#E5E5E5] text-[#6B6B6B]'
-                    }`}>
+                      }`}>
                       {step.id + 1}
                     </span>
                     <div className="flex flex-col gap-1">
@@ -378,7 +376,7 @@ export default function LandingPage() {
                     <svg className="w-full h-full" viewBox="0 0 200 100">
                       <line x1="0" y1="90" x2="200" y2="90" stroke="#E5E5E5" strokeWidth="1" />
                       <line x1="10" y1="0" x2="10" y2="100" stroke="#E5E5E5" strokeWidth="1" />
-                      
+
                       <path
                         d={`M 10 20 C 60 ${20 + decayRate * 60}, 120 ${80 - (1 - decayRate) * 40}, 190 90`}
                         fill="none"
@@ -387,7 +385,7 @@ export default function LandingPage() {
                         className="transition-all duration-350"
                       />
                     </svg>
-                    
+
                     <div className="absolute bottom-2 right-4 left-4 bg-white border border-[#E5E5E5] p-2 rounded-lg flex items-center gap-3">
                       <span className="text-[10px] text-[#6B6B6B] uppercase font-bold tracking-wider">Adjust Delay</span>
                       <Slider
@@ -419,13 +417,12 @@ export default function LandingPage() {
                       return (
                         <span
                           key={idx}
-                          className={`h-3 w-3 rounded-full transition-all duration-500 ${
-                            isConverted
+                          className={`h-3 w-3 rounded-full transition-all duration-500 ${isConverted
                               ? 'bg-[#FACC15] shadow-[0_0_10px_rgba(250,204,21,0.6)] animate-pulse'
                               : isExposed
                                 ? 'bg-[#0A0A0A]/30'
                                 : 'bg-[#E5E5E5]'
-                          }`}
+                            }`}
                         />
                       )
                     })}
@@ -446,19 +443,19 @@ export default function LandingPage() {
                     <svg className="w-full h-full" viewBox="0 0 200 100">
                       <line x1="10" y1="90" x2="190" y2="90" stroke="#E5E5E5" strokeWidth="1" />
                       <line x1="20" y1="10" x2="20" y2="90" stroke="#E5E5E5" strokeWidth="1" />
-                      
+
                       <circle cx="50" cy="70" r="3" fill="#E5E5E5" />
                       <circle cx="70" cy="55" r="3" fill="#E5E5E5" />
                       <circle cx="85" cy="65" r="3" fill="#E5E5E5" />
                       <circle cx="110" cy="45" r="3" fill="#E5E5E5" />
                       <circle cx="130" cy="60" r="3" fill="#E5E5E5" />
-                      
+
                       <path d="M 40 30 Q 95 32 160 55" fill="none" stroke="#EF4444" strokeWidth="2" strokeDasharray="3 3" />
-                      
+
                       <circle cx="40" cy="30" r="4.5" fill="#EF4444" className="animate-pulse" />
                       <circle cx="95" cy="32" r="4.5" fill="#EF4444" className="animate-pulse" />
                       <circle cx="160" cy="55" r="4.5" fill="#EF4444" className="animate-pulse" />
-                      
+
                       <text x="45" y="24" fill="#6B6B6B" fontSize="7" fontFamily="monospace">Point A (Max ROI)</text>
                       <text x="110" y="28" fill="#6B6B6B" fontSize="7" fontFamily="monospace">Point B (Balanced)</text>
                     </svg>
@@ -478,11 +475,10 @@ export default function LandingPage() {
                           key={node}
                           type="button"
                           onClick={() => setSelectedGraphNode(node)}
-                          className={`text-[8px] uppercase font-bold px-2 py-0.5 rounded border transition-all ${
-                            selectedGraphNode === node
+                          className={`text-[8px] uppercase font-bold px-2 py-0.5 rounded border transition-all ${selectedGraphNode === node
                               ? 'bg-[#FACC15] border-[#FACC15] text-[#0A0A0A]'
                               : 'bg-white border-[#E5E5E5] text-[#6B6B6B] hover:border-[#0A0A0A]'
-                          }`}
+                            }`}
                         >
                           {node}
                         </button>
@@ -495,7 +491,7 @@ export default function LandingPage() {
                       <line x1="100" y1="50" x2="40" y2="30" stroke={selectedGraphNode === 'brand' ? '#0A0A0A' : '#E5E5E5'} strokeWidth="1.5" className="transition-colors duration-300" />
                       <line x1="100" y1="50" x2="160" y2="30" stroke={selectedGraphNode === 'campaign' ? '#0A0A0A' : '#E5E5E5'} strokeWidth="1.5" className="transition-colors duration-300" />
                       <line x1="100" y1="50" x2="100" y2="90" stroke={selectedGraphNode === 'metric' ? '#0A0A0A' : '#E5E5E5'} strokeWidth="1.5" className="transition-colors duration-300" />
-                      
+
                       <circle cx="100" cy="50" r="12" fill="#0A0A0A" stroke="#0A0A0A" strokeWidth="2" />
                       <text x="100" y="53" fill="#FFFFFF" fontSize="6" fontWeight="bold" textAnchor="middle">BrandOS</text>
 
@@ -566,7 +562,7 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════════════════════ */}
 
       <section id="simulator" className="relative z-10 bg-[#F5F5F0] py-20 md:py-28 border-t border-[#E5E5E5]">
-        
+
         {/* Parallax background */}
         <div className="absolute inset-0 flex items-center overflow-hidden pointer-events-none" aria-hidden="true">
           <ParallaxText text="SIMULATE" className="opacity-[0.02]" />
@@ -583,10 +579,10 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-            
+
             {/* Sliders Input Panel */}
             <div className="lg:col-span-5 editorial-card rounded-2xl p-6 sm:p-8 flex flex-col justify-between gap-8 shadow-lg">
-              
+
               {/* Meta Ads Slider */}
               <div className="flex flex-col gap-4 group">
                 <div className="flex justify-between items-center text-sm">
@@ -645,7 +641,7 @@ export default function LandingPage() {
 
               {/* Main Metric Cards */}
               <div className="grid grid-cols-2 gap-4 relative z-10">
-                
+
                 {/* iROAS Output */}
                 <div className="bg-[#F5F5F0] border border-[#E5E5E5] rounded-xl p-5 flex flex-col gap-1 transition-all hover:border-[#0A0A0A]">
                   <span className="text-xs text-[#6B6B6B] font-semibold uppercase tracking-wider">{t('simulator.metrics.iroas')}</span>

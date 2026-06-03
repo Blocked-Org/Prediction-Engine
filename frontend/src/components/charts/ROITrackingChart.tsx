@@ -68,8 +68,8 @@ export function ROITrackingChart({
         horzLines: { color: "rgba(148, 163, 184, 0.15)" },
       },
       crosshair: {
-        vertLine: { color: "rgba(99, 102, 241, 0.6)", width: 1 },
-        horzLine: { color: "rgba(99, 102, 241, 0.6)", width: 1 },
+        vertLine: { color: "rgba(10, 10, 10, 0.6)", width: 1 },
+        horzLine: { color: "rgba(10, 10, 10, 0.6)", width: 1 },
       },
       timeScale: {
         borderVisible: false,
@@ -86,8 +86,8 @@ export function ROITrackingChart({
     // ── 1. Confidence interval band (upper) ─────────────────────────────────
     const upperBand = chart.addSeries(AreaSeries, {
       lineColor: "transparent",
-      topColor: "rgba(99, 102, 241, 0.18)",
-      bottomColor: "rgba(99, 102, 241, 0.04)",
+      topColor: "rgba(10, 10, 10, 0.10)",
+      bottomColor: "rgba(10, 10, 10, 0.02)",
       lineWidth: 1,
       lastValueVisible: false,
       priceLineVisible: false,
@@ -97,8 +97,8 @@ export function ROITrackingChart({
     // ── 2. Confidence interval band (lower — solid baseline for the fill) ───
     const lowerBand = chart.addSeries(AreaSeries, {
       lineColor: "transparent",
-      topColor: "rgba(99, 102, 241, 0.0)",
-      bottomColor: "rgba(99, 102, 241, 0.0)",
+      topColor: "rgba(10, 10, 10, 0.0)",
+      bottomColor: "rgba(10, 10, 10, 0.0)",
       lineWidth: 1,
       lastValueVisible: false,
       priceLineVisible: false,
@@ -107,12 +107,12 @@ export function ROITrackingChart({
 
     // ── 3. iROAS point estimate ─────────────────────────────────────────────
     const iRoasLine = chart.addSeries(LineSeries, {
-      color: "#6366f1", // indigo-500
+      color: "#0A0A0A", // black
       lineWidth: 2,
       crosshairMarkerVisible: true,
       crosshairMarkerRadius: 5,
       crosshairMarkerBorderColor: "#ffffff",
-      crosshairMarkerBackgroundColor: "#6366f1",
+      crosshairMarkerBackgroundColor: "#0A0A0A",
       lastValueVisible: true,
       priceLineVisible: false,
       title: "iROAS",
@@ -120,7 +120,7 @@ export function ROITrackingChart({
 
     // ── 4. Break-even threshold (dashed reference) ──────────────────────────
     const thresholdLine = chart.addSeries(LineSeries, {
-      color: "#f59e0b", // amber-400
+      color: "#FACC15", // yellow
       lineWidth: 1,
       lineStyle: 2, // Dashed
       crosshairMarkerVisible: false,
@@ -162,18 +162,17 @@ export function ROITrackingChart({
     <div className="relative w-full">
       <div ref={containerRef} className="w-full" />
       {/* Legend */}
-      <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+      <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-[#6B6B6B] font-noto-bengali">
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-0.5 w-5 rounded-full bg-indigo-500" />
+          <span className="inline-block h-0.5 w-5 rounded-full bg-[#0A0A0A]" />
           iROAS (point estimate)
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-3 w-5 rounded-sm bg-indigo-200/60" />
+          <span className="inline-block h-3 w-5 rounded-sm bg-[#0A0A0A] opacity-20" />
           90% credible interval
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-0.5 w-5 rounded-full bg-amber-400" style={{ borderTop: "2px dashed #f59e0b", height: 0, marginTop: 1 }} />
-          <span className="inline-block h-0 w-5 border-t-2 border-dashed border-amber-400" />
+          <span className="inline-block h-0.5 w-5 rounded-full" style={{ borderTop: "2px dashed #FACC15", height: 0, marginTop: 1 }} />
           Break-even
         </span>
       </div>

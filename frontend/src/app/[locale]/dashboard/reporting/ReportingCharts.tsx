@@ -17,8 +17,8 @@ const AllocationDonutChart = dynamic(
     ssr: false,
     loading: () => (
       <div className="flex h-[300px] flex-col items-center justify-center gap-3">
-        <Skeleton className="h-[250px] w-full rounded-xl" />
-        <Skeleton className="h-4 w-1/3" />
+        <Skeleton className="h-[250px] w-full rounded-xl bg-[#E5E5E5]" />
+        <Skeleton className="h-4 w-1/3 bg-[#E5E5E5]" />
       </div>
     )
   }
@@ -30,8 +30,8 @@ const SaturationCurveChart = dynamic(
     ssr: false,
     loading: () => (
       <div className="flex h-[300px] flex-col items-center justify-center gap-3">
-        <Skeleton className="h-[250px] w-full rounded-xl" />
-        <Skeleton className="h-4 w-1/3" />
+        <Skeleton className="h-[250px] w-full rounded-xl bg-[#E5E5E5]" />
+        <Skeleton className="h-4 w-1/3 bg-[#E5E5E5]" />
       </div>
     )
   }
@@ -48,20 +48,20 @@ export function ReportingCharts({ allocations, totalSpend, estimatedRevenue }: R
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <Card>
+      <Card className="border border-[#E5E5E5] bg-white shadow-sm rounded-2xl transition-all duration-300 hover:shadow-md">
         <CardHeader>
-          <CardTitle className="font-noto-bengali">{t('pareto_optimal')}</CardTitle>
-          <CardDescription className="font-noto-bengali">{t('pareto_desc')}</CardDescription>
+          <CardTitle className="font-noto-bengali text-[#0A0A0A] font-bold uppercase tracking-wider text-sm">{t('pareto_optimal')}</CardTitle>
+          <CardDescription className="font-noto-bengali text-[#6B6B6B]">{t('pareto_desc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <AllocationDonutChart allocations={allocations} />
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border border-[#E5E5E5] bg-white shadow-sm rounded-2xl transition-all duration-300 hover:shadow-md">
         <CardHeader>
-          <CardTitle className="font-noto-bengali">{t('saturation_curve')}</CardTitle>
-          <CardDescription className="font-noto-bengali">{t('saturation_desc')}</CardDescription>
+          <CardTitle className="font-noto-bengali text-[#0A0A0A] font-bold uppercase tracking-wider text-sm">{t('saturation_curve')}</CardTitle>
+          <CardDescription className="font-noto-bengali text-[#6B6B6B]">{t('saturation_desc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <SaturationCurveChart maxSpend={totalSpend} estimatedRevenue={estimatedRevenue} />

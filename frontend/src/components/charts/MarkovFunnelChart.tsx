@@ -72,11 +72,11 @@ const STAGE_ORDER: Record<string, number> = {
 
 // Colour palette (indigo/emerald gradient, plus amber for absorbing state)
 const NODE_COLOURS: Record<number, { fill: string; stroke: string; text: string }> = {
-  0: { fill: "#e0e7ff", stroke: "#6366f1", text: "#3730a3" }, // indigo – top-of-funnel
-  1: { fill: "#d1fae5", stroke: "#10b981", text: "#065f46" }, // emerald – mid-funnel
-  2: { fill: "#fef3c7", stroke: "#f59e0b", text: "#92400e" }, // amber – lower-funnel
-  3: { fill: "#f0fdf4", stroke: "#22c55e", text: "#166534" }, // green – conversion
-  4: { fill: "#fee2e2", stroke: "#ef4444", text: "#991b1b" }, // red – null/absorbed
+  0: { fill: "#F5F5F0", stroke: "#E5E5E5", text: "#0A0A0A" }, // light gray – top-of-funnel
+  1: { fill: "#F5F5F0", stroke: "#E5E5E5", text: "#0A0A0A" }, // light gray – mid-funnel
+  2: { fill: "#F5F5F0", stroke: "#E5E5E5", text: "#0A0A0A" }, // light gray – lower-funnel
+  3: { fill: "#FACC15", stroke: "#0A0A0A", text: "#0A0A0A" }, // yellow – conversion
+  4: { fill: "#FFFFFF", stroke: "#E5E5E5", text: "#6B6B6B" }, // white – null/absorbed
 };
 
 // ── Helper: resolve column for a node ────────────────────────────────────────
@@ -193,8 +193,8 @@ export function MarkovFunnelChart({ data, height = 240 }: MarkovFunnelChartProps
               y={(y1 + y2) / 2 - 6}
               textAnchor="middle"
               fontSize={10}
-              fill="#64748b"
-              fontFamily="ui-sans-serif, system-ui, sans-serif"
+              fill="#6B6B6B"
+              fontFamily="var(--font-noto-bengali), ui-sans-serif, system-ui, sans-serif"
             >
               {(edge.probability * 100).toFixed(0)}%
             </text>
@@ -243,7 +243,7 @@ export function MarkovFunnelChart({ data, height = 240 }: MarkovFunnelChartProps
             fontSize={12}
             fontWeight={600}
             fill={colours.text}
-            fontFamily="ui-sans-serif, system-ui, sans-serif"
+            fontFamily="var(--font-noto-bengali), ui-sans-serif, system-ui, sans-serif"
           >
             {node.label}
           </text>
@@ -255,7 +255,7 @@ export function MarkovFunnelChart({ data, height = 240 }: MarkovFunnelChartProps
             fontSize={9}
             fill={colours.text}
             opacity={0.75}
-            fontFamily="ui-sans-serif, system-ui, sans-serif"
+            fontFamily="var(--font-noto-bengali), ui-sans-serif, system-ui, sans-serif"
           >
             {(node.trafficShare * 100).toFixed(1)}% traffic
           </text>
@@ -266,7 +266,7 @@ export function MarkovFunnelChart({ data, height = 240 }: MarkovFunnelChartProps
 
   if (nodes.length === 0) {
     return (
-      <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
+      <div className="flex h-40 items-center justify-center text-sm text-[#6B6B6B] font-noto-bengali">
         No Markov chain data available.
       </div>
     );
@@ -291,7 +291,7 @@ export function MarkovFunnelChart({ data, height = 240 }: MarkovFunnelChartProps
             refY="3"
             orient="auto"
           >
-            <path d="M0,0 L0,6 L8,3 z" fill="#94a3b8" />
+            <path d="M0,0 L0,6 L8,3 z" fill="#6B6B6B" />
           </marker>
         </defs>
 
@@ -304,10 +304,10 @@ export function MarkovFunnelChart({ data, height = 240 }: MarkovFunnelChartProps
               y={PAD_Y / 2}
               textAnchor="middle"
               fontSize={10}
-              fill="#94a3b8"
+              fill="#6B6B6B"
               fontWeight={500}
               letterSpacing="0.05em"
-              fontFamily="ui-sans-serif, system-ui, sans-serif"
+              fontFamily="var(--font-noto-bengali), ui-sans-serif, system-ui, sans-serif"
             >
               {label.toUpperCase()}
             </text>
@@ -322,7 +322,7 @@ export function MarkovFunnelChart({ data, height = 240 }: MarkovFunnelChartProps
       </svg>
 
       {/* Legend */}
-      <div className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
+      <div className="mt-3 flex flex-wrap gap-3 text-xs text-[#6B6B6B] font-noto-bengali">
         {Object.entries(NODE_COLOURS)
           .slice(0, 4)
           .map(([col, c]) => {
@@ -338,7 +338,7 @@ export function MarkovFunnelChart({ data, height = 240 }: MarkovFunnelChartProps
             );
           })}
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-1 w-5 rounded-full bg-slate-400 opacity-60" />
+          <span className="inline-block h-1 w-5 rounded-full bg-[#E5E5E5] opacity-60" />
           Edge width ∝ P(i→j)
         </span>
       </div>

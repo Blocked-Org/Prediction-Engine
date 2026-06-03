@@ -40,22 +40,22 @@ const CHANNELS = [
   {
     key: "Meta" as const,
     label: "Meta",
-    color: "bg-blue-500",
-    trackColor: "text-blue-500",
+    color: "bg-[#0A0A0A]",
+    trackColor: "text-[#0A0A0A]",
     icon: "📘",
   },
   {
     key: "Google" as const,
     label: "Google",
-    color: "bg-emerald-500",
-    trackColor: "text-emerald-500",
+    color: "bg-[#FACC15]",
+    trackColor: "text-[#0A0A0A]",
     icon: "🔍",
   },
   {
     key: "TikTok" as const,
     label: "TikTok",
-    color: "bg-pink-500",
-    trackColor: "text-pink-500",
+    color: "bg-[#EF4444]",
+    trackColor: "text-[#EF4444]",
     icon: "🎵",
   },
 ] as const;
@@ -120,25 +120,21 @@ export function SimulationControls({
   return (
     <Card
       id="simulation-controls"
-      className="relative overflow-hidden border-dashed border-indigo-300/50"
+      className="relative overflow-hidden border border-[#E5E5E5] bg-white shadow-sm rounded-2xl"
     >
-      {/* Decorative gradient accent */}
-      <div 
-        className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 via-emerald-400 to-pink-500"
-        style={{
-          backgroundSize: '200% 100%',
-          animation: 'shimmer 4s linear infinite',
-        }}
-      />
+      {/* Top accent bar */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-[#FACC15]" />
 
       <CardHeader className="pb-4">
         <div className="flex items-center gap-2">
-          <FlaskConical className="size-5 text-indigo-500" />
-          <CardTitle className="font-noto-bengali text-lg">
+          <div className="p-1.5 rounded-lg bg-[#FACC15]">
+            <FlaskConical className="size-4 text-[#0A0A0A]" />
+          </div>
+          <CardTitle className="font-noto-bengali text-lg text-[#0A0A0A] font-bold">
             {t("title")}
           </CardTitle>
         </div>
-        <CardDescription className="font-noto-bengali">
+        <CardDescription className="font-noto-bengali text-[#6B6B6B]">
           {t("description")}
         </CardDescription>
       </CardHeader>
@@ -150,16 +146,16 @@ export function SimulationControls({
             <div className="flex items-center justify-between">
               <Label
                 htmlFor={`slider-${key}`}
-                className="flex items-center gap-2 text-sm font-medium"
+                className="flex items-center gap-2 text-sm font-semibold text-[#0A0A0A]"
               >
                 <span>{icon}</span>
                 <span>{label}</span>
               </Label>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold tabular-nums">
+                <span className="text-sm font-bold tabular-nums text-[#0A0A0A]">
                   {formatCurrency(budgets[key])}
                 </span>
-                <span className="rounded-md bg-muted px-1.5 py-0.5 text-xs text-muted-foreground tabular-nums">
+                <span className="rounded-full bg-[#F5F5F0] border border-[#E5E5E5] px-2 py-0.5 text-xs font-semibold text-[#6B6B6B] tabular-nums">
                   {formatPercent(budgets[key], totalAllocated)}
                 </span>
               </div>
@@ -184,13 +180,13 @@ export function SimulationControls({
         ))}
 
         {/* ── Total allocation summary ─────────────────────────────────── */}
-        <div className={`flex items-center justify-between rounded-lg border bg-muted/40 px-4 py-3 transition-all duration-300 ${
-          isPulsing ? "animate-pulse border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)] bg-indigo-500/5" : ""
+        <div className={`flex items-center justify-between rounded-xl border bg-[#F5F5F0] px-4 py-3 transition-all duration-300 ${
+          isPulsing ? "border-[#FACC15] shadow-sm bg-[#FACC15]/5" : "border-[#E5E5E5]"
         }`}>
-          <span className="text-sm font-medium text-muted-foreground">
+          <span className="text-sm font-medium text-[#6B6B6B]">
             {t("total_allocated")}
           </span>
-          <span className="text-lg font-bold tabular-nums">
+          <span className="text-lg font-black tabular-nums text-[#0A0A0A]">
             {formatCurrency(totalAllocated)}
           </span>
         </div>
@@ -200,7 +196,7 @@ export function SimulationControls({
           id="run-simulation-btn"
           onClick={handleRun}
           disabled={isLoading || totalAllocated === 0}
-          className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg transition-all hover:from-indigo-500 hover:to-violet-500 hover:shadow-indigo-200/50 active:scale-[0.98] disabled:opacity-60"
+          className="w-full bg-[#0A0A0A] text-white shadow-sm transition-all hover:bg-[#333] active:scale-[0.98] disabled:opacity-60 rounded-full font-bold text-sm uppercase tracking-wide h-11"
           size="lg"
         >
           {isLoading ? (
@@ -215,7 +211,7 @@ export function SimulationControls({
             </>
           )}
         </Button>
-        <p className="text-center text-xs text-muted-foreground mt-1">
+        <p className="text-center text-xs text-[#6B6B6B] mt-1">
           Sliders update the preview curve instantly. This button runs a full Bayesian re-optimization on the server.
         </p>
       </CardContent>

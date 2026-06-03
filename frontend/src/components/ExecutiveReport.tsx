@@ -77,38 +77,38 @@ export function ExecutiveReport({ simulationData }: ExecutiveReportProps) {
   };
 
   return (
-    <Card className="mt-6 w-full shadow-lg border-indigo-500/20 relative overflow-hidden card-hover-lift hover:shadow-indigo-500/5 duration-300">
+    <Card className="mt-6 w-full shadow-sm border border-[#E5E5E5] relative overflow-hidden transition-all hover:shadow-md duration-300 rounded-2xl bg-white">
       {/* Animated Progress Bar at top of Card when generating */}
       {isLoading && (
-        <div className="absolute top-0 inset-x-0 h-1 bg-muted/30 overflow-hidden z-30">
-          <div className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 animate-pulse w-full" />
+        <div className="absolute top-0 inset-x-0 h-1 bg-[#E5E5E5] overflow-hidden z-30">
+          <div className="h-full bg-[#FACC15] animate-pulse w-full" />
         </div>
       )}
       
       <CardHeader className="flex flex-col md:flex-row md:items-center justify-between pb-4 gap-4">
         <div>
           <CardTitle className="flex items-center gap-2 font-noto-bengali">
-            <Bot className="h-6 w-6 text-indigo-500" />
+            <Bot className="h-6 w-6 text-[#0A0A0A]" />
             {t('title')}
           </CardTitle>
-          <CardDescription className="font-noto-bengali">
+          <CardDescription className="font-noto-bengali text-[#6B6B6B]">
             {t('description')}
           </CardDescription>
         </div>
         
         <div className="flex items-center gap-3">
           {provider === 'offline' && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full animate-in fade-in zoom-in duration-300 shadow-sm shrink-0">
-              <Zap className="h-3 w-3 fill-current animate-pulse text-emerald-400" />
+            <div className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold bg-[#F5F5F0] text-[#0A0A0A] border border-[#E5E5E5] rounded-full animate-in fade-in zoom-in duration-300 shadow-sm shrink-0">
+              <Zap className="h-3 w-3 fill-current text-[#0A0A0A]" />
               <span>No Cloud Required</span>
             </div>
           )}
           
           {/* Segmented Control */}
-          <div className="relative flex items-center bg-muted p-1 rounded-xl font-noto-bengali border border-border/40 shrink-0">
+          <div className="relative flex items-center bg-[#F5F5F0] p-1 rounded-xl font-noto-bengali border border-[#E5E5E5] shrink-0">
             {/* Sliding background indicator */}
             <div 
-              className="absolute top-1 bottom-1 rounded-lg bg-card shadow-sm border border-border/20 transition-all duration-300 ease-out"
+              className="absolute top-1 bottom-1 rounded-lg bg-white shadow-sm border border-[#E5E5E5] transition-all duration-300 ease-out"
               style={{
                 left: provider === 'cloud' ? '4px' : 'calc(50% + 2px)',
                 width: 'calc(50% - 6px)',
@@ -118,22 +118,22 @@ export function ExecutiveReport({ simulationData }: ExecutiveReportProps) {
               onClick={() => setProvider('cloud')}
               className={`relative z-10 flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300 w-24 cursor-pointer ${
                 provider === 'cloud' 
-                  ? 'text-blue-400' 
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'text-[#0A0A0A]' 
+                  : 'text-[#6B6B6B] hover:text-[#0A0A0A]'
               }`}
             >
-              <Cloud className={`h-4 w-4 transition-all duration-300 ${provider === 'cloud' ? 'scale-110 text-blue-400' : 'text-muted-foreground'}`} />
+              <Cloud className={`h-4 w-4 transition-all duration-300 ${provider === 'cloud' ? 'scale-110 text-[#0A0A0A]' : 'text-[#6B6B6B]'}`} />
               {t('cloud')}
             </button>
             <button 
               onClick={() => setProvider('offline')}
               className={`relative z-10 flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300 w-24 cursor-pointer ${
                 provider === 'offline' 
-                  ? 'text-emerald-400' 
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'text-[#0A0A0A]' 
+                  : 'text-[#6B6B6B] hover:text-[#0A0A0A]'
               }`}
             >
-              <Server className={`h-4 w-4 transition-all duration-300 ${provider === 'offline' ? 'scale-110 text-emerald-400' : 'text-muted-foreground'}`} />
+              <Server className={`h-4 w-4 transition-all duration-300 ${provider === 'offline' ? 'scale-110 text-[#0A0A0A]' : 'text-[#6B6B6B]'}`} />
               {t('offline')}
             </button>
           </div>
@@ -142,17 +142,13 @@ export function ExecutiveReport({ simulationData }: ExecutiveReportProps) {
       
       <CardContent className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5 w-full">
-          <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-1 pl-0.5">
+          <span className="text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest flex items-center gap-1 pl-0.5">
             ✨ AI-Powered
           </span>
           <button
             onClick={handleGenerate}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600 text-white h-11 px-4 py-2.5 rounded-lg font-bold shadow-lg transition-all duration-300 hover:shadow-indigo-500/30 hover:scale-[1.005] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed font-noto-bengali cursor-pointer bg-[length:200%_auto] hover:bg-right"
-            style={{
-              backgroundSize: '200% 100%',
-              animation: isLoading ? 'none' : 'shimmer 4s linear infinite',
-            }}
+            className="w-full flex items-center justify-center gap-2 bg-[#0A0A0A] text-white h-11 px-4 py-2.5 rounded-full font-bold shadow-sm transition-all duration-300 hover:bg-[#333] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed font-noto-bengali cursor-pointer text-sm uppercase tracking-wide"
           >
             {isLoading ? (
               <>
@@ -166,7 +162,7 @@ export function ExecutiveReport({ simulationData }: ExecutiveReportProps) {
         </div>
 
         {error && (
-          <div className="flex items-start gap-2 p-4 text-sm text-red-600 bg-red-50 dark:bg-red-950/50 dark:text-red-400 rounded-md font-noto-bengali">
+          <div className="flex items-start gap-2 p-4 text-sm text-[#EF4444] bg-[#EF4444]/5 border border-[#EF4444]/20 rounded-xl font-noto-bengali">
             <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
             <div>
               <p className="font-semibold">{t('generation_failed')}</p>
@@ -187,20 +183,20 @@ export function ExecutiveReport({ simulationData }: ExecutiveReportProps) {
         )}
 
         {completion && (
-          <div className="relative mt-4 p-6 bg-slate-950 text-slate-100 rounded-lg border border-slate-800/80 shadow-2xl font-noto-bengali group/output overflow-hidden">
-            {/* Subtle border-left gradient */}
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 via-indigo-500 to-purple-600" />
+          <div className="relative mt-4 p-6 bg-[#F5F5F0] text-[#0A0A0A] rounded-2xl border border-[#E5E5E5] shadow-sm font-noto-bengali group/output overflow-hidden">
+            {/* Subtle border-left accent */}
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#FACC15] rounded-l-2xl" />
             
             {/* Copy to Clipboard button */}
             <div className="absolute top-4 right-4 z-20">
               <button
                 onClick={handleCopy}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-md bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:border-slate-700 text-slate-300 hover:text-white transition-all cursor-pointer shadow-sm active:scale-95"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-white border border-[#E5E5E5] hover:bg-[#F5F5F0] text-[#0A0A0A] transition-all cursor-pointer shadow-sm active:scale-95"
               >
                 {copied ? (
                   <>
-                    <span className="text-emerald-400">✓</span>
-                    <span className="text-emerald-400">Copied</span>
+                    <span className="text-[#0A0A0A]">✓</span>
+                    <span className="text-[#0A0A0A]">Copied</span>
                   </>
                 ) : (
                   <>
@@ -214,12 +210,12 @@ export function ExecutiveReport({ simulationData }: ExecutiveReportProps) {
             </div>
 
             {/* Markdown Output */}
-            <div className="prose dark:prose-invert max-w-none prose-slate pr-10 pl-2
-              prose-headings:text-slate-100 prose-strong:text-indigo-300 prose-code:text-indigo-400
-              prose-code:bg-slate-900/60 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
+            <div className="prose max-w-none pr-10 pl-2
+              prose-headings:text-[#0A0A0A] prose-strong:text-[#0A0A0A] prose-code:text-[#0A0A0A]
+              prose-code:bg-white prose-code:border prose-code:border-[#E5E5E5] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
               <ReactMarkdown>{completion}</ReactMarkdown>
               {isLoading && (
-                <span className="inline-block w-1.5 h-4 ml-1 bg-indigo-400 animate-pulse align-middle" />
+                <span className="inline-block w-1.5 h-4 ml-1 bg-[#0A0A0A] animate-pulse align-middle" />
               )}
             </div>
           </div>
