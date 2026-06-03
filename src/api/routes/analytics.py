@@ -13,7 +13,7 @@ from datetime import date, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from neo4j.exceptions import Neo4jError, ServiceUnavailable
+from neo4j.exceptions import ServiceUnavailable
 
 from src.api.auth import Role, require_role
 from src.api.cache import get_simulation_cache
@@ -170,11 +170,24 @@ async def get_roi_analytics(
         impressions = max(clicks, int(clicks / 0.025))
         conversions = max(1, int(clicks * 0.02))
 
+        # Distribute the budget across primary channels or split equally
+        primary_channels = [ch.lower() for ch in _as_str_list(campaign.get("primary_channels"), ["Meta", "Google", "TikTok"])]
+        spend_meta = budget / len(primary_channels) if "meta" in primary_channels else 0.0
+        spend_google = budget / len(primary_channels) if "google" in primary_channels else 0.0
+        spend_tiktok = budget / len(primary_channels) if "tiktok" in primary_channels else 0.0
+        if spend_meta == 0.0 and spend_google == 0.0 and spend_tiktok == 0.0:
+            spend_meta = spend_google = spend_tiktok = budget / 3.0
+
+        revenue = _as_float(campaign.get("historical_revenue"), conversions * 100.0)
+
         sim_request = SimulationRequest(
             Impressions=float(impressions),
             Clicks=clicks,
-            Spent=budget,
+            spend_meta=spend_meta,
+            spend_google=spend_google,
+            spend_tiktok=spend_tiktok,
             Total_Conversion=conversions,
+            revenue=revenue,
             age=str(campaign.get("target_age_range") or "25-29"),
             gender="M",
             interest="Travel",
@@ -245,7 +258,6 @@ def _build_markov_funnel(
 
     # Map transition matrix states to frontend node IDs
     tm_states = list(transition_matrix.index) if hasattr(transition_matrix, "index") else []
-    channel_ids = {ch.lower().replace(" ", "_"): ch for ch in channels}
 
     # Helper to find the best matching state in the transition matrix
     def _find_tm_state(node_id: str) -> str | None:
@@ -263,10 +275,10 @@ def _build_markov_funnel(
         if start_state and ch_state:
             prob = float(transition_matrix.loc[start_state, ch_state])
             if prob > 0.01:
-                edges.append(MarkovEdge(**{"from": "organic", "to": ch_id, "probability": round(prob, 3)}))
+                edges.append(MarkovEdge.model_validate({"from": "organic", "to": ch_id, "probability": round(prob, 3)}))
         else:
             # Fallback: distribute evenly
-            edges.append(MarkovEdge(**{"from": "organic", "to": ch_id, "probability": round(0.6 / len(channels), 3)}))
+            edges.append(MarkovEdge.model_validate({"from": "organic", "to": ch_id, "probability": round(0.6 / len(channels), 3)}))
 
     # organic -> null
     start_to_null = 0.0
@@ -274,7 +286,7 @@ def _build_markov_funnel(
     null_state = _find_tm_state("Null")
     if start_state and null_state:
         start_to_null = float(transition_matrix.loc[start_state, null_state])
-    edges.append(MarkovEdge(**{"from": "organic", "to": "null", "probability": round(max(0.1, start_to_null), 3)}))
+    edges.append(MarkovEdge.model_validate({"from": "organic", "to": "null", "probability": round(max(0.1, start_to_null), 3)}))
 
     # Channel -> retargeting / converted / null (from real probabilities)
     for ch in channels:
@@ -290,17 +302,17 @@ def _build_markov_funnel(
             # channel -> retargeting (remainder)
             p_retarget = round(max(0.0, 1.0 - p_conv - p_null), 3)
 
-            edges.append(MarkovEdge(**{"from": ch_id, "to": "retargeting", "probability": round(p_retarget, 3)}))
-            edges.append(MarkovEdge(**{"from": ch_id, "to": "converted", "probability": round(p_conv, 3)}))
-            edges.append(MarkovEdge(**{"from": ch_id, "to": "null", "probability": round(p_null, 3)}))
+            edges.append(MarkovEdge.model_validate({"from": ch_id, "to": "retargeting", "probability": round(p_retarget, 3)}))
+            edges.append(MarkovEdge.model_validate({"from": ch_id, "to": "converted", "probability": round(p_conv, 3)}))
+            edges.append(MarkovEdge.model_validate({"from": ch_id, "to": "null", "probability": round(p_null, 3)}))
         else:
-            edges.append(MarkovEdge(**{"from": ch_id, "to": "retargeting", "probability": 0.35}))
-            edges.append(MarkovEdge(**{"from": ch_id, "to": "converted", "probability": 0.25}))
-            edges.append(MarkovEdge(**{"from": ch_id, "to": "null", "probability": 0.4}))
+            edges.append(MarkovEdge.model_validate({"from": ch_id, "to": "retargeting", "probability": 0.35}))
+            edges.append(MarkovEdge.model_validate({"from": ch_id, "to": "converted", "probability": 0.25}))
+            edges.append(MarkovEdge.model_validate({"from": ch_id, "to": "null", "probability": 0.4}))
 
     # Retargeting -> converted / null
-    edges.append(MarkovEdge(**{"from": "retargeting", "to": "converted", "probability": 0.55}))
-    edges.append(MarkovEdge(**{"from": "retargeting", "to": "null", "probability": 0.45}))
+    edges.append(MarkovEdge.model_validate({"from": "retargeting", "to": "converted", "probability": 0.55}))
+    edges.append(MarkovEdge.model_validate({"from": "retargeting", "to": "null", "probability": 0.45}))
 
     return nodes, edges
 

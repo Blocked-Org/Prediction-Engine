@@ -124,4 +124,5 @@ class SimulationRequest(BaseModel):
     endogenous: EndogenousMatrix
     transactional: TransactionalMatrix
     audience: AudienceMatrix
+    exogenous: ExogenousMatrix = Field(default_factory=ExogenousMatrix)
     budget_overrides: dict[str, float] | None = Field(default=None, description="Optional overrides for specific channels.")

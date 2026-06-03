@@ -1,5 +1,4 @@
 import logging
-import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List
 
@@ -100,7 +99,7 @@ def update_docs_config(
     try:
         start_dt = datetime.fromisoformat(payload.schedule.startDate.replace('Z', '+00:00'))
         end_dt = datetime.fromisoformat(payload.schedule.endDate.replace('Z', '+00:00'))
-    except ValueError as e:
+    except ValueError:
         raise HTTPException(status_code=400, detail="Invalid date format. Must be ISO 8601.")
         
     if not settings:

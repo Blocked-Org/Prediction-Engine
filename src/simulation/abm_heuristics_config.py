@@ -11,8 +11,6 @@ Adjust them based on market research as the product evolves.
 
 from __future__ import annotations
 
-from pydantic import Field
-from pydantic_settings import BaseSettings
 
 
 # ──────────────────────────────────────────────────────────────────────────── #

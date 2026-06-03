@@ -76,7 +76,7 @@ async def simulate(
         total_spend = payload.endogenous.spend_meta + payload.endogenous.spend_google + payload.endogenous.spend_tiktok
         logger.info(
             "Enqueuing simulation request: Impressions=%s, total_spend=%s, age=%s, gender=%s, interest=%s, competitor_urls=%d, overrides=%s",
-            flat_payload["Impressions"], total_spend, flat_payload["age"], flat_payload["gender"], flat_payload["interest"], len(flat_payload["competitor_urls"]), "yes" if payload.budget_overrides else "no"
+            flat_payload["Impressions"], total_spend, flat_payload["age"], flat_payload["gender"], flat_payload["interest"], len(payload.exogenous.competitor_urls), "yes" if payload.budget_overrides else "no"
         )
         
         # Enqueue the Celery task — does NOT block the ASGI thread

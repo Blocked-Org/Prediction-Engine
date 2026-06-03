@@ -207,10 +207,6 @@ def run_micro_simulation(params: Union[SimulationRequest, Dict[str, Any]]) -> Si
         bayesian_roi_signal = max(0.0, float(target_samples.mean()))
         logger.info(f"Bayesian prior predictive mean revenue signal: {bayesian_roi_signal:.2f}")
 
-        # 5. Blend ABM conversion counts with Bayesian signal to compute metrics
-        df = env.datacollector.get_model_vars_dataframe()
-        total_conversions = float(df['Total_Conversions'].iloc[-1]) if not df.empty else 0.0
-        
         # Calculate actual ROI from real revenue / total_spend (no magic number)
         abm_roi = revenue / total_budget if total_budget > 0 else 0.0
         # Weight: 60% Bayesian signal, 40% ABM — Bayesian dominates when graph data is present
