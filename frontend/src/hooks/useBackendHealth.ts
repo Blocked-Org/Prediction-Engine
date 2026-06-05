@@ -55,11 +55,15 @@ export function useBackendHealth(
   }, []);
 
   useEffect(() => {
-    check();
+    const init = setTimeout(() => void check(), 0);
     if (autoRefreshMs > 0) {
       const interval = setInterval(check, autoRefreshMs);
-      return () => clearInterval(interval);
+      return () => {
+        clearTimeout(init);
+        clearInterval(interval);
+      };
     }
+    return () => clearTimeout(init);
   }, [check, autoRefreshMs]);
 
   return { healthy, services, checking, refresh: check };

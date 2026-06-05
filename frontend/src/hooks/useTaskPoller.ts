@@ -47,18 +47,29 @@ export function useTaskPoller(
 ): TaskPollerReturn {
   const { intervalMs = 2000, timeoutMs = 5 * 60 * 1000, onSuccess, onError } = options;
 
-  const [status, setStatus] = useState<TaskState>("idle");
+  const [prevTaskId, setPrevTaskId] = useState(taskId);
+
+  const [status, setStatus] = useState<TaskState>(taskId ? "PENDING" : "idle");
   const [result, setResult] = useState<unknown>(null);
   const [error, setError] = useState<string | null>(null);
+
+  if (taskId !== prevTaskId) {
+    setPrevTaskId(taskId);
+    setStatus(taskId ? "PENDING" : "idle");
+    setResult(null);
+    setError(null);
+  }
 
   // Use refs for callbacks to avoid re-triggering the effect when they change
   const onSuccessRef = useRef(onSuccess);
   const onErrorRef = useRef(onError);
-  onSuccessRef.current = onSuccess;
-  onErrorRef.current = onError;
+  useEffect(() => {
+    onSuccessRef.current = onSuccess;
+    onErrorRef.current = onError;
+  }, [onSuccess, onError]);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const startTimeRef = useRef<number>(Date.now());
+  const startTimeRef = useRef<number>(0);
   const isActiveRef = useRef(false);
 
   const stop = () => {
@@ -71,13 +82,9 @@ export function useTaskPoller(
 
   useEffect(() => {
     if (!taskId) {
-      setStatus("idle");
       return;
     }
 
-    setStatus("PENDING");
-    setResult(null);
-    setError(null);
     startTimeRef.current = Date.now();
     isActiveRef.current = true;
 
@@ -130,7 +137,6 @@ export function useTaskPoller(
     intervalRef.current = setInterval(poll, intervalMs);
 
     return () => stop();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId, intervalMs, timeoutMs]);
 
   return { status, result, error, stop };

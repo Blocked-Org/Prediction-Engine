@@ -38,7 +38,7 @@ export async function getDocsConfig(): Promise<DocsConfigData> {
     if (res.ok) {
       return await res.json();
     }
-  } catch (e) {
+  } catch {
     // Quietly fallback when backend is offline
   }
   return {

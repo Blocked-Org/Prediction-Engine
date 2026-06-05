@@ -21,7 +21,8 @@ const weaviateClient = weaviate.client({
 async function retrieveVectorContext(query: string): Promise<string> {
   try {
     const vectorStore = new WeaviateVectorStore({
-      weaviateClient: weaviateClient as any,
+      // @ts-expect-error Type mismatch between weaviate-ts-client and llamaindex
+      weaviateClient: weaviateClient,
       indexName: 'Campaign', // Will fall back if not populated yet
     });
     
@@ -33,11 +34,13 @@ async function retrieveVectorContext(query: string): Promise<string> {
     
     const contextLines = ["### Weaviate Vector Retrieval (Semantic Matches)"];
     nodes.forEach((n) => {
-      contextLines.push(`- ${(n.node as any).text}`);
+      const text = 'text' in n.node ? String(n.node.text) : '';
+      contextLines.push(`- ${text}`);
     });
     return contextLines.join('\\n');
-  } catch (error: any) {
-    console.warn("Weaviate vector retrieval skipped (likely unpopulated):", error.message || error);
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.warn("Weaviate vector retrieval skipped (likely unpopulated):", err.message || error);
     return "";
   }
 }

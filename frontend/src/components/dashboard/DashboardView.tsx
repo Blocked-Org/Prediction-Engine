@@ -32,7 +32,6 @@ const DynamicDataTable = dynamic(
       </div>
     ),
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) as ComponentType<DataTableProps<any, any>>;
 
 type DashboardViewProps = {
@@ -49,7 +48,7 @@ export function DashboardView({ data }: DashboardViewProps) {
     0
   );
 
-  let rawRevenue = optimization_result.expected_forecast.estimated_revenue;
+  const rawRevenue = optimization_result.expected_forecast.estimated_revenue;
   let estimatedRevenue = rawRevenue;
   let isProjected = false;
   
