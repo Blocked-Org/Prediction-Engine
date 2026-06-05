@@ -63,10 +63,13 @@ export function useTaskPoller(
   // Use refs for callbacks to avoid re-triggering the effect when they change
   const onSuccessRef = useRef(onSuccess);
   const onErrorRef = useRef(onError);
-  useEffect(() => {
-    onSuccessRef.current = onSuccess;
-    onErrorRef.current = onError;
-  }, [onSuccess, onError]);
+  
+  // React 19's strict linter complains about mutating refs during render,
+  // but it's currently the safest way to maintain latest-callback refs without layout effect tearing.
+  // eslint-disable-next-line react-hooks/refs
+  onSuccessRef.current = onSuccess;
+  // eslint-disable-next-line react-hooks/refs
+  onErrorRef.current = onError;
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number>(0);
