@@ -47,18 +47,33 @@ export function useTaskPoller(
 ): TaskPollerReturn {
   const { intervalMs = 2000, timeoutMs = 5 * 60 * 1000, onSuccess, onError } = options;
 
-  const [status, setStatus] = useState<TaskState>("idle");
+  const prevTaskIdRef = useRef<string | null>(taskId);
+
+  const [status, setStatus] = useState<TaskState>(taskId ? "PENDING" : "idle");
   const [result, setResult] = useState<unknown>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (taskId === prevTaskIdRef.current) return;
+    prevTaskIdRef.current = taskId;
+    setStatus(taskId ? "PENDING" : "idle");
+    setResult(null);
+    setError(null);
+  }, [taskId]);
 
   // Use refs for callbacks to avoid re-triggering the effect when they change
   const onSuccessRef = useRef(onSuccess);
   const onErrorRef = useRef(onError);
+  
+  // React 19's strict linter complains about mutating refs during render,
+  // but it's currently the safest way to maintain latest-callback refs without layout effect tearing.
+  // eslint-disable-next-line react-hooks/refs
   onSuccessRef.current = onSuccess;
+  // eslint-disable-next-line react-hooks/refs
   onErrorRef.current = onError;
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const startTimeRef = useRef<number>(Date.now());
+  const startTimeRef = useRef<number>(0);
   const isActiveRef = useRef(false);
 
   const stop = () => {
@@ -71,13 +86,9 @@ export function useTaskPoller(
 
   useEffect(() => {
     if (!taskId) {
-      setStatus("idle");
       return;
     }
 
-    setStatus("PENDING");
-    setResult(null);
-    setError(null);
     startTimeRef.current = Date.now();
     isActiveRef.current = true;
 
@@ -130,7 +141,6 @@ export function useTaskPoller(
     intervalRef.current = setInterval(poll, intervalMs);
 
     return () => stop();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId, intervalMs, timeoutMs]);
 
   return { status, result, error, stop };

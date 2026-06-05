@@ -190,7 +190,7 @@ export function SaturationCurveChart({
       overrideMarkerRef.current = null;
     };
     // Chart is created once — data updates go through the refs below
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   // ── Update baseline data when source props change ───────────────────────
