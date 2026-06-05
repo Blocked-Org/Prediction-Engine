@@ -47,18 +47,19 @@ export function useTaskPoller(
 ): TaskPollerReturn {
   const { intervalMs = 2000, timeoutMs = 5 * 60 * 1000, onSuccess, onError } = options;
 
-  const [prevTaskId, setPrevTaskId] = useState(taskId);
+  const prevTaskIdRef = useRef<string | null>(taskId);
 
   const [status, setStatus] = useState<TaskState>(taskId ? "PENDING" : "idle");
   const [result, setResult] = useState<unknown>(null);
   const [error, setError] = useState<string | null>(null);
 
-  if (taskId !== prevTaskId) {
-    setPrevTaskId(taskId);
+  useEffect(() => {
+    if (taskId === prevTaskIdRef.current) return;
+    prevTaskIdRef.current = taskId;
     setStatus(taskId ? "PENDING" : "idle");
     setResult(null);
     setError(null);
-  }
+  }, [taskId]);
 
   // Use refs for callbacks to avoid re-triggering the effect when they change
   const onSuccessRef = useRef(onSuccess);
