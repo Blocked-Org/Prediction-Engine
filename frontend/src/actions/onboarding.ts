@@ -1,7 +1,6 @@
 "use server";
 
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 
 import type { SimulationRequest } from "@/lib/types/contracts";
 
@@ -84,10 +83,10 @@ export async function completeOnboarding(
   }
 
   if (shouldRedirect) {
-    redirect(`/${locale}/dashboard`);
+    return { success: true };
   }
   
-  return { success: true };
+  return { success: false, error: "Onboarding could not be completed. Please try again." };
 }
 
 export async function syncOnboardingMetadata(

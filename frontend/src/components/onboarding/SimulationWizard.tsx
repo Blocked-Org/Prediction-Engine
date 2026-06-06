@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { useAuth } from "@clerk/nextjs"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, type FieldPath } from "react-hook-form"
@@ -133,6 +134,7 @@ function NumberField({
 }
 
 export function SimulationWizard({ locale }: { locale: string }) {
+  const router = useRouter()
   const { userId, isLoaded } = useAuth()
   const [step, setStep] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -219,7 +221,9 @@ export function SimulationWizard({ locale }: { locale: string }) {
     }
 
     const result = await completeOnboarding(locale, payload)
-    if (!result.success) {
+    if (result.success) {
+      router.push(`/${locale}/dashboard`)
+    } else {
       setSubmitError(result.error)
       setIsSubmitting(false)
     }
