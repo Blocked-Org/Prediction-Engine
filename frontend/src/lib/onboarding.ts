@@ -42,10 +42,13 @@ export async function fetchOnboardingStatus(
   }
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10_000);
     const response = await fetch(
       `${API_URL}/api/v1/simulate/status/${encodeURIComponent(clerkUserId)}`,
-      { cache: "no-store" }
+      { cache: "no-store", signal: controller.signal }
     );
+    clearTimeout(timeout);
     if (!response.ok) {
       const { MOCK_ONBOARDING_STATUS } = await import("./mock-data");
       return MOCK_ONBOARDING_STATUS;

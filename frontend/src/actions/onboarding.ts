@@ -38,6 +38,8 @@ export async function completeOnboarding(
       // Get the Clerk session JWT for backend auth (org_id → tenant_id mapping)
       const token = await getToken();
 
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15_000);
       const response = await fetch(`${API_URL}/api/v1/simulate/init`, {
         method: "POST",
         headers: {
@@ -45,8 +47,10 @@ export async function completeOnboarding(
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(payload),
+        signal: controller.signal,
         cache: "no-store",
       });
+      clearTimeout(timeout);
 
       const body = await response.json().catch(() => ({}));
 
