@@ -2,10 +2,8 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import LanguageSwitcher from "@/components/LanguageSwitcher"
 import { getTranslations } from "next-intl/server"
-import { auth } from "@clerk/nextjs/server"
 import { BackendHealthBanner } from "@/components/dashboard/BackendHealthBanner"
 import { ChatWidgetWrapper } from "@/components/chat/ChatWidgetWrapper"
-import { fetchDashboardResults, toDashboardData } from "@/lib/dashboard"
 
 export default async function DashboardLayout({
   children,
@@ -13,20 +11,6 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }) {
   const t = await getTranslations('Dashboard')
-
-  // Fetch simulation data for the floating chat widget
-  let simulationData = null;
-  try {
-    const { userId } = await auth();
-    if (userId) {
-      const results = await fetchDashboardResults(userId);
-      if (results) {
-        simulationData = toDashboardData(results);
-      }
-    }
-  } catch {
-    // Silently degrade — chat widget simply won't appear
-  }
 
   return (
     <>
@@ -51,7 +35,7 @@ export default async function DashboardLayout({
       </SidebarProvider>
 
       {/* Floating AI Chatbot — renders independently of page layout */}
-      <ChatWidgetWrapper simulationData={simulationData} />
+      <ChatWidgetWrapper simulationData={null} />
     </>
   )
 }

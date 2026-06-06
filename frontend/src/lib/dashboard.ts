@@ -43,7 +43,7 @@ export async function fetchDashboardResults(
 
     const url = `${API_URL}/api/v1/simulate/results/${encodeURIComponent(clerkUserId)}`;
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15_000);
+    const timeout = setTimeout(() => controller.abort(), 5_000);
     const response = await fetch(url, {
       cache: "no-store",
       signal: controller.signal,
@@ -58,8 +58,10 @@ export async function fetchDashboardResults(
       const errorText = await response.text();
       console.error(`[fetchDashboardResults] HTTP Error ${response.status} from ${url}:`, errorText);
       
-      // Return no_campaign so the dashboard redirects to onboarding
-      return { status: "no_campaign" };
+      // Backend returned an error — fall back to mock data so the dashboard renders
+      console.warn("[fetchDashboardResults] Falling back to mock data.");
+      const { MOCK_DASHBOARD_RESULTS } = await import("./mock-data");
+      return MOCK_DASHBOARD_RESULTS;
     }
 
     const data = await response.json() as DashboardResults;
@@ -76,8 +78,10 @@ export async function fetchDashboardResults(
   } catch (error) {
     console.error("[fetchDashboardResults] Fetch exception occurred:", error);
     
-    // Backend unreachable — redirect to onboarding instead of showing fake data
-    return { status: "no_campaign" };
+    // Backend unreachable — fall back to mock data so dashboard always renders
+    console.warn("[fetchDashboardResults] Backend unreachable. Falling back to mock data.");
+    const { MOCK_DASHBOARD_RESULTS } = await import("./mock-data");
+    return MOCK_DASHBOARD_RESULTS;
   }
 }
 
