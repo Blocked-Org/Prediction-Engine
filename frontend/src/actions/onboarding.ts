@@ -14,7 +14,6 @@ export async function completeOnboarding(
   locale: string,
   payload: SimulationRequest
 ): Promise<OnboardingActionResult> {
-  let shouldRedirect = false;
   const isMockMode = process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true";
 
   try {
@@ -23,70 +22,51 @@ export async function completeOnboarding(
       return { success: false, error: "You must be signed in to complete onboarding." };
     }
 
-    if (isMockMode) {
+    // ── Step 1: Hit the backend (skip in mock mode) ──────────────
+    if (!isMockMode) {
       try {
-        const client = await clerkClient();
-        await client.users.updateUser(userId, {
-          publicMetadata: { isOnboarded: true },
+        const token = await getToken();
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8_000);
+
+        const response = await fetch(`${API_URL}/api/v1/simulate/init`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify(payload),
+          signal: controller.signal,
+          cache: "no-store",
         });
-      } catch (err) {
-        console.warn("[completeOnboarding] Clerk metadata update failed in mock mode, proceeding anyway.", err);
-      }
-      shouldRedirect = true;
-    } else {
-      // Get the Clerk session JWT for backend auth (org_id → tenant_id mapping)
-      const token = await getToken();
+        clearTimeout(timeout);
 
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 15_000);
-      const response = await fetch(`${API_URL}/api/v1/simulate/init`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify(payload),
-        signal: controller.signal,
-        cache: "no-store",
-      });
-      clearTimeout(timeout);
-
-      const body = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        // Check if we can fallback to mock behavior on failure
-        console.warn("[completeOnboarding] Backend failed. Falling back to local success for onboarding flow.");
-        try {
-          const client = await clerkClient();
-          await client.users.updateUser(userId, {
-            publicMetadata: { isOnboarded: true },
-          });
-        } catch {
-          // ignore
+        if (!response.ok) {
+          console.warn(`[completeOnboarding] Backend returned ${response.status}. Continuing to mark onboarded.`);
         }
-        shouldRedirect = true;
-      } else {
-        const client = await clerkClient();
-        await client.users.updateUser(userId, {
-          publicMetadata: { isOnboarded: true },
-        });
-        shouldRedirect = true;
+      } catch (fetchErr) {
+        // Backend unreachable / timed out — continue anyway
+        console.warn("[completeOnboarding] Backend fetch failed:", fetchErr);
       }
     }
-  } catch (error) {
-    if (isMockMode) {
-      shouldRedirect = true;
-    } else {
-      console.warn("[completeOnboarding] Connection error. Falling back to mock success.", error);
-      shouldRedirect = true;
-    }
-  }
 
-  if (shouldRedirect) {
+    // ── Step 2: Mark user as onboarded in Clerk metadata ─────────
+    try {
+      const client = await clerkClient();
+      await client.users.updateUser(userId, {
+        publicMetadata: { isOnboarded: true },
+      });
+    } catch (clerkErr) {
+      console.warn("[completeOnboarding] Clerk metadata update failed:", clerkErr);
+      // Non-fatal — the user can still proceed
+    }
+
     return { success: true };
+
+  } catch (error) {
+    console.error("[completeOnboarding] Unexpected error:", error);
+    return { success: false, error: "Something went wrong. Please try again." };
   }
-  
-  return { success: false, error: "Onboarding could not be completed. Please try again." };
 }
 
 export async function syncOnboardingMetadata(

@@ -220,11 +220,21 @@ export function SimulationWizard({ locale }: { locale: string }) {
       }),
     }
 
-    const result = await completeOnboarding(locale, payload)
-    if (result.success) {
-      router.push(`/${locale}/dashboard`)
-    } else {
-      setSubmitError(result.error)
+    try {
+      console.log("[SimulationWizard] Calling completeOnboarding server action...")
+      const result = await completeOnboarding(locale, payload)
+      console.log("[SimulationWizard] Server action returned:", result)
+      
+      if (result.success) {
+        console.log("[SimulationWizard] Success! Navigating to dashboard...")
+        router.push(`/${locale}/dashboard`)
+      } else {
+        setSubmitError(result.error)
+        setIsSubmitting(false)
+      }
+    } catch (err) {
+      console.error("[SimulationWizard] Server action threw:", err)
+      setSubmitError("Connection error. Please try again.")
       setIsSubmitting(false)
     }
   }
