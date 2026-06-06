@@ -95,17 +95,28 @@ export default clerkMiddleware(async (auth, req) => {
     }
 
     const locale = localeFromPathname(req.nextUrl.pathname);
-    const onboarded = await resolveOnboarded(
-      userId,
-      sessionClaims as Parameters<typeof isOnboardedFromClaims>[0]
-    );
+    const isOnboarding = isOnboardingRoute(req);
 
-    if (!onboarded && !isOnboardingRoute(req)) {
+    let onboarded = false;
+    if (isOnboarding) {
+      // To break infinite redirect loops, if the user is visiting the onboarding route,
+      // we query the backend directly to verify if they actually have a campaign.
+      const status = await fetchOnboardingStatus(userId);
+      onboarded = status?.is_onboarded === true && status?.has_campaign === true;
+    } else {
+      // For dashboard and other routes, use the faster session claims check
+      onboarded = await resolveOnboarded(
+        userId,
+        sessionClaims as Parameters<typeof isOnboardedFromClaims>[0]
+      );
+    }
+
+    if (!onboarded && !isOnboarding) {
       const onboardingUrl = new URL(`/${locale}/onboarding`, req.url);
       return NextResponse.redirect(onboardingUrl);
     }
 
-    if (onboarded && isOnboardingRoute(req)) {
+    if (onboarded && isOnboarding) {
       const dashboardUrl = new URL(`/${locale}/dashboard`, req.url);
       return NextResponse.redirect(dashboardUrl);
     }

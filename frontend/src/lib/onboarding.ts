@@ -66,11 +66,10 @@ export async function fetchOnboardingStatus(
 
 export async function resolveIsOnboarded(
   clerkUserId: string | null | undefined,
-  sessionClaims: ClerkSessionClaims | null | undefined
+  _sessionClaims: ClerkSessionClaims | null | undefined
 ): Promise<boolean> {
   if (!clerkUserId) return false;
-  if (isOnboardedFromClaims(sessionClaims)) return true;
 
   const status = await fetchOnboardingStatus(clerkUserId);
-  return status?.is_onboarded === true;
+  return status?.is_onboarded === true && status?.has_campaign === true;
 }

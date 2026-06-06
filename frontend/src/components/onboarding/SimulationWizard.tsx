@@ -191,7 +191,14 @@ export function SimulationWizard({ locale }: { locale: string }) {
     const competitorUrlList = values.competitor_urls
       ? values.competitor_urls
           .split(",")
-          .map((u) => u.trim())
+          .map((u) => {
+            const trimmed = u.trim();
+            if (!trimmed) return "";
+            if (/^https?:\/\//i.test(trimmed)) {
+              return trimmed;
+            }
+            return `https://${trimmed}`;
+          })
           .filter((u) => u.length > 0)
       : []
 

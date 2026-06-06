@@ -42,11 +42,19 @@ export async function completeOnboarding(
         clearTimeout(timeout);
 
         if (!response.ok) {
-          console.warn(`[completeOnboarding] Backend returned ${response.status}. Continuing to mark onboarded.`);
+          const errText = await response.text();
+          console.error(`[completeOnboarding] Backend returned HTTP ${response.status}:`, errText);
+          return {
+            success: false,
+            error: `Simulation initialization failed (HTTP ${response.status}): ${errText || "Unknown error"}`,
+          };
         }
       } catch (fetchErr) {
-        // Backend unreachable / timed out — continue anyway
-        console.warn("[completeOnboarding] Backend fetch failed:", fetchErr);
+        console.error("[completeOnboarding] Backend fetch failed:", fetchErr);
+        return {
+          success: false,
+          error: `Failed to connect to simulation engine: ${fetchErr instanceof Error ? fetchErr.message : String(fetchErr)}`,
+        };
       }
     }
 
