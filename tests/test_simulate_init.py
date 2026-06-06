@@ -167,7 +167,7 @@ def test_persist_simulation_init_executes_write_transaction() -> None:
     assert result.is_onboarded is True
     assert result.node_counts.competitors == 2
     assert captured_params["clerk_user_id"] == "user_test_clerk_123"
-    assert captured_params["primary_channels"] == ["Meta"]
+    assert captured_params["primary_channels"] == ["Meta", "Google", "TikTok"]
     assert captured_params["target_age_range"] == "25-34"
     session.execute_write.assert_called_once()
 

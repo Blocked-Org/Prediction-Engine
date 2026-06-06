@@ -22,22 +22,16 @@ import pytest
 
 SIMULATION_PAYLOAD = {
     "clerk_user_id": "dummy_user_123",
-    "endogenous": {
-        "Impressions": 10000.0,
-        "Clicks": 500,
-        "spend_meta": 500.0,
-        "spend_google": 300.0,
-        "spend_tiktok": 200.0
-    },
-    "transactional": {
-        "Total_Conversion": 50,
-        "revenue": 5000.0
-    },
-    "audience": {
-        "age": "25-34",
-        "gender": "all",
-        "interest": "technology"
-    }
+    "Impressions": 10000.0,
+    "Clicks": 500,
+    "spend_meta": 500.0,
+    "spend_google": 300.0,
+    "spend_tiktok": 200.0,
+    "Total_Conversion": 50,
+    "revenue": 5000.0,
+    "age": "25-34",
+    "gender": "all",
+    "interest": "technology"
 }
 
 FORECAST_PAYLOAD = {

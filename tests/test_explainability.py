@@ -23,6 +23,7 @@ class TestMathematicalExplainer:
         Validates that the SHAP TreeExplainer surrogate accurately captures
         feature importances of a deterministic mock model.
         """
+        np.random.seed(42)
         explainer = MathematicalExplainer()
         
         input_data = {
@@ -58,6 +59,7 @@ class TestMathematicalExplainer:
         def constant_model(data: Dict[str, List[float]]) -> List[float]:
             return [5.0] * len(data[list(data.keys())[0]])
             
+        np.random.seed(42)
         explainer = MathematicalExplainer()
         contributions = explainer.compute_feature_contributions(
             model_wrapper=constant_model,
