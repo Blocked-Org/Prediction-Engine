@@ -17,10 +17,13 @@ VALID_PAYLOAD = {
     "endogenous": {
         "Impressions": 10000.0,
         "Clicks": 500,
-        "Spent": 1500.0
+        "spend_meta": 1500.0,
+        "spend_google": 0.0,
+        "spend_tiktok": 0.0
     },
     "transactional": {
-        "Total_Conversion": 50
+        "Total_Conversion": 50,
+        "revenue": 5000.0
     },
     "audience": {
         "age": "25-34",
@@ -52,7 +55,7 @@ def client() -> TestClient:
 
 
 def test_simulate_init_rejects_invalid_payload(client: TestClient) -> None:
-    bad = {**VALID_PAYLOAD, "endogenous": {**VALID_PAYLOAD["endogenous"], "Spent": -1.0}}
+    bad = {**VALID_PAYLOAD, "endogenous": {**VALID_PAYLOAD["endogenous"], "spend_meta": -1.0}}
     response = client.post("/api/v1/simulate/init", json=bad)
     assert response.status_code == 422
 

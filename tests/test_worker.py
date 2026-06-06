@@ -21,13 +21,23 @@ import pytest
 # ---------------------------------------------------------------------------
 
 SIMULATION_PAYLOAD = {
-    "Impressions": 10000.0,
-    "Clicks": 500,
-    "Spent": 1000.0,
-    "Total_Conversion": 50,
-    "age": "25-29",
-    "gender": "M",
-    "interest": "Travel",
+    "clerk_user_id": "dummy_user_123",
+    "endogenous": {
+        "Impressions": 10000.0,
+        "Clicks": 500,
+        "spend_meta": 500.0,
+        "spend_google": 300.0,
+        "spend_tiktok": 200.0
+    },
+    "transactional": {
+        "Total_Conversion": 50,
+        "revenue": 5000.0
+    },
+    "audience": {
+        "age": "25-34",
+        "gender": "all",
+        "interest": "technology"
+    }
 }
 
 FORECAST_PAYLOAD = {
@@ -44,7 +54,7 @@ FORECAST_PAYLOAD = {
 # ---------------------------------------------------------------------------
 
 
-@patch("src.api.worker.run_micro_simulation")
+@patch("src.simulation.engine_runner.run_micro_simulation")
 def test_run_simulation_task_success(mock_run: MagicMock) -> None:
     """Task should call run_micro_simulation and return model_dump() dict."""
     from src.api.worker import run_simulation_task
@@ -66,7 +76,7 @@ def test_run_simulation_task_success(mock_run: MagicMock) -> None:
     assert isinstance(result["pareto_optimal_budgets"], list)
 
 
-@patch("src.api.worker.run_micro_simulation")
+@patch("src.simulation.engine_runner.run_micro_simulation")
 def test_run_simulation_task_propagates_exception(mock_run: MagicMock) -> None:
     """Task should re-raise so Celery records FAILURE state."""
     from src.api.worker import run_simulation_task
@@ -77,7 +87,7 @@ def test_run_simulation_task_propagates_exception(mock_run: MagicMock) -> None:
         run_simulation_task(SIMULATION_PAYLOAD)
 
 
-@patch("src.api.worker.run_micro_simulation")
+@patch("src.simulation.engine_runner.run_micro_simulation")
 def test_run_simulation_task_invalid_payload(mock_run: MagicMock) -> None:
     """Task should raise ValidationError for a missing required field."""
     from src.api.worker import run_simulation_task
@@ -92,7 +102,7 @@ def test_run_simulation_task_invalid_payload(mock_run: MagicMock) -> None:
 # ---------------------------------------------------------------------------
 
 
-@patch("src.api.worker.run_macro_forecast")
+@patch("src.simulation.engine_runner.run_macro_forecast")
 def test_run_forecast_task_success(mock_forecast: MagicMock) -> None:
     """Task should call run_macro_forecast and return model_dump() dict."""
     from src.api.worker import run_forecast_task
@@ -112,7 +122,7 @@ def test_run_forecast_task_success(mock_forecast: MagicMock) -> None:
     assert "confidence_interval" in result
 
 
-@patch("src.api.worker.run_macro_forecast")
+@patch("src.simulation.engine_runner.run_macro_forecast")
 def test_run_forecast_task_propagates_exception(mock_forecast: MagicMock) -> None:
     """Task should re-raise so Celery records FAILURE state."""
     from src.api.worker import run_forecast_task

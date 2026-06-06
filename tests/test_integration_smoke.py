@@ -75,10 +75,13 @@ def test_simulate_endpoint_real_engines(mock_delay):
         "endogenous": {
             "Impressions": 10000.0,
             "Clicks": 500,
-            "Spent": 1500.0
+            "spend_meta": 1500.0,
+            "spend_google": 0.0,
+            "spend_tiktok": 0.0
         },
         "transactional": {
-            "Total_Conversion": 50
+            "Total_Conversion": 50,
+            "revenue": 5000.0
         },
         "audience": {
             "age": "25-34",

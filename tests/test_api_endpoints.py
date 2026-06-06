@@ -10,7 +10,7 @@ client = TestClient(app)
 @patch("src.api.auth.SessionLocal")
 @patch("src.api.auth.verify_clerk_token")
 @patch("src.api.worker.run_simulation_task.delay")
-@patch("src.api.main.AsyncResult")
+@patch("celery.result.AsyncResult")
 def test_simulate_endpoint(mock_async_result, mock_delay, mock_verify, mock_session, mock_resolve):
     """
     Test the /api/v1/simulate and /api/v1/task/{task_id} endpoints
@@ -35,10 +35,13 @@ def test_simulate_endpoint(mock_async_result, mock_delay, mock_verify, mock_sess
         "endogenous": {
             "Impressions": 10000.0,
             "Clicks": 500,
-            "Spent": 1500.0
+            "spend_meta": 1500.0,
+            "spend_google": 0.0,
+            "spend_tiktok": 0.0
         },
         "transactional": {
-            "Total_Conversion": 50
+            "Total_Conversion": 50,
+            "revenue": 5000.0
         },
         "audience": {
             "age": "25-34",
@@ -82,7 +85,7 @@ def test_simulate_endpoint(mock_async_result, mock_delay, mock_verify, mock_sess
 @patch("src.api.auth._resolve_tenant_id", return_value="fake-tenant-uuid")
 @patch("src.api.auth.SessionLocal")
 @patch("src.api.auth.verify_clerk_token")
-@patch("src.api.main.AsyncResult")
+@patch("celery.result.AsyncResult")
 def test_task_polling_pending_status(mock_async_result, mock_verify, mock_session, mock_resolve):
     """
     Test the polling endpoint when the Celery task is still processing.

@@ -11,13 +11,23 @@ def test_simulation_contract_validation():
     """
     # 1. Create a realistic dummy instance of SimulationRequest
     dummy_request = SimulationRequest(
-        Impressions=10000.0,
-        Clicks=500,
-        Spent=1000.0,
-        Total_Conversion=50,
-        age="25-29",
-        gender="M",
-        interest="Travel",
+        clerk_user_id="dummy_user_123",
+        endogenous={
+            "Impressions": 10000.0,
+            "Clicks": 500,
+            "spend_meta": 500.0,
+            "spend_google": 300.0,
+            "spend_tiktok": 200.0
+        },
+        transactional={
+            "Total_Conversion": 50,
+            "revenue": 5000.0
+        },
+        audience={
+            "age": "25-34",
+            "gender": "all",
+            "interest": "technology"
+        }
     )
 
     # 2. Pass the dummy request into run_micro_simulation

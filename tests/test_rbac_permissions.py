@@ -32,10 +32,13 @@ def _make_valid_simulate_payload() -> dict:
         "endogenous": {
             "Impressions": 1000.0,
             "Clicks": 100,
-            "Spent": 500.0
+            "spend_meta": 200.0,
+            "spend_google": 200.0,
+            "spend_tiktok": 100.0
         },
         "transactional": {
-            "Total_Conversion": 10
+            "Total_Conversion": 10,
+            "revenue": 1000.0
         },
         "audience": {
             "age": "25-34",
@@ -51,10 +54,13 @@ def _make_valid_init_payload() -> dict:
         "endogenous": {
             "Impressions": 10000.0,
             "Clicks": 500,
-            "Spent": 1500.0
+            "spend_meta": 500.0,
+            "spend_google": 500.0,
+            "spend_tiktok": 500.0
         },
         "transactional": {
-            "Total_Conversion": 50
+            "Total_Conversion": 50,
+            "revenue": 5000.0
         },
         "audience": {
             "age": "18-24",
