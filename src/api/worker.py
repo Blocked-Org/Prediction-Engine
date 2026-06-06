@@ -5,10 +5,15 @@ from typing import Any, Dict
 from dotenv import load_dotenv
 load_dotenv()  # Must run before os.getenv('REDIS_URL') below
 
+# Fix matplotlib cache before any transitive import
+os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib")
+os.environ.setdefault("MPLBACKEND", "Agg")
+
 from celery import Celery  # noqa: E402
 
 from src.api.schemas import SimulationRequest, ForecastRequest  # noqa: E402
-from src.simulation.engine_runner import run_micro_simulation, run_macro_forecast  # noqa: E402
+# NOTE: engine_runner is lazy-imported inside task bodies to avoid loading
+# PyMC/Mesa/SHAP/XGBoost at module level (causes OOM on Railway startup).
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -57,6 +62,8 @@ def run_simulation_task(self, payload: Dict[str, Any]) -> Dict[str, Any]:
     """
     logger.info(f"Task {self.request.id} started simulation.")
     try:
+        from src.simulation.engine_runner import run_micro_simulation
+        
         # Unpack the JSON dictionary into the Pydantic SimulationRequest model
         request = SimulationRequest(**payload)
         
@@ -90,6 +97,8 @@ def run_forecast_task(self, payload: Dict[str, Any]) -> Dict[str, Any]:
     """
     logger.info(f"Task {self.request.id} started forecast.")
     try:
+        from src.simulation.engine_runner import run_macro_forecast
+        
         request = ForecastRequest(**payload)
         response = run_macro_forecast(request)
         

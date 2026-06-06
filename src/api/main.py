@@ -7,14 +7,16 @@ and defines the API routers for the Prediction Engine.
 
 from __future__ import annotations
 
+# ── Fix matplotlib cache BEFORE any transitive import touches it ──
+import os
+os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib")
+os.environ.setdefault("MPLBACKEND", "Agg")
+
 import logging
 from pathlib import Path
 from typing import Any
 
 from src.api.config import get_settings
-
-from celery.result import AsyncResult
-from src.api.worker import celery_app
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -48,10 +50,21 @@ app = FastAPI(
     description="Graph-Augmented Bayesian Simulation Engine API"
 )
 
-# Configure CORS Middleware — locked to Dev A's Next.js port for integration day
+# Configure CORS Middleware
+_cors_origins = [
+    "http://localhost:3000",
+    # Allow all Vercel preview and production deployments
+    *[
+        origin
+        for origin in [os.environ.get("FRONTEND_URL", "")]
+        if origin
+    ],
+]
+# Also accept any *.vercel.app origin via regex
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=_cors_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -211,6 +224,8 @@ async def get_task_status(task_id: str) -> Any:
     Returns:
         Any: The task status. If successful, returns the result payload.
     """
+    from celery.result import AsyncResult
+    from src.api.worker import celery_app
     task_result = AsyncResult(task_id, app=celery_app)
     
     if task_result.state == "SUCCESS":

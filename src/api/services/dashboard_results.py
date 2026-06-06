@@ -24,7 +24,8 @@ from src.shared.contracts import (
     SimulationScenario,
     TargetAudience,
 )
-from src.simulation.engine_runner import run_macro_forecast, run_micro_simulation
+# NOTE: engine_runner is lazy-imported inside build_dashboard_results()
+# to avoid loading PyMC/Mesa/SHAP at API startup (causes OOM on Railway).
 
 logger = logging.getLogger(__name__)
 
@@ -218,6 +219,7 @@ def build_dashboard_results(campaign: dict[str, Any]) -> DashboardResultsRespons
     sim_request = _build_simulation_request(campaign)
     forecast_request = _build_forecast_request(campaign)
 
+    from src.simulation.engine_runner import run_micro_simulation, run_macro_forecast
     sim = run_micro_simulation(sim_request)
     forecast = run_macro_forecast(forecast_request)
 

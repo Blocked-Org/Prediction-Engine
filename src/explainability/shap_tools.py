@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import os
+os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib")
+os.environ.setdefault("MPLBACKEND", "Agg")
+
 from pathlib import Path
 from typing import Any, Mapping
 
