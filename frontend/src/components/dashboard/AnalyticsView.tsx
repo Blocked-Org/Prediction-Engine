@@ -477,7 +477,7 @@ export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <span className="text-xs">Bayesian projected iROAS and 90% credible intervals over a 12-month period.</span>
+                    <span className="text-xs">Projected true profit per ad dollar and expected range over a 12-month period.</span>
                   </TooltipContent>
                 </Tooltip>
               </div>
@@ -492,7 +492,7 @@ export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
                 : "bg-[#EF4444]/10 border-[#EF4444] text-[#EF4444]"
             }`}>
               <p className="text-xs font-bold uppercase tracking-wider text-[#6B6B6B]">
-                iROAS
+                True Profit per Ad Dollar
               </p>
               <div className="flex items-center justify-center gap-1 mt-1">
                 <span className="text-2xl font-black font-sans text-[#0A0A0A]">

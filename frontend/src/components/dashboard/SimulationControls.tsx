@@ -90,7 +90,86 @@ export function SimulationControls({
     TikTok: Math.round(totalSpend * 0.25),
   });
 
+  const [initialBudgets, setInitialBudgets] = useState<ChannelBudgets>({
+    Meta: Math.round(totalSpend * 0.4),
+    Google: Math.round(totalSpend * 0.35),
+    TikTok: Math.round(totalSpend * 0.25),
+  });
+
   const totalAllocated = budgets.Meta + budgets.Google + budgets.TikTok;
+
+  // Reset references when totalSpend changes
+  useEffect(() => {
+    const base = {
+      Meta: Math.round(totalSpend * 0.4),
+      Google: Math.round(totalSpend * 0.35),
+      TikTok: Math.round(totalSpend * 0.25),
+    };
+    setInitialBudgets(base);
+    setBudgets(base);
+  }, [totalSpend]);
+
+  // Pre-calculated target states for the quick action buttons
+  const presets = {
+    profit: {
+      Meta: Math.round(totalSpend * 0.65),
+      Google: Math.round(totalSpend * 0.20),
+      TikTok: Math.round(totalSpend * 0.15),
+    },
+    traffic: {
+      Meta: Math.round(totalSpend * 0.25),
+      Google: Math.round(totalSpend * 0.45),
+      TikTok: Math.round(totalSpend * 0.30),
+    },
+    risk: {
+      Meta: Math.round(totalSpend * 0.35),
+      Google: Math.round(totalSpend * 0.45),
+      TikTok: Math.round(totalSpend * 0.20),
+    },
+  };
+
+  const handleApplyPreset = (type: "profit" | "traffic" | "risk") => {
+    setBudgets(presets[type]);
+  };
+
+  const isPresetActive = (type: "profit" | "traffic" | "risk") => {
+    const p = presets[type];
+    return (
+      Math.abs(budgets.Meta - p.Meta) < 100 &&
+      Math.abs(budgets.Google - p.Google) < 100 &&
+      Math.abs(budgets.TikTok - p.TikTok) < 100
+    );
+  };
+
+  // CPC and CPA constants computed from the baseline metrics
+  const channelMetrics = {
+    Meta: { cpc: 4.0, cpa: 62.5 },
+    Google: { cpc: 4.0, cpa: 61.5 },
+    TikTok: { cpc: 4.0, cpa: 66.7 },
+  };
+
+  const getDeltaDisplay = (channel: keyof ChannelBudgets) => {
+    const deltaSpend = budgets[channel] - initialBudgets[channel];
+    if (deltaSpend === 0) return null;
+
+    const metrics = channelMetrics[channel];
+    const deltaClicks = Math.round(deltaSpend / metrics.cpc);
+    const deltaConversions = Math.round(deltaSpend / metrics.cpa);
+
+    const clickText = deltaClicks >= 0 ? `+${deltaClicks}` : `${deltaClicks}`;
+    const convText = deltaConversions >= 0 ? `+${deltaConversions}` : `${deltaConversions}`;
+    const isPositive = deltaSpend >= 0;
+
+    return (
+      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border transition-all duration-300 ${
+        isPositive 
+          ? "bg-green-50 text-green-700 border-green-200" 
+          : "bg-red-50 text-red-700 border-red-200"
+      }`}>
+        {clickText} clicks, {convText} expected conversions
+      </span>
+    );
+  };
 
   const handleSliderChange = useCallback(
     (channel: keyof ChannelBudgets, values: number[]) => {
@@ -140,17 +219,69 @@ export function SimulationControls({
       </CardHeader>
 
       <CardContent className="space-y-6">
+        
+        {/* ── Quick-action Preset Buttons ───────────────────────────────── */}
+        <div className="space-y-2 pb-2">
+          <Label className="text-[10px] font-bold uppercase tracking-widest text-[#6B6B6B]">
+            Goal-Oriented Presets
+          </Label>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isLoading}
+              onClick={() => handleApplyPreset("profit")}
+              className={`text-xs font-bold uppercase tracking-wider h-9 rounded-full transition-all duration-300 ${
+                isPresetActive("profit")
+                  ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-sm hover:bg-[#0A0A0A] hover:text-white"
+                  : "bg-white text-[#0A0A0A] border-[#E5E5E5] hover:bg-[#F5F5F0]"
+              }`}
+            >
+              📈 Maximize Profit
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isLoading}
+              onClick={() => handleApplyPreset("traffic")}
+              className={`text-xs font-bold uppercase tracking-wider h-9 rounded-full transition-all duration-300 ${
+                isPresetActive("traffic")
+                  ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-sm hover:bg-[#0A0A0A] hover:text-white"
+                  : "bg-white text-[#0A0A0A] border-[#E5E5E5] hover:bg-[#F5F5F0]"
+              }`}
+            >
+              ⚡ Maximize Traffic
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isLoading}
+              onClick={() => handleApplyPreset("risk")}
+              className={`text-xs font-bold uppercase tracking-wider h-9 rounded-full transition-all duration-300 ${
+                isPresetActive("risk")
+                  ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-sm hover:bg-[#0A0A0A] hover:text-white"
+                  : "bg-white text-[#0A0A0A] border-[#E5E5E5] hover:bg-[#F5F5F0]"
+              }`}
+            >
+              🛡️ Lowest Risk
+            </Button>
+          </div>
+        </div>
+
         {/* ── Slider controls ──────────────────────────────────────────── */}
         {CHANNELS.map(({ key, label, color, icon }) => (
           <div key={key} className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label
-                htmlFor={`slider-${key}`}
-                className="flex items-center gap-2 text-sm font-semibold text-[#0A0A0A]"
-              >
-                <span>{icon}</span>
-                <span>{label}</span>
-              </Label>
+              <div className="flex items-center gap-3">
+                <Label
+                  htmlFor={`slider-${key}`}
+                  className="flex items-center gap-2 text-sm font-semibold text-[#0A0A0A]"
+                >
+                  <span>{icon}</span>
+                  <span>{label}</span>
+                </Label>
+                {getDeltaDisplay(key)}
+              </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold tabular-nums text-[#0A0A0A]">
                   {formatCurrency(budgets[key])}

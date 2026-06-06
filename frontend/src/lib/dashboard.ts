@@ -54,10 +54,8 @@ export async function fetchDashboardResults(
       const errorText = await response.text();
       console.error(`[fetchDashboardResults] HTTP Error ${response.status} from ${url}:`, errorText);
       
-      // Fallback on HTTP failures (e.g. 502, 503)
-      console.warn("[fetchDashboardResults] Backend returned error. Falling back to mock data.");
-      const { MOCK_DASHBOARD_RESULTS } = await import("./mock-data");
-      return MOCK_DASHBOARD_RESULTS;
+      // Return no_campaign so the dashboard redirects to onboarding
+      return { status: "no_campaign" };
     }
 
     const data = await response.json() as DashboardResults;
@@ -74,14 +72,8 @@ export async function fetchDashboardResults(
   } catch (error) {
     console.error("[fetchDashboardResults] Fetch exception occurred:", error);
     
-    // Fallback on connection/network exceptions
-    console.warn("[fetchDashboardResults] Backend unreachable. Falling back to mock data.");
-    try {
-      const { MOCK_DASHBOARD_RESULTS } = await import("./mock-data");
-      return MOCK_DASHBOARD_RESULTS;
-    } catch {
-      return null;
-    }
+    // Backend unreachable — redirect to onboarding instead of showing fake data
+    return { status: "no_campaign" };
   }
 }
 

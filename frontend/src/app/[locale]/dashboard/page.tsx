@@ -33,7 +33,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   }
 
   if (results.status === "no_campaign") {
-    return <DashboardEmptyState status="no_campaign" />;
+    redirect(`/${locale}/onboarding`);
   }
 
   if (results.status === "processing") {

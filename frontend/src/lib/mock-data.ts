@@ -114,8 +114,8 @@ export const MOCK_DASHBOARD_RESULTS: DashboardResults = {
 
 export const MOCK_ONBOARDING_STATUS: OnboardingStatus = {
   clerk_user_id: "mock-user-123",
-  is_onboarded: true,
-  has_campaign: true
+  is_onboarded: false,
+  has_campaign: false
 };
 
 export const MOCK_ROI_DATA: ROIAnalyticsResponse = {

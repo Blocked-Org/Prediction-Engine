@@ -115,7 +115,7 @@ export function ROITrackingChart({
       crosshairMarkerBackgroundColor: "#0A0A0A",
       lastValueVisible: true,
       priceLineVisible: false,
-      title: "iROAS",
+      title: "True Profit per Ad Dollar",
     });
 
     // ── 4. Break-even threshold (dashed reference) ──────────────────────────
@@ -165,11 +165,11 @@ export function ROITrackingChart({
       <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-[#6B6B6B] font-noto-bengali">
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-0.5 w-5 rounded-full bg-[#0A0A0A]" />
-          iROAS (point estimate)
+          True Profit per Ad Dollar (estimate)
         </span>
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-3 w-5 rounded-sm bg-[#0A0A0A] opacity-20" />
-          90% credible interval
+          Expected Range
         </span>
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-0.5 w-5 rounded-full" style={{ borderTop: "2px dashed #FACC15", height: 0, marginTop: 1 }} />

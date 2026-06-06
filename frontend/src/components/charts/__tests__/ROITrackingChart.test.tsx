@@ -36,10 +36,10 @@ describe("ROITrackingChart", () => {
     expect(container.firstChild).not.toBeNull();
   });
 
-  it("renders the legend with iROAS and interval labels", () => {
+  it("renders the legend with True Profit per Ad Dollar and interval labels", () => {
     render(<ROITrackingChart dataPoints={MOCK_POINTS} />);
-    expect(screen.getByText(/iROAS \(point estimate\)/i)).toBeInTheDocument();
-    expect(screen.getByText(/90% credible interval/i)).toBeInTheDocument();
+    expect(screen.getByText(/True Profit per Ad Dollar \(estimate\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Expected Range/i)).toBeInTheDocument();
     expect(screen.getByText(/Break-even/i)).toBeInTheDocument();
   });
 

@@ -1,8 +1,11 @@
 "use client";
 
 import React, { useMemo } from "react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 // ── Types ────────────────────────────────────────────────────────────────────
+// ... (rest of the definitions are unchanged)
+
 
 export interface MarkovNode {
   id: string;
@@ -155,6 +158,27 @@ export function MarkovFunnelChart({ data, height = 240 }: MarkovFunnelChartProps
     };
   }, [nodes, height]);
 
+  // ── Drop-off calculations to find the largest drop-off node ─────────────
+  const nodeDropOffs = useMemo(() => {
+    return nodes.map((node) => {
+      const col = resolveColumn(node.id);
+      if (col >= 3) return { id: node.id, dropOff: 0 }; // Exclude conversion nodes
+
+      // Calculate sum of probabilities of transitions to OTHER stages (progression)
+      const outgoing = edges.filter(e => e.from === node.id && e.to !== node.id);
+      const progressionProb = outgoing.reduce((sum, e) => sum + e.probability, 0);
+      const dropOff = 1 - progressionProb;
+
+      return { id: node.id, dropOff };
+    });
+  }, [nodes, edges]);
+
+  const largestDropOffNodeId = useMemo(() => {
+    if (nodeDropOffs.length === 0) return null;
+    const sorted = [...nodeDropOffs].sort((a, b) => b.dropOff - a.dropOff);
+    return sorted[0]?.dropOff > 0 ? sorted[0].id : null;
+  }, [nodeDropOffs]);
+
   // ── Edge rendering ──────────────────────────────────────────────────────
   const renderedEdges = useMemo(() => {
     return edges
@@ -208,11 +232,16 @@ export function MarkovFunnelChart({ data, height = 240 }: MarkovFunnelChartProps
     return nodes.map((node) => {
       const pos = nodePositions[node.id];
       if (!pos) return null;
-      const colours = NODE_COLOURS[pos.col] ?? NODE_COLOURS[1];
+
+      const isLargestDropOff = node.id === largestDropOffNodeId;
+      const colours = isLargestDropOff
+        ? { fill: "#FFECEB", stroke: "#F43F5E", text: "#991B1B" }
+        : (NODE_COLOURS[pos.col] ?? NODE_COLOURS[1]);
+
       const barW = Math.max(4, node.trafficShare * NODE_W * 0.9);
 
-      return (
-        <g key={`node-${node.id}`} className="group">
+      const nodeContent = (
+        <g key={`node-${node.id}`} className="group cursor-pointer">
           {/* Node rectangle */}
           <rect
             x={pos.x}
@@ -223,7 +252,7 @@ export function MarkovFunnelChart({ data, height = 240 }: MarkovFunnelChartProps
             ry={8}
             fill={colours.fill}
             stroke={colours.stroke}
-            strokeWidth={1.5}
+            strokeWidth={isLargestDropOff ? 2 : 1.5}
           />
           {/* Traffic-share bar at bottom of node */}
           <rect
@@ -261,8 +290,23 @@ export function MarkovFunnelChart({ data, height = 240 }: MarkovFunnelChartProps
           </text>
         </g>
       );
+
+      if (isLargestDropOff) {
+        return (
+          <Tooltip key={`node-tooltip-${node.id}`}>
+            <TooltipTrigger asChild>
+              {nodeContent}
+            </TooltipTrigger>
+            <TooltipContent className="bg-red-50 text-red-950 border border-red-200 p-2 rounded-lg text-xs font-semibold shadow-md">
+              <p>Most customers drop off here. Focus on improving this stage.</p>
+            </TooltipContent>
+          </Tooltip>
+        );
+      }
+
+      return nodeContent;
     });
-  }, [nodes, nodePositions]);
+  }, [nodes, nodePositions, largestDropOffNodeId]);
 
   if (nodes.length === 0) {
     return (
@@ -337,6 +381,10 @@ export function MarkovFunnelChart({ data, height = 240 }: MarkovFunnelChartProps
               </span>
             );
           })}
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block h-3 w-3 rounded-sm border bg-[#FFECEB] border-[#F43F5E]" />
+          Highest Drop-off Warning
+        </span>
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-1 w-5 rounded-full bg-[#E5E5E5] opacity-60" />
           Edge width ∝ P(i→j)

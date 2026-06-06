@@ -20,6 +20,31 @@ type ReportingPageProps = {
   params: Promise<{ locale: string }>;
 };
 
+// Conversational formatter for AI recommendations
+function formatConversationalRecommendation(reasoning: string): string {
+  const amountMatch = reasoning.match(/(?:BDT|৳)\s*([\d,]+)/i) || reasoning.match(/([\d,]+)\s*(?:BDT|৳)/i);
+  const channelMatch = reasoning.match(/to\s+([A-Za-z\s]+?)(?:\s+Ads|\s+Search)?\./i) || reasoning.match(/to\s+([A-Za-z\s]+?)(?:\s+Ads|\s+Search)?\s/i);
+  const percentMatch = reasoning.match(/([\d.]+%)/);
+  const demoMatch = reasoning.match(/in\s+the\s+([\d-]+)\s+([A-Za-z\s]+)?/i) || reasoning.match(/demographic\s+([^\s,.]+)/i);
+
+  const amount = amountMatch ? `৳${amountMatch[1]}` : "some budget";
+  const channel = channelMatch ? channelMatch[1].trim() : "the recommended channel";
+  const percentage = percentMatch ? percentMatch[1] : "a significant margin";
+  const demographic = demoMatch ? `the ${demoMatch[1].trim()} audience` : "your target demographic";
+
+  if (reasoning.toLowerCase().includes("shift")) {
+    return `Moving ${amount} to ${channel} could increase profits by ${percentage}, especially with ${demographic}.`;
+  }
+  
+  if (reasoning.toLowerCase().includes("maintain") || reasoning.toLowerCase().includes("hold")) {
+    const holdChannelMatch = reasoning.match(/(?:Maintain|Hold)\s+([A-Za-z]+)\s+spend/i) || reasoning.match(/([A-Za-z]+)\s+spend/i);
+    const holdChannel = holdChannelMatch ? holdChannelMatch[1] : "this channel";
+    return `Keeping your spend on ${holdChannel} stable is recommended to avoid diminishing returns, as it has reached its optimal profit point.`;
+  }
+
+  return reasoning;
+}
+
 export default async function ReportingPage({ params }: ReportingPageProps) {
   const { locale } = await params;
   const { userId } = await auth();
@@ -199,7 +224,7 @@ export default async function ReportingPage({ params }: ReportingPageProps) {
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${rec.action === 'shift_budget' ? 'bg-[#FACC15] text-[#0A0A0A]' : 'bg-[#0A0A0A] text-white'}`}>
                       {rec.action.replace(/_/g, ' ')}
                     </span>
-                    <span className="text-xs text-[#0A0A0A]">{rec.recommendation_reasoning}</span>
+                    <span className="text-xs text-[#0A0A0A]">{formatConversationalRecommendation(rec.recommendation_reasoning)}</span>
                   </div>
                 </div>
               ))}

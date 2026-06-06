@@ -38,12 +38,12 @@ function generateHillCurveData(
   S: number,
   K: number,
   pointsCount: number = 120
-): { time: string; value: number }[] {
+): { time: string; value: number; spend: number }[] {
   const maxRevenue = estimatedRevenue * 1.2; // Asymptotic ceiling
   const plotMax = maxSpend * 1.5; // Show saturation tail beyond current spend
   const startDate = new Date('2024-01-01').getTime();
 
-  const data: { time: string; value: number }[] = [];
+  const data: { time: string; value: number; spend: number }[] = [];
 
   for (let i = 0; i <= pointsCount; i++) {
     const spend = (i / pointsCount) * plotMax;
@@ -52,6 +52,7 @@ function generateHillCurveData(
     data.push({
       time: d.toISOString().split('T')[0],
       value: revenue,
+      spend: spend,
     });
   }
 
@@ -92,7 +93,9 @@ export function SaturationCurveChart({
 
   // Refs to hold chart + series instances so we can update without re-creating
   const chartRef = useRef<IChartApi | null>(null);
-  const baselineSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
+  const greenSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
+  const yellowSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
+  const redSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
   const overrideSeriesRef = useRef<ISeriesApi<'Area'> | null>(null);
   const overrideMarkerRef = useRef<ISeriesApi<'Line'> | null>(null);
 
@@ -144,9 +147,27 @@ export function SaturationCurveChart({
       },
     });
 
-    // ── Baseline series (black solid line) ──────────────────────────────
-    const baselineSeries = chart.addSeries(LineSeries, {
-      color: '#0A0A0A', // black
+    // ── 1. Green Series ("Safe to scale") ──────────────────────────────
+    const greenSeries = chart.addSeries(LineSeries, {
+      color: '#22C55E', // Green
+      lineWidth: 3,
+      crosshairMarkerVisible: true,
+      lastValueVisible: false,
+      priceLineVisible: false,
+    });
+
+    // ── 2. Yellow Series ("Approaching limits") ──────────────────────────
+    const yellowSeries = chart.addSeries(LineSeries, {
+      color: '#EAB308', // Yellow
+      lineWidth: 3,
+      crosshairMarkerVisible: true,
+      lastValueVisible: false,
+      priceLineVisible: false,
+    });
+
+    // ── 3. Red Series ("Diminishing returns - stop spending") ────────────
+    const redSeries = chart.addSeries(LineSeries, {
+      color: '#EF4444', // Red
       lineWidth: 3,
       crosshairMarkerVisible: true,
       lastValueVisible: false,
@@ -175,7 +196,9 @@ export function SaturationCurveChart({
     });
 
     chartRef.current = chart;
-    baselineSeriesRef.current = baselineSeries;
+    greenSeriesRef.current = greenSeries;
+    yellowSeriesRef.current = yellowSeries;
+    redSeriesRef.current = redSeries;
     overrideSeriesRef.current = overrideSeries;
     overrideMarkerRef.current = overrideMarker;
 
@@ -185,7 +208,9 @@ export function SaturationCurveChart({
       window.removeEventListener('resize', handleResize);
       chart.remove();
       chartRef.current = null;
-      baselineSeriesRef.current = null;
+      greenSeriesRef.current = null;
+      yellowSeriesRef.current = null;
+      redSeriesRef.current = null;
       overrideSeriesRef.current = null;
       overrideMarkerRef.current = null;
     };
@@ -195,14 +220,24 @@ export function SaturationCurveChart({
 
   // ── Update baseline data when source props change ───────────────────────
   useEffect(() => {
-    baselineSeriesRef.current?.setData(baselineData);
-  }, [baselineData]);
+    if (!baselineData || !greenSeriesRef.current) return;
+
+    // Partition baselineData based on spend vs K
+    // To ensure continuity, segments should overlap at boundary points
+    const greenData = baselineData.filter((d: any) => d.spend <= K);
+    const yellowData = baselineData.filter((d: any) => d.spend >= K && d.spend <= K * 1.5);
+    const redData = baselineData.filter((d: any) => d.spend >= K * 1.5);
+
+    greenSeriesRef.current.setData(greenData.map(d => ({ time: d.time, value: d.value })));
+    yellowSeriesRef.current?.setData(yellowData.map(d => ({ time: d.time, value: d.value })));
+    redSeriesRef.current?.setData(redData.map(d => ({ time: d.time, value: d.value })));
+  }, [baselineData, K]);
 
   // ── Update override data in real-time (slider drag) ─────────────────────
   useEffect(() => {
     if (overrideData) {
-      overrideSeriesRef.current?.setData(overrideData);
-      overrideMarkerRef.current?.setData(overrideData);
+      overrideSeriesRef.current?.setData(overrideData.map(d => ({ time: d.time, value: d.value })));
+      overrideMarkerRef.current?.setData(overrideData.map(d => ({ time: d.time, value: d.value })));
     } else {
       // Clear override series when no override is active
       overrideSeriesRef.current?.setData([]);
@@ -210,5 +245,24 @@ export function SaturationCurveChart({
     }
   }, [overrideData]);
 
-  return <div ref={chartContainerRef} style={{ width: '100%' }} />;
+  return (
+    <div className="relative w-full">
+      <div ref={chartContainerRef} style={{ width: '100%' }} />
+      {/* Traffic Light Legend */}
+      <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-[#6B6B6B] font-noto-bengali">
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block h-3 w-3 rounded-full bg-[#22C55E]" />
+          Safe to scale (early/steep curve)
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block h-3 w-3 rounded-full bg-[#EAB308]" />
+          Approaching limits (middle curve)
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block h-3 w-3 rounded-full bg-[#EF4444]" />
+          Diminishing returns - stop spending (plateau)
+        </span>
+      </div>
+    </div>
+  );
 }
