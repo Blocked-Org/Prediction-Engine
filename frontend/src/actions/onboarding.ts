@@ -23,11 +23,30 @@ export async function completeOnboarding(
     }
 
     // ── Step 1: Hit the backend (skip in mock mode) ──────────────
+    let graphWriteSucceeded = false;
     if (!isMockMode) {
       try {
         const token = await getToken();
+
+        // Warm-up ping: wake up a sleeping Railway container before the
+        // heavy /init request.  Fire-and-forget with a short timeout so
+        // it doesn't add more than ~2 s to the happy path.
+        try {
+          const warmup = new AbortController();
+          const warmupTimeout = setTimeout(() => warmup.abort(), 5_000);
+          await fetch(`${API_URL}/health`, {
+            signal: warmup.signal,
+            cache: "no-store",
+          }).catch(() => {});
+          clearTimeout(warmupTimeout);
+        } catch {
+          // Warm-up is best-effort — ignore failures
+        }
+
+        // Railway cold-starts can take 15-30 s; Vercel serverless caps
+        // at 60 s.  Use 55 s to leave a small buffer.
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 8_000);
+        const timeout = setTimeout(() => controller.abort(), 55_000);
 
         const response = await fetch(`${API_URL}/api/v1/simulate/init`, {
           method: "POST",
@@ -41,7 +60,15 @@ export async function completeOnboarding(
         });
         clearTimeout(timeout);
 
-        if (!response.ok) {
+        if (response.ok) {
+          graphWriteSucceeded = true;
+        } else if (response.status === 503) {
+          // Neo4j / graph DB is unavailable — non-fatal for onboarding.
+          // The user can proceed; graph data will be written on next init.
+          console.warn(
+            "[completeOnboarding] Graph DB unavailable (503) — proceeding with onboarding anyway."
+          );
+        } else {
           const errText = await response.text();
           console.error(`[completeOnboarding] Backend returned HTTP ${response.status}:`, errText);
           return {
@@ -50,12 +77,24 @@ export async function completeOnboarding(
           };
         }
       } catch (fetchErr) {
+        // Network error or timeout — treat as non-fatal so the user
+        // isn't permanently stuck on onboarding.
+        const message = fetchErr instanceof Error ? fetchErr.message : String(fetchErr);
         console.error("[completeOnboarding] Backend fetch failed:", fetchErr);
-        return {
-          success: false,
-          error: `Failed to connect to simulation engine: ${fetchErr instanceof Error ? fetchErr.message : String(fetchErr)}`,
-        };
+
+        if (message.includes("aborted")) {
+          console.warn(
+            "[completeOnboarding] Request timed out — proceeding with onboarding anyway."
+          );
+        } else {
+          console.warn(
+            "[completeOnboarding] Backend unreachable — proceeding with onboarding anyway."
+          );
+        }
       }
+    } else {
+      // Mock mode: skip backend entirely
+      graphWriteSucceeded = true;
     }
 
     // ── Step 2: Mark user as onboarded in Clerk metadata ─────────
@@ -67,6 +106,13 @@ export async function completeOnboarding(
     } catch (clerkErr) {
       console.warn("[completeOnboarding] Clerk metadata update failed:", clerkErr);
       // Non-fatal — the user can still proceed
+    }
+
+    if (!graphWriteSucceeded) {
+      console.warn(
+        "[completeOnboarding] Onboarding completed without graph persistence. " +
+        "The user's campaign data was NOT saved to Neo4j."
+      );
     }
 
     return { success: true };
