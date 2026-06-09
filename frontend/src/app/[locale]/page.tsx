@@ -7,6 +7,7 @@ import { Navbar } from '@/components/marketing/Navbar'
 import { Footer } from '@/components/marketing/Footer'
 import { FAQAccordion } from '@/components/marketing/FAQAccordion'
 import { MarqueeBar, ParallaxText, useCardReveal, useSectionReveal } from '@/components/marketing/ScrollAnimations'
+import { BuniCompanion } from '@/components/companion/BuniCompanion'
 import { Slider } from '@/components/ui/slider'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -151,12 +152,14 @@ export default function LandingPage() {
             </h1>
           </div>
 
-          {/* Subtitle Row with bunny placeholder */}
+          {/* Subtitle Row with Buni Companion */}
           <div className="flex flex-col md:flex-row items-start md:items-center gap-8 mb-12">
-            {/* Bunny Placeholder */}
-            <div className="bunny-placeholder w-24 h-24 md:w-32 md:h-32 rounded-2xl flex-shrink-0">
-              <span className="text-4xl">🐰</span>
-            </div>
+            {/* Buni Companion */}
+            <BuniCompanion
+              state="happy"
+              speech="Hello! I'm Buni, your campaign assistant. 🐰✨ Let's optimize some simulations!"
+              className="bunny-placeholder w-24 h-24 md:w-32 md:h-32 flex-shrink-0 !overflow-visible"
+            />
 
             <div className="flex flex-col gap-4 max-w-xl">
               {/* <span className="text-xs font-semibold uppercase tracking-[0.15em] text-[#6B6B6B]">FIND TRENDS</span> */}
