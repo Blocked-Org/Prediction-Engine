@@ -43,7 +43,7 @@ export async function fetchDashboardResults(
 
     const url = `${API_URL}/api/v1/simulate/results/${encodeURIComponent(clerkUserId)}`;
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5_000);
+    const timeout = setTimeout(() => controller.abort(), 55_000);
     const response = await fetch(url, {
       cache: "no-store",
       signal: controller.signal,

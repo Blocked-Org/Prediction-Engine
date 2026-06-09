@@ -2,6 +2,8 @@
 
 These endpoints compute real analytics from the simulation engine and cache
 the results in Redis via ``SimulationCache`` so that demo re-loads are instant.
+
+Neo4j dependency removed — campaigns are fetched from the in-memory store.
 """
 
 from __future__ import annotations
@@ -13,11 +15,9 @@ from datetime import date, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from neo4j.exceptions import ServiceUnavailable
 
 from src.api.auth import Role, require_role
 from src.api.cache import get_simulation_cache
-from src.api.db.neo4j_client import Neo4jManager, get_neo4j_manager
 from src.schemas.analytics import (
     MarkovAnalyticsResponse,
     MarkovEdge,
@@ -32,36 +32,14 @@ router = APIRouter(prefix="/api/v1/analytics", tags=["analytics"])
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 
-_CAMPAIGN_BY_ID_CYPHER = """
-MATCH (c:Campaign {id: $campaign_id})
-OPTIONAL MATCH (u:User)-[:OWNS]->(c)
-OPTIONAL MATCH (c)-[:COMPETES_WITH]->(comp:Competitor)
-OPTIONAL MATCH (c)-[:TARGETS]->(ac:AgentCluster)
-WITH c, ac, collect(DISTINCT comp.name) AS competitor_names
-RETURN
-  c.id AS campaign_id,
-  c.budget AS budget,
-  c.cpc AS cpc,
-  c.primary_channels AS primary_channels,
-  c.historical_revenue AS historical_revenue,
-  ac.target_age_range AS target_age_range,
-  ac.intent_clusters AS intent_clusters,
-  competitor_names
-LIMIT 1
-"""
 
-
-def _fetch_campaign(manager: Neo4jManager, campaign_id: str) -> dict[str, Any] | None:
-    """Fetch a campaign dict from Neo4j by campaign ID."""
-    if manager.driver is None:
-        manager.connect()
-    if manager.driver is None:
-        raise ServiceUnavailable("Neo4j driver is not available.")
-
-    with manager.driver.session() as session:
-        record = session.run(_CAMPAIGN_BY_ID_CYPHER, campaign_id=campaign_id).single()
-
-    return dict(record) if record else None
+def _fetch_campaign_from_memory(campaign_id: str) -> dict[str, Any] | None:
+    """Fetch a campaign dict from the in-memory store by campaign ID."""
+    from src.api.routes.simulate import _user_campaigns
+    for user_id, campaign in _user_campaigns.items():
+        if campaign.get("campaign_id") == campaign_id:
+            return campaign
+    return None
 
 
 def _as_float(value: Any, default: float) -> float:
@@ -138,7 +116,6 @@ def _generate_roi_series(
 )
 async def get_roi_analytics(
     campaign_id: str,
-    neo4j: Neo4jManager = Depends(get_neo4j_manager),
     role: Role = Depends(require_role(Role.owner, Role.admin, Role.analyst, Role.viewer)),
 ) -> ROIAnalyticsResponse:
     """Return a cached-or-computed iROAS time-series derived from the simulation engine."""
@@ -148,16 +125,19 @@ async def get_roi_analytics(
     cache_params = {"campaign_id": campaign_id}
 
     # ── Cache check ────────────────────────────────────────────────────
-    cached = await cache.get(cache_ns, cache_params)
-    if cached is not None:
-        try:
-            return ROIAnalyticsResponse(**cached)
-        except Exception:
-            logger.warning("Cached ROI payload failed validation — recomputing.")
+    try:
+        cached = await cache.get(cache_ns, cache_params)
+        if cached is not None:
+            try:
+                return ROIAnalyticsResponse(**cached)
+            except Exception:
+                logger.warning("Cached ROI payload failed validation — recomputing.")
+    except Exception as cache_exc:
+        logger.warning("Redis cache check failed (non-fatal): %s", cache_exc)
 
     # ── Compute from simulation engine ─────────────────────────────────
     try:
-        campaign = _fetch_campaign(neo4j, campaign_id)
+        campaign = _fetch_campaign_from_memory(campaign_id)
         if campaign is None:
             raise HTTPException(status_code=404, detail="Campaign not found.")
 
@@ -215,9 +195,6 @@ async def get_roi_analytics(
 
     except HTTPException:
         raise
-    except ServiceUnavailable as exc:
-        logger.error("Neo4j unavailable during ROI analytics: %s", exc)
-        raise HTTPException(status_code=503, detail="Graph database unavailable.") from exc
     except Exception as exc:
         logger.exception("ROI analytics computation failed for campaign %s", campaign_id)
         raise HTTPException(status_code=500, detail="Internal server error.") from exc
@@ -324,7 +301,6 @@ def _build_markov_funnel(
 )
 async def get_markov_analytics(
     campaign_id: str,
-    neo4j: Neo4jManager = Depends(get_neo4j_manager),
     role: Role = Depends(require_role(Role.owner, Role.admin, Role.analyst, Role.viewer)),
 ) -> MarkovAnalyticsResponse:
     """Return a cached-or-computed Markov funnel built from the ABM + Markov engine."""
@@ -334,16 +310,19 @@ async def get_markov_analytics(
     cache_params = {"campaign_id": campaign_id}
 
     # ── Cache check ────────────────────────────────────────────────────
-    cached = await cache.get(cache_ns, cache_params)
-    if cached is not None:
-        try:
-            return MarkovAnalyticsResponse(**cached)
-        except Exception:
-            logger.warning("Cached Markov payload failed validation — recomputing.")
+    try:
+        cached = await cache.get(cache_ns, cache_params)
+        if cached is not None:
+            try:
+                return MarkovAnalyticsResponse(**cached)
+            except Exception:
+                logger.warning("Cached Markov payload failed validation — recomputing.")
+    except Exception as cache_exc:
+        logger.warning("Redis cache check failed (non-fatal): %s", cache_exc)
 
     # ── Compute from simulation engine ─────────────────────────────────
     try:
-        campaign = _fetch_campaign(neo4j, campaign_id)
+        campaign = _fetch_campaign_from_memory(campaign_id)
         if campaign is None:
             raise HTTPException(status_code=404, detail="Campaign not found.")
 
@@ -400,9 +379,6 @@ async def get_markov_analytics(
 
     except HTTPException:
         raise
-    except ServiceUnavailable as exc:
-        logger.error("Neo4j unavailable during Markov analytics: %s", exc)
-        raise HTTPException(status_code=503, detail="Graph database unavailable.") from exc
     except Exception as exc:
         logger.exception("Markov analytics computation failed for campaign %s", campaign_id)
         raise HTTPException(status_code=500, detail="Internal server error.") from exc

@@ -50,15 +50,26 @@ async function resolveOnboarded(
   userId: string,
   sessionClaims: Parameters<typeof isOnboardedFromClaims>[0]
 ): Promise<boolean> {
+  // Fast path: Clerk session claims already say onboarded
   if (isOnboardedFromClaims(sessionClaims)) {
     return true;
   }
 
+  // Try fetching from backend
   const status = await fetchOnboardingStatus(userId);
-  if (!status?.is_onboarded) {
+
+  // Backend unreachable — don't block the user. They may have just
+  // completed onboarding and Clerk claims haven't propagated yet.
+  if (status === null) {
+    console.warn("[middleware] Backend unreachable for onboarding check — allowing through");
+    return true;
+  }
+
+  if (!status.is_onboarded) {
     return false;
   }
 
+  // Backfill Clerk metadata so future requests use the fast path
   try {
     const client = await clerkClient();
     await client.users.updateUser(userId, {
@@ -102,7 +113,8 @@ export default clerkMiddleware(async (auth, req) => {
       // To break infinite redirect loops, if the user is visiting the onboarding route,
       // we query the backend directly to verify if they actually have a campaign.
       const status = await fetchOnboardingStatus(userId);
-      onboarded = status?.is_onboarded === true && status?.has_campaign === true;
+      // If backend is unreachable (null), DON'T redirect to dashboard — let them stay on onboarding
+      onboarded = status !== null && status.is_onboarded === true && status.has_campaign === true;
     } else {
       // For dashboard and other routes, use the faster session claims check
       onboarded = await resolveOnboarded(

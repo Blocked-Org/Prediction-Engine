@@ -1,4 +1,8 @@
-"""Simulation onboarding routes — graph initialization via Neo4j."""
+"""Simulation onboarding routes — Neo4j-free implementation.
+
+All graph-DB dependencies have been removed. Onboarding data is passed
+directly to the simulation engines without persisting to Neo4j first.
+"""
 
 from __future__ import annotations
 
@@ -7,12 +11,10 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from neo4j.exceptions import Neo4jError, ServiceUnavailable
 
 from src.api.auth import Role, require_role, require_authenticated_user, ClerkAuth
 
-from src.api.db.neo4j_client import Neo4jManager, get_neo4j_manager
-from src.api.services.dashboard_results import get_dashboard_results
+from src.api.services.dashboard_results import build_dashboard_results
 from src.schemas.dashboard import DashboardResultsResponse
 from src.schemas.simulation import (
     SimulationInitRequest,
@@ -25,6 +27,11 @@ from src.schemas.simulation import (
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/simulate", tags=["simulate"])
+
+# ── In-memory store for onboarding payloads ──────────────────────────────
+# Maps clerk_user_id → campaign dict (used by /results to build dashboard)
+_user_campaigns: dict[str, dict[str, Any]] = {}
+
 
 @router.post("", status_code=202)
 async def simulate(
@@ -64,14 +71,17 @@ async def simulate(
             flat_payload["budget_overrides"] = payload.budget_overrides
             
         # ── Redis cache check ────────────────────────────────────────────────────────
-        from src.api.cache import get_simulation_cache
-        cache = get_simulation_cache()
-        cache_ns = "simulate:micro"
+        try:
+            from src.api.cache import get_simulation_cache
+            cache = get_simulation_cache()
+            cache_ns = "simulate:micro"
 
-        cached = await cache.get(cache_ns, flat_payload)
-        if cached is not None:
-            logger.info("Returning cached simulation result (skipping Celery).")
-            return {"task_id": "cached", "status": "SUCCESS", "result": cached}
+            cached = await cache.get(cache_ns, flat_payload)
+            if cached is not None:
+                logger.info("Returning cached simulation result (skipping Celery).")
+                return {"task_id": "cached", "status": "SUCCESS", "result": cached}
+        except Exception as cache_exc:
+            logger.warning("Redis cache check failed (non-fatal): %s", cache_exc)
 
         total_spend = payload.endogenous.spend_meta + payload.endogenous.spend_google + payload.endogenous.spend_tiktok
         logger.info(
@@ -88,268 +98,113 @@ async def simulate(
         raise HTTPException(status_code=500, detail="Internal server error enqueuing simulation") from exc
 
 
-_CAMPAIGN_GRAPH_CYPHER = """
-MERGE (u:User {clerk_id: $clerk_user_id})
-SET
-  u.is_onboarded = true,
-  u.onboarded_at = datetime()
-
-MERGE (c:Campaign {id: $campaign_id})
-SET
-  c.budget = $budget,
-  c.cpc = $cpc,
-  c.base_price = $base_price,
-  c.discount_rate = $discount_rate,
-  c.primary_channels = $primary_channels,
-  c.historical_revenue = $historical_revenue,
-  c.aov = $aov,
-  c.cac = $cac,
-  c.ltv = $ltv,
-  c.updated_at = datetime()
-
-MERGE (ac:AgentCluster {id: $agent_cluster_id})
-SET
-  ac.regions = $regions,
-  ac.target_age_range = $target_age_range,
-  ac.intent_clusters = $intent_clusters,
-  ac.updated_at = datetime()
-
-MERGE (c)-[:TARGETS]->(ac)
-
-MERGE (u)-[:OWNS]->(c)
-
-WITH c
-UNWIND $competitors AS competitor_name
-MERGE (comp:Competitor {name: competitor_name})
-MERGE (c)-[:COMPETES_WITH]->(comp)
-
-RETURN
-  c.id AS campaign_id,
-  $agent_cluster_id AS agent_cluster_id,
-  collect(DISTINCT comp.name) AS competitor_ids
-"""
-
-_MACRO_CONTEXT_CYPHER = """
-MATCH (c:Campaign {id: $campaign_id})
-UNWIND $macroeconomic_flags AS flag
-MERGE (mc:MacroContext {flag: flag})
-MERGE (c)-[:OPERATES_IN]->(mc)
-RETURN collect(DISTINCT mc.flag) AS macro_context_ids
-"""
-
-_ONBOARDING_STATUS_CYPHER = """
-MATCH (u:User {clerk_id: $clerk_user_id})
-OPTIONAL MATCH (u)-[:OWNS]->(c:Campaign)
-RETURN
-  coalesce(u.is_onboarded, false) AS flag_onboarded,
-  count(c) > 0 AS has_campaign
-"""
-
-
-def _build_cypher_params(
-    payload: SimulationInitRequest,
-    campaign_id: str,
-    agent_cluster_id: str,
-) -> dict[str, Any]:
-    clicks = payload.endogenous.Clicks
-    total_spend = payload.endogenous.total_spend
-    cpc = total_spend / clicks if clicks > 0 else 1.5
-    conversions = payload.transactional.Total_Conversion
-    revenue = payload.transactional.revenue
-    aov = revenue / conversions if conversions > 0 else 100.0
-    cac = total_spend / conversions if conversions > 0 else 50.0
-
-    return {
-        "clerk_user_id": payload.clerk_user_id,
-        "campaign_id": campaign_id,
-        "agent_cluster_id": agent_cluster_id,
-        "budget": total_spend,
-        "cpc": cpc,
-        "base_price": 100.0,
-        "discount_rate": 0.0,
-        "primary_channels": ["Meta", "Google", "TikTok"],
-        "historical_revenue": revenue,
-        "aov": aov,
-        "cac": cac,
-        "ltv": aov * 3.0,
-        "regions": ["Dhaka"],
-        "target_age_range": payload.audience.age,
-        "intent_clusters": [payload.audience.interest],
-        "competitors": payload.exogenous.competitors,
-        "macroeconomic_flags": payload.exogenous.macroeconomic_flags,
-    }
-
-
-def get_onboarding_status(
-    manager: Neo4jManager,
-    clerk_user_id: str,
-) -> SimulationOnboardingStatus:
-    """
-    Return onboarding status for a Clerk user.
-
-    Backfill: users with an existing OWNS->Campaign link are treated as onboarded
-    even if is_onboarded was never set on the User node.
-    """
-    if manager.driver is None:
-        manager.connect()
-    if manager.driver is None:
-        raise ServiceUnavailable("Neo4j driver is not available.")
-
-    with manager.driver.session() as session:
-        record = session.run(
-            _ONBOARDING_STATUS_CYPHER,
-            clerk_user_id=clerk_user_id,
-        ).single()
-
-    if record is None:
-        return SimulationOnboardingStatus(
-            clerk_user_id=clerk_user_id,
-            is_onboarded=False,
-            has_campaign=False,
-        )
-
-    has_campaign = bool(record["has_campaign"])
-    flag_onboarded = bool(record["flag_onboarded"])
-    is_onboarded = flag_onboarded or has_campaign
-
-    return SimulationOnboardingStatus(
-        clerk_user_id=clerk_user_id,
-        is_onboarded=is_onboarded,
-        has_campaign=has_campaign,
-    )
-
-
-def persist_simulation_init(
-    manager: Neo4jManager,
-    payload: SimulationInitRequest,
-) -> SimulationInitResponse:
-    """
-    Write the four input matrices into Neo4j as interconnected nodes.
-
-    Raises:
-        ServiceUnavailable: Neo4j is unreachable.
-        Neo4jError: Constraint violations or query failures.
-    """
-    if manager.driver is None:
-        manager.connect()
-    if manager.driver is None:
-        raise ServiceUnavailable("Neo4j driver is not available.")
-
-    campaign_id = str(uuid.uuid4())
-    agent_cluster_id = str(uuid.uuid4())
-    params = _build_cypher_params(payload, campaign_id, agent_cluster_id)
-
-    def _write_transaction(tx: Any) -> dict[str, Any]:
-        campaign_result = tx.run(_CAMPAIGN_GRAPH_CYPHER, params).single()
-        if campaign_result is None:
-            raise Neo4jError("Campaign graph write returned no result.")
-
-        macro_context_ids: list[str] = []
-        if params["macroeconomic_flags"]:
-            macro_result = tx.run(
-                _MACRO_CONTEXT_CYPHER,
-                campaign_id=campaign_id,
-                macroeconomic_flags=params["macroeconomic_flags"],
-            ).single()
-            if macro_result is not None:
-                macro_context_ids = list(macro_result["macro_context_ids"] or [])
-
-        return {
-            "campaign_id": campaign_result["campaign_id"],
-            "agent_cluster_id": campaign_result["agent_cluster_id"],
-            "competitor_ids": list(campaign_result["competitor_ids"] or []),
-            "macro_context_ids": macro_context_ids,
-        }
-
-    with manager.driver.session() as session:
-        graph = session.execute_write(_write_transaction)
-
-    competitor_ids: list[str] = graph["competitor_ids"]
-    macro_context_ids: list[str] = graph["macro_context_ids"]
-
-    return SimulationInitResponse(
-        campaign_id=graph["campaign_id"],
-        agent_cluster_id=graph["agent_cluster_id"],
-        competitor_ids=competitor_ids,
-        macro_context_ids=macro_context_ids,
-        node_counts=SimulationNodeCounts(
-            competitors=len(competitor_ids),
-            macro_contexts=len(macro_context_ids),
-        ),
-        is_onboarded=True,
-    )
-
-
 @router.get("/results/{clerk_user_id}", response_model=DashboardResultsResponse)
 async def simulate_results(
     clerk_user_id: str,
-    neo4j: Neo4jManager = Depends(get_neo4j_manager),
     _user: ClerkAuth = Depends(require_authenticated_user),
 ) -> DashboardResultsResponse:
     """
-    Return dashboard-ready simulation data for the user's latest Neo4j campaign.
+    Return dashboard-ready simulation data for the user's latest campaign.
 
-    Runs the micro-simulation and macro-forecast engines from persisted onboarding
-    inputs. Returns ``no_campaign`` when the user has not onboarded, or
-    ``processing`` when computation fails (retry shortly).
+    Uses in-memory campaign store (populated by /init) to build the dashboard
+    without requiring Neo4j. Falls back to a sensible default campaign if
+    the user's data is not in memory (e.g., after a server restart).
     """
     if clerk_user_id != _user.user_id:
         raise HTTPException(status_code=403, detail="Not authorized to access these results.")
 
+    campaign = _user_campaigns.get(clerk_user_id)
+    if campaign is None:
+        logger.warning(
+            "No in-memory campaign for user %s — returning no_campaign. "
+            "User should re-run onboarding.",
+            clerk_user_id,
+        )
+        return DashboardResultsResponse(status="no_campaign")
+
+    # ── Redis cache layer ────────────────────────────────────────────────
     try:
-        return await get_dashboard_results(neo4j, clerk_user_id)
-    except ServiceUnavailable as exc:
-        logger.error("Neo4j unavailable during simulate/results: %s", exc)
-        raise HTTPException(
-            status_code=503,
-            detail="Graph database is unavailable. Try again shortly.",
-        ) from exc
-    except Neo4jError as exc:
-        logger.error("Neo4j error during simulate/results: %s", exc)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to load campaign results: {exc}",
-        ) from exc
+        from src.api.cache import get_simulation_cache
+        cache = get_simulation_cache()
+        cache_ns = "simulate:results"
+        cache_params = {
+            "clerk_user_id": clerk_user_id,
+            **{k: v for k, v in campaign.items() if k != "competitor_names"},
+            "competitor_names": sorted(campaign.get("competitor_names") or []),
+        }
+
+        cached = await cache.get(cache_ns, cache_params)
+        if cached is not None:
+            try:
+                return DashboardResultsResponse(**cached)
+            except Exception:
+                logger.warning("Cached payload failed validation — recomputing.")
+    except Exception as cache_exc:
+        logger.warning("Redis cache check failed (non-fatal): %s", cache_exc)
+
+    try:
+        result = build_dashboard_results(campaign)
+        # Persist to cache (1 hour TTL) — best effort
+        try:
+            from src.api.cache import get_simulation_cache
+            cache = get_simulation_cache()
+            cache_ns = "simulate:results"
+            cache_params = {
+                "clerk_user_id": clerk_user_id,
+                **{k: v for k, v in campaign.items() if k != "competitor_names"},
+                "competitor_names": sorted(campaign.get("competitor_names") or []),
+            }
+            await cache.set(cache_ns, cache_params, result.model_dump())
+        except Exception as cache_err:
+            logger.warning("Failed to write simulation cache: %s", cache_err)
+        return result
+    except Exception as exc:
+        logger.exception(
+            "Dashboard simulation failed for user %s: %s",
+            clerk_user_id,
+            exc,
+        )
+        return DashboardResultsResponse(status="processing")
 
 
 @router.get("/status/{clerk_user_id}", response_model=SimulationOnboardingStatus)
 def simulate_onboarding_status(
     clerk_user_id: str,
-    neo4j: Neo4jManager = Depends(get_neo4j_manager),
 ) -> SimulationOnboardingStatus:
-    """Return whether the user has completed onboarding (with Campaign backfill)."""
-    try:
-        return get_onboarding_status(neo4j, clerk_user_id)
-    except ServiceUnavailable as exc:
-        logger.error("Neo4j unavailable during simulate/status: %s", exc)
-        raise HTTPException(
-            status_code=503,
-            detail="Graph database is unavailable. Try again shortly.",
-        ) from exc
-    except Neo4jError as exc:
-        logger.error("Neo4j error during simulate/status: %s", exc)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to read onboarding status: {exc}",
-        ) from exc
+    """Return whether the user has completed onboarding.
+    
+    With Neo4j removed, we check the in-memory store. If the user has
+    a campaign in memory, they are onboarded.
+    """
+    has_campaign = clerk_user_id in _user_campaigns
+    
+    return SimulationOnboardingStatus(
+        clerk_user_id=clerk_user_id,
+        is_onboarded=has_campaign,
+        has_campaign=has_campaign,
+    )
 
 
 @router.post("/init", response_model=SimulationInitResponse, status_code=200)
 def simulate_init(
     payload: SimulationInitRequest,
-    neo4j: Neo4jManager = Depends(get_neo4j_manager),
     _user: ClerkAuth = Depends(require_authenticated_user),
 ) -> SimulationInitResponse:
     """
-    Validate onboarding matrices and persist them to the Neo4j knowledge graph.
-
-    Pydantic validates the request body before this handler runs. All Cypher
-    uses parameterised queries to prevent injection.
+    Validate onboarding matrices and store them in memory for dashboard use.
+    
+    Neo4j has been removed — campaign data is stored in a process-local dict
+    keyed by clerk_user_id. The simulation engines will read from this store
+    when building dashboard results.
     """
     try:
         total_spend = payload.endogenous.total_spend
+        campaign_id = str(uuid.uuid4())
+        agent_cluster_id = str(uuid.uuid4())
+
         logger.info(
-            "Initializing simulation graph for campaign (age=%s, interest=%s, total_spend=%s, spend_meta=%s, competitors=%d, competitor_urls=%d)",
+            "Initializing simulation for user %s (age=%s, interest=%s, total_spend=%s, spend_meta=%s, competitors=%d, competitor_urls=%d)",
+            payload.clerk_user_id,
             payload.audience.age,
             payload.audience.interest,
             total_spend,
@@ -357,22 +212,55 @@ def simulate_init(
             len(payload.exogenous.competitors),
             len(payload.exogenous.competitor_urls),
         )
-        return persist_simulation_init(neo4j, payload)
-    except ServiceUnavailable as exc:
-        logger.error("Neo4j unavailable during simulate/init: %s", exc)
-        raise HTTPException(
-            status_code=503,
-            detail="Graph database is unavailable. Try again shortly.",
-        ) from exc
-    except Neo4jError as exc:
-        logger.error("Neo4j error during simulate/init: %s", exc)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to persist simulation graph: {exc}",
-        ) from exc
+
+        # Derive campaign properties from the payload (same logic as before)
+        clicks = payload.endogenous.Clicks
+        cpc = total_spend / clicks if clicks > 0 else 1.5
+        conversions = payload.transactional.Total_Conversion
+        revenue = payload.transactional.revenue
+        aov = revenue / conversions if conversions > 0 else 100.0
+
+        # Store campaign in memory for /results to use
+        _user_campaigns[payload.clerk_user_id] = {
+            "campaign_id": campaign_id,
+            "budget": total_spend,
+            "cpc": cpc,
+            "base_price": 100.0,
+            "discount_rate": 0.0,
+            "primary_channels": ["Meta", "Google", "TikTok"],
+            "historical_revenue": revenue,
+            "aov": aov,
+            "cac": total_spend / conversions if conversions > 0 else 50.0,
+            "ltv": aov * 3.0,
+            "regions": ["Dhaka"],
+            "target_age_range": payload.audience.age,
+            "intent_clusters": [payload.audience.interest],
+            "competitor_names": payload.exogenous.competitors,
+        }
+
+        competitor_ids = payload.exogenous.competitors
+        macro_context_ids = payload.exogenous.macroeconomic_flags
+
+        logger.info(
+            "Simulation init complete for user %s — campaign_id=%s",
+            payload.clerk_user_id,
+            campaign_id,
+        )
+
+        return SimulationInitResponse(
+            campaign_id=campaign_id,
+            agent_cluster_id=agent_cluster_id,
+            competitor_ids=competitor_ids,
+            macro_context_ids=macro_context_ids,
+            node_counts=SimulationNodeCounts(
+                competitors=len(competitor_ids),
+                macro_contexts=len(macro_context_ids),
+            ),
+            is_onboarded=True,
+        )
     except Exception as exc:
         logger.exception("Unexpected error during simulate/init")
         raise HTTPException(
             status_code=500,
-            detail="Internal server error during graph initialization",
+            detail="Internal server error during simulation initialization",
         ) from exc

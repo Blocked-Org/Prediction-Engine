@@ -1,7 +1,9 @@
-"""Report context generation — orchestrates SHAP formatting + GraphRAG retrieval.
+"""Report context generation — orchestrates SHAP formatting + context retrieval.
 
 Endpoint ``POST /api/generate_report_context`` is consumed by the Next.js
 ``/api/report`` route to inject grounded context into the LLM system prompt.
+
+Neo4j dependency removed — campaigns fetched from in-memory store.
 """
 
 from __future__ import annotations
@@ -11,12 +13,10 @@ import os
 from pathlib import Path
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
-from src.api.db.neo4j_client import Neo4jManager, get_neo4j_manager
 from src.explainability.shap_tools import format_shap_for_llm
-from src.llm.graphrag_service import GraphRAGService
 
 logger = logging.getLogger(__name__)
 
@@ -32,11 +32,11 @@ class ReportContextRequest(BaseModel):
     """Payload for POST /api/generate_report_context."""
 
     simulation_id: str = Field(
-        ..., min_length=1, description="Campaign ID (maps to Campaign.id in Neo4j)."
+        ..., min_length=1, description="Campaign ID."
     )
     query: str = Field(
         default="Summarize the campaign performance and key drivers.",
-        description="Natural-language user query for GraphRAG retrieval.",
+        description="Natural-language user query for context retrieval.",
     )
 
 
@@ -118,47 +118,17 @@ def _get_shap_explanation(campaign: dict[str, Any]) -> Optional[dict[str, Any]]:
 
 
 # ---------------------------------------------------------------------------
-# Campaign fetch (reuses the same Cypher pattern as dashboard_results.py)
+# Campaign fetch from in-memory store
 # ---------------------------------------------------------------------------
 
-_CAMPAIGN_BY_ID_CYPHER = """
-MATCH (c:Campaign {id: $campaign_id})
-OPTIONAL MATCH (c)-[:COMPETES_WITH]->(comp:Competitor)
-OPTIONAL MATCH (c)-[:TARGETS]->(ac:AgentCluster)
-WITH c, ac, collect(DISTINCT comp.name) AS competitor_names
-RETURN
-  c.id AS campaign_id,
-  c.budget AS budget,
-  c.cpc AS cpc,
-  c.base_price AS base_price,
-  c.discount_rate AS discount_rate,
-  c.primary_channels AS primary_channels,
-  c.historical_revenue AS historical_revenue,
-  c.aov AS aov,
-  c.cac AS cac,
-  c.ltv AS ltv,
-  ac.regions AS regions,
-  ac.target_age_range AS target_age_range,
-  ac.intent_clusters AS intent_clusters,
-  competitor_names
-LIMIT 1
-"""
 
-
-def _fetch_campaign(manager: Neo4jManager, campaign_id: str) -> Optional[dict[str, Any]]:
-    """Fetch a single campaign record by ID from Neo4j."""
-    if manager.driver is None:
-        manager.connect()
-    if manager.driver is None:
-        return None
-
-    try:
-        with manager.driver.session() as session:
-            record = session.run(_CAMPAIGN_BY_ID_CYPHER, campaign_id=campaign_id).single()
-        return dict(record) if record else None
-    except Exception as exc:
-        logger.error("Failed to fetch campaign %s: %s", campaign_id, exc)
-        return None
+def _fetch_campaign_from_memory(campaign_id: str) -> Optional[dict[str, Any]]:
+    """Fetch a campaign dict from the in-memory store by campaign ID."""
+    from src.api.routes.simulate import _user_campaigns
+    for user_id, campaign in _user_campaigns.items():
+        if campaign.get("campaign_id") == campaign_id:
+            return campaign
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -169,25 +139,17 @@ def _fetch_campaign(manager: Neo4jManager, campaign_id: str) -> Optional[dict[st
 @router.post("/api/generate_report_context", response_model=ReportContextResponse)
 def generate_report_context(
     payload: ReportContextRequest,
-    neo4j: Neo4jManager = Depends(get_neo4j_manager),
 ) -> ReportContextResponse:
-    """Orchestrate SHAP formatting + GraphRAG retrieval for LLM grounding.
+    """Orchestrate SHAP formatting + context retrieval for LLM grounding.
 
-    1. Fetch the campaign from Neo4j by ``simulation_id``.
+    1. Fetch the campaign from in-memory store by ``simulation_id``.
     2. Attempt SHAP explanation (graceful fallback if model not available).
-    3. Run GraphRAG context retrieval.
+    3. Build basic context from campaign data.
     4. Return combined payload for the frontend system prompt.
     """
-    # --- Graph context (always attempted) ---
-    graphrag = GraphRAGService(neo4j)
-    graph_context = graphrag.retrieve_campaign_context(
-        query=payload.query,
-        campaign_id=payload.simulation_id,
-    )
+    campaign = _fetch_campaign_from_memory(payload.simulation_id)
 
     # --- SHAP context ---
-    campaign = _fetch_campaign(neo4j, payload.simulation_id)
-
     if campaign is not None:
         shap_dict = _get_shap_explanation(campaign)
         if shap_dict is not None:
@@ -195,13 +157,35 @@ def generate_report_context(
         else:
             shap_context = (
                 "SHAP values unavailable — no trained model loaded. "
-                "Recommendations should rely on the graph context and simulation data only."
+                "Recommendations should rely on the simulation data only."
             )
     else:
         shap_context = (
-            "SHAP values unavailable — campaign not found in the knowledge graph. "
+            "SHAP values unavailable — campaign not found. "
             "Recommendations should rely on the provided simulation data only."
         )
+
+    # --- Graph context (build from campaign data instead of Neo4j) ---
+    if campaign is not None:
+        channels = campaign.get("primary_channels", ["Meta", "Google", "TikTok"])
+        budget = campaign.get("budget", 10000)
+        competitors = campaign.get("competitor_names", [])
+        age_range = campaign.get("target_age_range", "25-34")
+        interests = campaign.get("intent_clusters", [])
+        
+        graph_context = (
+            f"Campaign Overview:\n"
+            f"- Total Budget: BDT {budget:,.0f}\n"
+            f"- Channels: {', '.join(channels)}\n"
+            f"- Target Age: {age_range}\n"
+            f"- Interest Clusters: {', '.join(interests) if interests else 'General'}\n"
+            f"- Competitors: {', '.join(competitors) if competitors else 'None specified'}\n"
+            f"- Historical Revenue: BDT {campaign.get('historical_revenue', 0):,.0f}\n"
+            f"- CPC: BDT {campaign.get('cpc', 1.5):.2f}\n"
+            f"- AOV: BDT {campaign.get('aov', 100):.2f}\n"
+        )
+    else:
+        graph_context = "No campaign context available — campaign not found in the system."
 
     return ReportContextResponse(
         shap_context=shap_context,

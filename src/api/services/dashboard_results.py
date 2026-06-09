@@ -1,4 +1,4 @@
-"""Build dashboard simulation payloads from Neo4j campaign graphs."""
+"""Build dashboard simulation payloads from campaign data (Neo4j-free)."""
 
 from __future__ import annotations
 
@@ -7,9 +7,6 @@ import uuid
 from datetime import date, timedelta
 from typing import Any
 
-from neo4j.exceptions import ServiceUnavailable
-
-from src.api.db.neo4j_client import Neo4jManager
 from src.api.schemas import ForecastRequest, HistoricalSpendRecord, SimulationRequest
 from src.schemas.dashboard import DashboardResultsResponse
 from src.shared.contracts import (
@@ -28,30 +25,6 @@ from src.shared.contracts import (
 # to avoid loading PyMC/Mesa/SHAP at API startup (causes OOM on Railway).
 
 logger = logging.getLogger(__name__)
-
-_CAMPAIGN_FOR_USER_CYPHER = """
-MATCH (u:User {clerk_id: $clerk_user_id})-[:OWNS]->(c:Campaign)
-OPTIONAL MATCH (c)-[:COMPETES_WITH]->(comp:Competitor)
-OPTIONAL MATCH (c)-[:TARGETS]->(ac:AgentCluster)
-WITH c, ac, collect(DISTINCT comp.name) AS competitor_names
-RETURN
-  c.id AS campaign_id,
-  c.budget AS budget,
-  c.cpc AS cpc,
-  c.base_price AS base_price,
-  c.discount_rate AS discount_rate,
-  c.primary_channels AS primary_channels,
-  c.historical_revenue AS historical_revenue,
-  c.aov AS aov,
-  c.cac AS cac,
-  c.ltv AS ltv,
-  ac.regions AS regions,
-  ac.target_age_range AS target_age_range,
-  ac.intent_clusters AS intent_clusters,
-  competitor_names
-ORDER BY c.updated_at DESC
-LIMIT 1
-"""
 
 
 def _as_float(value: Any, default: float) -> float:
@@ -208,7 +181,7 @@ def _recommendations(
 
 
 def build_dashboard_results(campaign: dict[str, Any]) -> DashboardResultsResponse:
-    """Run simulation engines and map Neo4j campaign properties to the UI contract."""
+    """Run simulation engines and map campaign properties to the UI contract."""
     channels = _as_str_list(campaign.get("primary_channels"), ["Meta"])
     budget = _as_float(campaign.get("budget"), 10_000.0)
     cpc = _as_float(campaign.get("cpc"), 1.5)
@@ -281,68 +254,3 @@ def build_dashboard_results(campaign: dict[str, Any]) -> DashboardResultsRespons
         simulation_scenario=simulation_scenario,
         optimization_result=optimization_result,
     )
-
-
-def fetch_campaign_for_user(
-    manager: Neo4jManager,
-    clerk_user_id: str,
-) -> dict[str, Any] | None:
-    if manager.driver is None:
-        manager.connect()
-    if manager.driver is None:
-        raise ServiceUnavailable("Neo4j driver is not available.")
-
-    with manager.driver.session() as session:
-        record = session.run(
-            _CAMPAIGN_FOR_USER_CYPHER,
-            clerk_user_id=clerk_user_id,
-        ).single()
-
-    if record is None:
-        return None
-    return dict(record)
-
-
-async def get_dashboard_results(
-    manager: Neo4jManager,
-    clerk_user_id: str,
-) -> DashboardResultsResponse:
-    campaign = fetch_campaign_for_user(manager, clerk_user_id)
-    if campaign is None:
-        return DashboardResultsResponse(status="no_campaign")
-
-    # ── Redis cache layer ────────────────────────────────────────────────
-    # Cache key is a deterministic hash of the campaign properties dict
-    # so identical onboarding inputs skip the full ABM → Bayesian pipeline.
-    from src.api.cache import get_simulation_cache
-    cache = get_simulation_cache()
-    cache_ns = "simulate:results"
-    cache_params = {
-        "clerk_user_id": clerk_user_id,
-        **{k: v for k, v in campaign.items() if k != "competitor_names"},
-        "competitor_names": sorted(campaign.get("competitor_names") or []),
-    }
-
-    cached = await cache.get(cache_ns, cache_params)
-    if cached is not None:
-        try:
-            return DashboardResultsResponse(**cached)
-        except Exception:
-            logger.warning("Cached payload failed validation — recomputing.")
-
-    try:
-        result = build_dashboard_results(campaign)
-        # Persist to cache (1 hour TTL)
-        try:
-            await cache.set(cache_ns, cache_params, result.model_dump())
-        except Exception as cache_err:
-            logger.warning("Failed to write simulation cache: %s", cache_err)
-        return result
-    except Exception as exc:
-        logger.exception(
-            "Dashboard simulation failed for user %s: %s",
-            clerk_user_id,
-            exc,
-        )
-        return DashboardResultsResponse(status="processing")
-

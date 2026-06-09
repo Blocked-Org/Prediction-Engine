@@ -137,20 +137,8 @@ def health_check() -> dict[str, Any]:
     """
     services: dict[str, str] = {}
 
-    # --- Neo4j Probe ---
-    try:
-        from src.api.db.neo4j_client import Neo4jManager
-        mgr = Neo4jManager()
-        ok = mgr.verify_connectivity()
-        services["neo4j"] = "ok" if ok else "error"
-    except Exception as exc:
-        logger.warning("Neo4j health probe failed: %s", exc)
-        services["neo4j"] = "error"
-    finally:
-        try:
-            mgr.close()  # type: ignore[possibly-undefined]
-        except Exception:
-            pass
+    # --- Neo4j Probe (skipped — Neo4j dependency removed) ---
+    services["neo4j"] = "skipped"
 
     # --- Redis Probe ---
     try:

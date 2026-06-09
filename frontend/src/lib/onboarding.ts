@@ -50,17 +50,13 @@ export async function fetchOnboardingStatus(
     );
     clearTimeout(timeout);
     if (!response.ok) {
-      const { MOCK_ONBOARDING_STATUS } = await import("./mock-data");
-      return MOCK_ONBOARDING_STATUS;
+      console.warn(`[fetchOnboardingStatus] Backend returned ${response.status} — returning null`);
+      return null;
     }
     return (await response.json()) as OnboardingStatus;
   } catch {
-    try {
-      const { MOCK_ONBOARDING_STATUS } = await import("./mock-data");
-      return MOCK_ONBOARDING_STATUS;
-    } catch {
-      return null;
-    }
+    console.warn("[fetchOnboardingStatus] Backend unreachable — returning null");
+    return null;
   }
 }
 
@@ -71,5 +67,9 @@ export async function resolveIsOnboarded(
   if (!clerkUserId) return false;
 
   const status = await fetchOnboardingStatus(clerkUserId);
-  return status?.is_onboarded === true && status?.has_campaign === true;
+  // If backend unreachable, assume NOT onboarded — let user stay on onboarding page.
+  // This is safe because the middleware (resolveOnboarded) handles the dashboard
+  // access case separately and allows through when backend is down.
+  if (status === null) return false;
+  return status.is_onboarded === true && status.has_campaign === true;
 }
