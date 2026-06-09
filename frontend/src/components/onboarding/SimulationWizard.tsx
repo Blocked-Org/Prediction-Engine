@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@clerk/nextjs"
+import { useAuth, useUser } from "@clerk/nextjs"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, type FieldPath } from "react-hook-form"
 import { Loader2, Sparkles, Eye, MousePointer, Target, Brain, Rocket, Users, ChevronLeft, ChevronRight, Globe, Link } from "lucide-react"
@@ -136,6 +136,7 @@ function NumberField({
 export function SimulationWizard({ locale }: { locale: string }) {
   const router = useRouter()
   const { userId, isLoaded } = useAuth()
+  const { user } = useUser()
   const [step, setStep] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -234,6 +235,7 @@ export function SimulationWizard({ locale }: { locale: string }) {
       
       if (result.success) {
         console.log("[SimulationWizard] Success! Navigating to dashboard...")
+        await user?.reload()
         router.push(`/${locale}/dashboard`)
       } else {
         setSubmitError(result.error)
