@@ -236,7 +236,7 @@ export function SimulationWizard({ locale }: { locale: string }) {
       if (result.success) {
         console.log("[SimulationWizard] Success! Navigating to dashboard...")
         await user?.reload()
-        router.push(`/${locale}/dashboard`)
+        window.location.assign(`/${locale}/dashboard`)
       } else {
         setSubmitError(result.error)
         setIsSubmitting(false)
