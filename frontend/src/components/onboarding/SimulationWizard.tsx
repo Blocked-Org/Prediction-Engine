@@ -8,6 +8,7 @@ import { useForm, type FieldPath } from "react-hook-form"
 import { Loader2, Sparkles, Eye, MousePointer, Target, Brain, Rocket, Users, ChevronLeft, ChevronRight, Globe, Link } from "lucide-react"
 
 import { completeOnboarding } from "@/actions/onboarding"
+import { BuniCompanion, type BuniState } from "@/components/companion/BuniCompanion"
 import {
   AGE_RANGES,
   GENDERS,
@@ -141,6 +142,26 @@ export function SimulationWizard({ locale }: { locale: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
+  let buniState: BuniState = "idle"
+  let buniSpeech = ""
+
+  if (submitError) {
+    buniState = "confused"
+    buniSpeech = "Oops, something went wrong... 🥕 Can you check the inputs?"
+  } else if (isSubmitting) {
+    buniState = "thinking"
+    buniSpeech = "Processing your inputs and launching the simulation... 🚀"
+  } else if (step === 0) {
+    buniState = "idle"
+    buniSpeech = "Hi! Let's set up your simulation. First, provide your historical ad metrics! 📊"
+  } else if (step === 1) {
+    buniState = "happy"
+    buniSpeech = "Great job! ✨ Now, who is your target audience?"
+  } else if (step === 2) {
+    buniState = "idle"
+    buniSpeech = "Almost done! 🐰 Drop in some competitor URLs, and I'll scrape their info!"
+  }
+
   const form = useForm<SimulationWizardInput>({
     resolver: zodResolver(simulationWizardSchema),
     defaultValues: EMPTY_DEFAULTS as SimulationWizardInput,
@@ -249,10 +270,15 @@ export function SimulationWizard({ locale }: { locale: string }) {
   }
 
   return (
-    <Card className="w-full bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-xl rounded-3xl shadow-[0_0_80px_rgba(99,102,241,0.1)] text-white relative overflow-hidden transition-all duration-500">
-      
-      {/* Decorative background glow */}
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
+    <div className="flex flex-col items-center gap-6 w-full">
+      <div className="flex justify-center w-full mt-4 mb-2">
+        <BuniCompanion state={buniState} speech={buniSpeech} />
+      </div>
+
+      <Card className="w-full bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-xl rounded-3xl shadow-[0_0_80px_rgba(99,102,241,0.1)] text-white relative overflow-hidden transition-all duration-500">
+        
+        {/* Decorative background glow */}
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
 
       <CardHeader className="border-b border-zinc-800/60 pb-8 px-6 sm:px-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
@@ -565,5 +591,6 @@ export function SimulationWizard({ locale }: { locale: string }) {
       </Form>
       {isSubmitting && <LoadingOverlay absolute />}
     </Card>
+    </div>
   )
 }

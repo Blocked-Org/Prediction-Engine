@@ -32,6 +32,8 @@ export const metadata: Metadata = {
 
 import { TooltipProvider } from '@/components/ui/tooltip'
 
+import { FloatingBuni } from '@/components/companion/FloatingBuni'
+
 export default async function RootLayout({
   children,
   params
@@ -54,6 +56,7 @@ export default async function RootLayout({
           <NextIntlClientProvider messages={messages}>
             <TooltipProvider>
               {children}
+              <FloatingBuni />
             </TooltipProvider>
           </NextIntlClientProvider>
         </body>
