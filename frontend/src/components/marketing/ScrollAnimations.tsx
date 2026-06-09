@@ -60,7 +60,7 @@ export function MarqueeBar({ items, direction = 'left', speed = 60 }: MarqueeBar
         trigger: container,
         start: 'top bottom',
         end: 'bottom top',
-        onUpdate: (self) => {
+        onUpdate: (self: any) => {
           const velocity = Math.abs(self.getVelocity())
           const speedMultiplier = 1 + Math.min(velocity / 2000, 2)
           tween.timeScale(speedMultiplier)

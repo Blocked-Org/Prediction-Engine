@@ -6,15 +6,42 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { MessageCircle, X, Send } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
+import type { UIMessage } from "ai";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
+function getMessageText(message: UIMessage): string {
+  return message.parts
+    .filter((p): p is { type: "text"; text: string } => p.type === "text")
+    .map((p) => p.text)
+    .join("");
+}
 
 export function FloatingBuni() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
-    api: "/api/buni",
+  const [input, setInput] = useState("");
+
+  const { messages, sendMessage, status } = useChat({
+    transport: new DefaultChatTransport({
+      api: "/api/buni",
+    }),
   });
+
+  const isLoading = status === "submitted" || status === "streaming";
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const text = input.trim();
+    if (!text || isLoading) return;
+    sendMessage({ text });
+    setInput("");
+  };
 
   // Hide on auth/onboarding pages
   if (
@@ -70,22 +97,25 @@ export function FloatingBuni() {
                   <p className="text-sm">Hi! I'm Buni. Ask me anything about your simulations! 🐰</p>
                 </div>
               )}
-              {messages.map((m) => (
-                <div
-                  key={m.id}
-                  className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
-                >
+              {messages.map((m) => {
+                const text = getMessageText(m);
+                return (
                   <div
-                    className={`max-w-[80%] p-3 rounded-2xl text-sm ${
-                      m.role === "user"
-                        ? "bg-indigo-600 text-white rounded-br-sm"
-                        : "bg-zinc-800 text-zinc-200 rounded-bl-sm"
-                    }`}
+                    key={m.id}
+                    className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
                   >
-                    {m.content}
+                    <div
+                      className={`max-w-[80%] p-3 rounded-2xl text-sm ${
+                        m.role === "user"
+                          ? "bg-indigo-600 text-white rounded-br-sm"
+                          : "bg-zinc-800 text-zinc-200 rounded-bl-sm"
+                      }`}
+                    >
+                      {text}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
               {isLoading && (
                 <div className="flex justify-start">
                   <div className="bg-zinc-800 text-zinc-400 p-3 rounded-2xl rounded-bl-sm text-sm flex gap-1">
