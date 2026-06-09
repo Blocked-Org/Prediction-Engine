@@ -64,7 +64,7 @@ export function DocsLayout({ locale, initialSlug, config }: Props) {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: 'BrandOS Documentation',
+        title: 'BuniOS Documentation',
         url: window.location.href,
       })
     } else {

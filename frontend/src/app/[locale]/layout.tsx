@@ -26,7 +26,7 @@ const notoSansBengali = Noto_Sans_Bengali({
 })
 
 export const metadata: Metadata = {
-  title: 'BrandOS — Predictive Marketing Intelligence',
+  title: 'BuniOS — Predictive Marketing Intelligence',
   description: 'A Graph-Augmented Bayesian Simulation Engine for SME marketing intelligence. Simulate campaigns, optimize budgets, and predict causal outcomes.',
 }
 

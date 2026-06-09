@@ -1,6 +1,6 @@
 {
   "HomePage": {
-    "title": "BrandOS — Predictive Marketing Intelligence",
+    "title": "BuniOS — Predictive Marketing Intelligence",
     "description": "A high-performance Graph-Augmented Bayesian Simulation platform. Optimize marketing spend with predictive MMM, multi-agent frameworks, and advanced deterministic metrics.",
     "top_badge": "Version 1.0 is live",
     "get_started": "Enter Dashboard",
@@ -176,7 +176,7 @@
   },
   "DocsPage": {
     "title": "Documentation",
-    "subtitle": "Everything you need to understand, deploy, and use BrandOS.",
+    "subtitle": "Everything you need to understand, deploy, and use BuniOS.",
     "search_placeholder": "Search documentation...",
     "categories": {
       "litepaper": "Litepaper",
@@ -197,7 +197,7 @@
   },
   "ContactPage": {
     "title": "Get in Touch",
-    "subtitle": "Have questions about BrandOS? Let's connect.",
+    "subtitle": "Have questions about BuniOS? Let's connect.",
     "name": "Full Name",
     "email": "Email Address",
     "message": "Message / Inquiry",
@@ -250,7 +250,7 @@
     },
     "bento": {
       "title": "Solving 4 Structural Blind Spots",
-      "subtitle": "Traditional attribution models fail in walled gardens. Here is how BrandOS fixes it.",
+      "subtitle": "Traditional attribution models fail in walled gardens. Here is how BuniOS fixes it.",
       "spot1_title": "1. Cold-Start Problem",
       "spot1_desc": "Uses Transfer Learning to estimate curves for new products with no historical data.",
       "spot2_title": "2. Linear Scale Fallacy",

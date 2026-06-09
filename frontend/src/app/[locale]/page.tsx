@@ -27,7 +27,7 @@ import {
   Sparkles
 } from 'lucide-react'
 
-// Marquee items adapted to BrandOS domain
+// Marquee items adapted to BuniOS domain
 const MARQUEE_ITEMS = [
   '( PREDICTIONS )',
   '( MARKET SIGNALS )',
@@ -493,7 +493,7 @@ export default function LandingPage() {
                       <line x1="100" y1="50" x2="100" y2="90" stroke={selectedGraphNode === 'metric' ? '#0A0A0A' : '#E5E5E5'} strokeWidth="1.5" className="transition-colors duration-300" />
 
                       <circle cx="100" cy="50" r="12" fill="#0A0A0A" stroke="#0A0A0A" strokeWidth="2" />
-                      <text x="100" y="53" fill="#FFFFFF" fontSize="6" fontWeight="bold" textAnchor="middle">BrandOS</text>
+                      <text x="100" y="53" fill="#FFFFFF" fontSize="6" fontWeight="bold" textAnchor="middle">BuniOS</text>
 
                       <circle cx="40" cy="30" r="10" fill={selectedGraphNode === 'brand' ? '#FACC15' : '#F5F5F0'} stroke={selectedGraphNode === 'brand' ? '#0A0A0A' : '#E5E5E5'} strokeWidth="1.5" className="transition-colors duration-300" />
                       <text x="40" y="32" fill="#0A0A0A" fontSize="5" textAnchor="middle">Competitor</text>

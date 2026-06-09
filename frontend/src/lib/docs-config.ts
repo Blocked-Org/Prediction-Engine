@@ -163,7 +163,7 @@ export interface PitchSection {
 }
 
 export const PITCH_SECTIONS: PitchSection[] = [
-  { id: 'hero', title: 'BrandOS', titleBn: 'ব্র্যান্ডওএস', subtitle: 'Predictive Marketing Intelligence for Emerging Markets', subtitleBn: 'উদীয়মান বাজারের জন্য প্রেডিক্টিভ মার্কেটিং ইন্টেলিজেন্স' },
+  { id: 'hero', title: 'BuniOS', titleBn: 'ব্র্যান্ডওএস', subtitle: 'Predictive Marketing Intelligence for Emerging Markets', subtitleBn: 'উদীয়মান বাজারের জন্য প্রেডিক্টিভ মার্কেটিং ইন্টেলিজেন্স' },
   { id: 'problem', title: 'The Problem', titleBn: 'সমস্যা' },
   { id: 'solution', title: 'Our Solution', titleBn: 'আমাদের সমাধান' },
   { id: 'why-now', title: 'Why Now', titleBn: 'কেন এখন' },
