@@ -8,7 +8,6 @@ import pytest
 from fastapi.testclient import TestClient
 
 from src.api.main import app
-from src.schemas.simulation import SimulationInitRequest, SimulationOnboardingStatus
 
 VALID_PAYLOAD = {
     "clerk_user_id": "user_test_clerk_123",
@@ -99,7 +98,7 @@ def test_simulate_results_endpoint(
     # Init for current user
     client.post("/api/v1/simulate/init", json=VALID_PAYLOAD)
     
-    mock_build.return_value = DashboardResultsResponse(status="success")
+    mock_build.return_value = DashboardResultsResponse(status="ready")
     response = client.get("/api/v1/simulate/results/user_test_clerk_123")
     assert response.status_code == 200
-    assert response.json()["status"] == "success"
+    assert response.json()["status"] == "ready"

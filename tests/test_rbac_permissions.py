@@ -165,9 +165,7 @@ def test_rbac_simulate_endpoint(
 @patch("src.api.auth._resolve_tenant_id", return_value=FAKE_TENANT_ID)
 @patch("src.api.auth.SessionLocal")
 @patch("src.api.auth.verify_clerk_token")
-@patch("src.api.routes.simulate.persist_simulation_init")
 def test_rbac_simulate_init_endpoint(
-    mock_persist,
     mock_verify,
     mock_session,
     mock_resolve,
@@ -177,16 +175,6 @@ def test_rbac_simulate_init_endpoint(
     """Test RBAC on POST /api/v1/simulate/init."""
     mock_verify.return_value = _make_claims(role)
     mock_session.return_value = MagicMock()
-    
-    # Mock Neo4j persistence
-    mock_persist.return_value = {
-        "campaign_id": "c-123",
-        "agent_cluster_id": "a-123",
-        "competitor_ids": ["BrandX"],
-        "macro_context_ids": [],
-        "node_counts": {"competitors": 1, "macro_contexts": 0},
-        "is_onboarded": True,
-    }
 
     headers = {"Authorization": "Bearer valid.jwt.token"}
     response = client.post(
@@ -209,7 +197,7 @@ def test_rbac_simulate_init_endpoint(
 @patch("src.api.auth._resolve_tenant_id", return_value=FAKE_TENANT_ID)
 @patch("src.api.auth.SessionLocal")
 @patch("src.api.auth.verify_clerk_token")
-@patch("src.api.routes.simulate.get_dashboard_results")
+@patch("src.api.routes.simulate.build_dashboard_results")
 def test_rbac_simulate_results_endpoint(
     mock_results,
     mock_verify,
@@ -219,15 +207,17 @@ def test_rbac_simulate_results_endpoint(
     expected_status,
 ):
     """Test RBAC on GET /api/v1/simulate/results/{id} — everyone can read."""
+    from src.schemas.dashboard import DashboardResultsResponse
+
     mock_verify.return_value = _make_claims(role)
     mock_session.return_value = MagicMock()
 
     # Mock dashboard results service response
-    mock_results.return_value = {
-        "status": "ready",
-        "simulation_scenario": None,
-        "optimization_result": None,
-    }
+    mock_results.return_value = DashboardResultsResponse(
+        status="ready",
+        simulation_scenario=None,
+        optimization_result=None,
+    )
 
     headers = {"Authorization": "Bearer valid.jwt.token"}
     response = client.get(
