@@ -296,11 +296,9 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
     ) => {
       const flow = getQuestionFlow(experience);
 
-      // Find the current buni question index
+      // Find the current buni question index by matching the last shown buni message
       const buniQuestions = flow.filter((m) => m.role === "buni");
-      const answeredCount = messages.filter(
-        (m) => m.role === "user" && m.answered
-      ).length;
+      const lastShownBuni = [...messages].reverse().find((m) => m.role === "buni");
 
       // Add user answer
       const userMsg: ChatMessage = {
@@ -312,8 +310,10 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
 
       setMessages((prev) => [...prev, userMsg]);
 
-      // Find next buni question
-      const currentBuniIdx = answeredCount; // 0-indexed into buniQuestions
+      // Find position of the last-shown buni message in the flow, then advance past it
+      const currentBuniIdx = lastShownBuni
+        ? buniQuestions.findIndex((q) => q.id === lastShownBuni.id)
+        : -1;
       const nextBuniQuestions = buniQuestions.slice(currentBuniIdx + 1);
 
       if (nextBuniQuestions.length === 0) return;

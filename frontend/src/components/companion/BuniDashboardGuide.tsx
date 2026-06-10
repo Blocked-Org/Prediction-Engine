@@ -95,12 +95,9 @@ export function BuniDashboardGuide() {
 
   return (
     <>
-      {/* Backdrop overlay */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] pointer-events-auto"
+      {/* Transparent overlay — captures clicks to dismiss, no blur or darkening */}
+      <div
+        className="fixed inset-0 z-[60] pointer-events-auto"
         onClick={handleDismiss}
       />
 

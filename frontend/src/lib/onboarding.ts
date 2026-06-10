@@ -66,10 +66,12 @@ export async function resolveIsOnboarded(
 ): Promise<boolean> {
   if (!clerkUserId) return false;
 
+  // Fast-path: if Clerk metadata already says onboarded, trust it.
+  // This prevents users from getting stuck in an onboarding loop
+  // when the backend DB is temporarily unreachable.
+  if (isOnboardedFromClaims(_sessionClaims)) return true;
+
   const status = await fetchOnboardingStatus(clerkUserId);
-  // If backend unreachable, assume NOT onboarded — let user stay on onboarding page.
-  // This is safe because the middleware (resolveOnboarded) handles the dashboard
-  // access case separately and allows through when backend is down.
   if (status === null) return false;
   return status.is_onboarded === true && status.has_campaign === true;
 }
