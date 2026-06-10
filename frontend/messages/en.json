@@ -46,7 +46,8 @@
     "cpc": "CPC (৳)",
     "toggle_language": "Toggle language",
     "reporting": "Reporting",
-    "docs_admin": "Docs Admin"
+    "docs_admin": "Docs Admin",
+    "docs": "Docs"
   },
   "Simulation": {
     "title": "What-If Simulation",

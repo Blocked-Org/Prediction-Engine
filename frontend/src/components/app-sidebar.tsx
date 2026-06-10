@@ -7,7 +7,7 @@
 "use client"
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { LayoutDashboard, Settings, BarChart3, Home, FileText } from "lucide-react"
+import { LayoutDashboard, Settings, BarChart3, Home, FileText, BookOpen } from "lucide-react"
 import { ShowGuideAgainButton } from "@/components/companion/BuniDashboardGuide"
 
 import {
@@ -48,6 +48,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     { title: t('advanced_visualizations'), url: "/dashboard/analytics", icon: BarChart3, iconColor: "text-[#0A0A0A]", hasNotification: true },
     { title: t('reporting'), url: "/dashboard/reporting", icon: FileText, iconColor: "text-[#0A0A0A]" },
     { title: t('docs_admin') || 'Docs Admin', url: "/dashboard/docs-admin", icon: FileText, iconColor: "text-[#6B6B6B]" },
+    { title: t('docs'), url: "/docs", icon: BookOpen, iconColor: "text-[#6B6B6B]" },
     { title: t('settings'), url: "/dashboard/settings", icon: Settings, iconColor: "text-[#6B6B6B]" },
   ];
 
