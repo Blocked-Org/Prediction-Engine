@@ -118,16 +118,16 @@ def _get_shap_explanation(campaign: dict[str, Any]) -> Optional[dict[str, Any]]:
 
 
 # ---------------------------------------------------------------------------
-# Campaign fetch from in-memory store
+# Campaign fetch from database workspace
 # ---------------------------------------------------------------------------
 
 
-def _fetch_campaign_from_memory(campaign_id: str) -> Optional[dict[str, Any]]:
-    """Fetch a campaign dict from the in-memory store by campaign ID."""
-    from src.api.routes.simulate import _user_campaigns
-    for user_id, campaign in _user_campaigns.items():
-        if campaign.get("campaign_id") == campaign_id:
-            return campaign
+def _fetch_campaign_from_db(campaign_id: str) -> Optional[dict[str, Any]]:
+    """Fetch a campaign dict from the database workspace by campaign ID."""
+    from src.api.services.campaign_persistence import get_workspace_by_campaign_id
+    workspace = get_workspace_by_campaign_id(campaign_id)
+    if workspace is not None and isinstance(workspace.campaign_data, dict):
+        return workspace.campaign_data
     return None
 
 
@@ -142,12 +142,12 @@ def generate_report_context(
 ) -> ReportContextResponse:
     """Orchestrate SHAP formatting + context retrieval for LLM grounding.
 
-    1. Fetch the campaign from in-memory store by ``simulation_id``.
+    1. Fetch the campaign from database workspace by ``simulation_id``.
     2. Attempt SHAP explanation (graceful fallback if model not available).
     3. Build basic context from campaign data.
     4. Return combined payload for the frontend system prompt.
     """
-    campaign = _fetch_campaign_from_memory(payload.simulation_id)
+    campaign = _fetch_campaign_from_db(payload.simulation_id)
 
     # --- SHAP context ---
     if campaign is not None:
