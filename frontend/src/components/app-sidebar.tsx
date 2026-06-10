@@ -38,6 +38,7 @@ import { UserButton, Show } from "@clerk/nextjs"
  */
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const t = useTranslations('Dashboard');
+  const tOnboarding = useTranslations('Onboarding');
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
@@ -148,7 +149,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </div>
               <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[#F5F5F0] border border-[#E5E5E5] text-[9px] font-bold text-[#0A0A0A] uppercase tracking-wider leading-none">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#22c55e]" />
-                Online
+                {tOnboarding('online')}
               </div>
             </div>
           </SidebarMenuItem>

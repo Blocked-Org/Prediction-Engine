@@ -82,7 +82,9 @@
     "dashboard": "Dashboard",
     "logo": "Brand<os>OS</os>",
     "en": "EN",
-    "bn": "বাং"
+    "bn": "বাং",
+    "menu": "MENU",
+    "close": "CLOSE"
   },
   "Footer": {
     "rights": "All rights reserved.",
@@ -232,7 +234,11 @@
       "cta_docs": "Read Whitepaper",
       "monthly_spend_label": "Monthly Spend:",
       "simulate_btn": "Simulate ROI",
-      "simulate_btn_short": "Go"
+      "simulate_btn_short": "Go",
+      "buni_speech": "Hello! I'm Buni, your campaign assistant. 🐰✨ Let's optimize some simulations!",
+      "whats_next": "WHAT'S NEXT",
+      "ai_assistant": "AI Assistant",
+      "do": "DO"
     },
     "simulator": {
       "title": "Interactive Campaign Sandbox",
@@ -244,7 +250,9 @@
         "iroas": "Projected True Profit per Ad Dollar",
         "reach": "Audience Reach",
         "conversions": "Simulated Conversions (ABM)",
-        "optimal_mix": "Optimal Allocation"
+        "optimal_mix": "Optimal Allocation",
+        "agents": "agents",
+        "views": "views"
       },
       "explanation": "These projections run interactive Hill S-Curves and Mesa 3.0 Agent state calculations in the browser. In production, these calibrate against your historical datasets via PyMC."
     },
@@ -252,13 +260,13 @@
       "title": "Solving 4 Structural Blind Spots",
       "subtitle": "Traditional attribution models fail in walled gardens. Here is how BuniOS fixes it.",
       "spot1_title": "1. Cold-Start Problem",
-      "spot1_desc": "Uses Transfer Learning to estimate curves for new products with no historical data.",
+      "spot1_desc": "Uses Transfer Learning to estimate curves for new products with no historical data. Includes deep cross-industry metadata matching models to build high-accuracy estimations from the very first hour.",
       "spot2_title": "2. Linear Scale Fallacy",
-      "spot2_desc": "Applies Hill S-Curves to project the exact point where advertising yield diminishes.",
+      "spot2_desc": "Applies Hill S-Curves to project the exact point where advertising yield diminishes. Computes half-saturation and saturation ceilings to optimize thresholds.",
       "spot3_title": "3. Temporal Lag Neglect",
-      "spot3_desc": "Models adstock memory retention and delay carries across consumer paths.",
+      "spot3_desc": "Models adstock memory retention and delay carries across consumer paths. Decays campaign effects over custom memory coefficients.",
       "spot4_title": "4. Privacy & Walled Gardens",
-      "spot4_desc": "Aggregated Bayesian modeling replaces invasive third-party cookie tracking."
+      "spot4_desc": "Aggregated Bayesian modeling replaces invasive third-party cookie tracking. Uses aggregate statistical models and Markov chains. Zero reliance on third-party cookies or intrusive mobile device trackers."
     },
     "pipeline": {
       "title": "The Simulation Pipeline",
@@ -268,7 +276,25 @@
       "step3": "Micro-Agent Modeling (Mesa)",
       "step4": "NSGA-II Genetic Optimizer",
       "step5": "Neo4j GraphRAG",
-      "step6": "SHAP Verified Report"
+      "step6": "SHAP Verified Report",
+      "step1_desc": "Crawls competitor pricing & promotions via Firecrawl.",
+      "step2_desc": "Isolates adstock delay and S-curve thresholds.",
+      "step3_desc": "Simulates customer conversions via Agent-Based Models.",
+      "step4_desc": "Runs multi-objective genetic optimizations.",
+      "step5_desc": "Retrieves contextual semantic graphs from Neo4j.",
+      "step6_desc": "Calculates SHAP contributions for clean reports.",
+      "step1_canvas": "Crawls competitor pages dynamically, bypasses bot detection mechanisms, and converts unstructured layouts into formatted analytical rows.",
+      "step2_canvas": "Estimates non-linear saturation curves and carries over ad awareness across days. Evaluates decay delay factors to isolate organic baselines.",
+      "step3_canvas": "Simulates discrete actions (word-of-mouth diffusion, coupon triggers, churn decisions) to evaluate how ad impressions scale exponentially in customer cohorts.",
+      "step4_canvas": "Runs multi-objective evolutionary calculations to output a Pareto curve. Resolves conflict boundaries between maximum ROAS yield and lowest risk variance.",
+      "step5_canvas": "Maps structural connections between variables, campaigns, and competitor nodes. Retains cross-market context to feed deterministic parameters to localized summaries.",
+      "step6_canvas": "Guarantees execution safety by proving feature impact coefficients. Eliminates model hallucination vectors for deterministic reports."
+    },
+    "marquee": {
+      "predictions": "( PREDICTIONS )",
+      "market_signals": "( MARKET SIGNALS )",
+      "budget_optimization": "( BUDGET OPTIMIZATION )",
+      "causal_inference": "( CAUSAL INFERENCE )"
     }
   },
   "Onboarding": {

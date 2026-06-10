@@ -203,10 +203,10 @@ export function ShowGuideAgainButton() {
   return (
     <button
       onClick={handleClick}
-      className="flex items-center gap-2 w-full px-3 py-2 text-xs text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded-lg transition-colors group"
+      className="flex items-center justify-center gap-2 w-full px-3 py-2.5 text-xs font-bold text-[#0A0A0A] bg-[#FACC15] hover:bg-[#FACC15]/80 rounded-lg transition-colors group shadow-sm"
     >
-      <RotateCcw className="w-3.5 h-3.5 group-hover:rotate-[-180deg] transition-transform duration-500" />
-      <span className="font-medium">{t("show_again")}</span>
+      <RotateCcw className="w-3.5 h-3.5 group-hover:-rotate-180 transition-transform duration-500" />
+      <span>{t("show_again")}</span>
     </button>
   );
 }

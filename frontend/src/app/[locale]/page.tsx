@@ -135,9 +135,9 @@ export default function LandingPage() {
         <div className="relative z-10">
           {/* Small Label */}
           <div className="flex items-center gap-4 mb-8">
-            <span className="text-xs font-semibold uppercase tracking-[0.15em] text-[#6B6B6B]">WHAT&apos;S NEXT</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.15em] text-[#6B6B6B]">{t('hero.whats_next')}</span>
             <div className="flex-1 h-px bg-[#E5E5E5]"></div>
-            <span className="badge-pill">AI Assistant</span>
+            <span className="badge-pill">{t('hero.ai_assistant')}</span>
           </div>
 
           {/* Massive Typography */}
@@ -157,7 +157,7 @@ export default function LandingPage() {
             {/* Buni Companion */}
             <BuniCompanion
               state="happy"
-              speech="Hello! I'm Buni, your campaign assistant. 🐰✨ Let's optimize some simulations!"
+              speech={t('hero.buni_speech')}
               className="bunny-placeholder w-24 h-24 md:w-32 md:h-32 flex-shrink-0 !overflow-visible"
             />
 
@@ -219,7 +219,7 @@ export default function LandingPage() {
                   {t('bento.spot1_title')}
                 </h3>
                 <p className="text-[#6B6B6B] leading-relaxed text-sm sm:text-base">
-                  {t('bento.spot1_desc')} Includes deep cross-industry metadata matching models to build high-accuracy estimations from the very first hour.
+                  {t('bento.spot1_desc')}
                 </p>
               </div>
               <div className="w-full bg-[#F5F5F0] rounded-xl p-4 border border-[#E5E5E5] flex items-center justify-between font-mono text-xs text-[#6B6B6B]">
@@ -236,7 +236,7 @@ export default function LandingPage() {
                   {t('bento.spot2_title')}
                 </h3>
                 <p className="text-[#6B6B6B] leading-relaxed text-sm">
-                  {t('bento.spot2_desc')} Computes half-saturation and saturation ceilings to optimize thresholds.
+                  {t('bento.spot2_desc')}
                 </p>
               </div>
               <div className="h-20 flex items-end gap-1 px-2 border-b border-[#E5E5E5]">
@@ -257,7 +257,7 @@ export default function LandingPage() {
                   {t('bento.spot3_title')}
                 </h3>
                 <p className="text-[#6B6B6B] leading-relaxed text-sm">
-                  {t('bento.spot3_desc')} Decays campaign effects over custom memory coefficients.
+                  {t('bento.spot3_desc')}
                 </p>
               </div>
               <div className="flex items-center gap-4 text-xs font-mono text-[#6B6B6B]">
@@ -274,7 +274,7 @@ export default function LandingPage() {
                   {t('bento.spot4_title')}
                 </h3>
                 <p className="text-[#6B6B6B] leading-relaxed text-sm sm:text-base">
-                  {t('bento.spot4_desc')} Uses aggregate statistical models and Markov chains. Zero reliance on third-party cookies or intrusive mobile device trackers.
+                  {t('bento.spot4_desc')}
                 </p>
               </div>
               <div className="w-full bg-[#F5F5F0] rounded-xl p-4 border border-[#E5E5E5] flex items-center justify-between text-xs font-semibold text-[#6B6B6B]">
@@ -363,7 +363,7 @@ export default function LandingPage() {
                     <p className="text-[#6B6B6B]">└─ Parsed 8 ad copy assets; computed token weight = 0.82</p>
                     <p className="text-[#0A0A0A] font-bold">✓ Ingestion complete. Synced 42 parameters to TimescaleDB.</p>
                   </div>
-                  <p className="text-xs text-[#6B6B6B]">Crawls competitor pages dynamically, bypasses bot detection mechanisms, and converts unstructured layouts into formatted analytical rows.</p>
+                  <p className="text-xs text-[#6B6B6B]">{t('pipeline.step1_canvas')}</p>
                 </div>
               )}
 
@@ -402,7 +402,7 @@ export default function LandingPage() {
                     </div>
                   </div>
 
-                  <p className="text-xs text-[#6B6B6B]">Estimates non-linear saturation curves and carries over ad awareness across days. Evaluates decay delay factors to isolate organic baselines.</p>
+                  <p className="text-xs text-[#6B6B6B]">{t('pipeline.step2_canvas')}</p>
                 </div>
               )}
 
@@ -431,7 +431,7 @@ export default function LandingPage() {
                     })}
                   </div>
 
-                  <p className="text-xs text-[#6B6B6B]">Simulates discrete actions (word-of-mouth diffusion, coupon triggers, churn decisions) to evaluate how ad impressions scale exponentially in customer cohorts.</p>
+                  <p className="text-xs text-[#6B6B6B]">{t('pipeline.step3_canvas')}</p>
                 </div>
               )}
 
@@ -464,7 +464,7 @@ export default function LandingPage() {
                     </svg>
                   </div>
 
-                  <p className="text-xs text-[#6B6B6B]">Runs multi-objective evolutionary calculations to output a Pareto curve. Resolves conflict boundaries between maximum ROAS yield and lowest risk variance.</p>
+                  <p className="text-xs text-[#6B6B6B]">{t('pipeline.step4_canvas')}</p>
                 </div>
               )}
 
@@ -509,7 +509,7 @@ export default function LandingPage() {
                     </svg>
                   </div>
 
-                  <p className="text-xs text-[#6B6B6B]">Maps structural connections between variables, campaigns, and competitor nodes. Retains cross-market context to feed deterministic parameters to localized summaries.</p>
+                  <p className="text-xs text-[#6B6B6B]">{t('pipeline.step5_canvas')}</p>
                 </div>
               )}
 
@@ -552,7 +552,7 @@ export default function LandingPage() {
                     </div>
                   </div>
 
-                  <p className="text-xs text-[#6B6B6B]">Guarantees execution safety by proving feature impact coefficients. Eliminates model hallucination vectors for deterministic reports.</p>
+                  <p className="text-xs text-[#6B6B6B]">{t('pipeline.step6_canvas')}</p>
                 </div>
               )}
             </div>
@@ -662,7 +662,7 @@ export default function LandingPage() {
                   <span className="text-xs text-[#6B6B6B] font-semibold uppercase tracking-wider">{t('simulator.metrics.conversions')}</span>
                   <div className="flex items-baseline gap-2 mt-1">
                     <span className="text-3xl sm:text-4xl font-black text-[#0A0A0A] font-mono">{simulationResults.conversions.toLocaleString()}</span>
-                    <span className="text-xs text-[#6B6B6B] font-medium">agents</span>
+                    <span className="text-xs text-[#6B6B6B] font-medium">{t('simulator.metrics.agents')}</span>
                   </div>
                 </div>
 
@@ -672,7 +672,7 @@ export default function LandingPage() {
               <div className="flex flex-col gap-2.5 relative z-10 bg-[#F5F5F0] p-4 rounded-xl border border-[#E5E5E5]">
                 <div className="flex justify-between items-center text-xs sm:text-sm">
                   <span className="font-semibold text-[#6B6B6B] uppercase tracking-wide text-xs">{t('simulator.metrics.reach')}</span>
-                  <span className="font-bold text-[#0A0A0A] font-mono bg-white px-2 py-0.5 rounded-md border border-[#E5E5E5]">{simulationResults.reach.toLocaleString()} views</span>
+                  <span className="font-bold text-[#0A0A0A] font-mono bg-white px-2 py-0.5 rounded-md border border-[#E5E5E5]">{simulationResults.reach.toLocaleString()} {t('simulator.metrics.views')}</span>
                 </div>
                 <Progress value={Math.min((simulationResults.reach / 400000) * 100, 100)} className="h-2.5 bg-[#E5E5E5]" />
               </div>

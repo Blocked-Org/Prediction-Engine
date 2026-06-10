@@ -95,7 +95,7 @@ export function Navbar() {
             aria-label="Toggle menu"
           >
             <span className="text-lg leading-none">{isOpen ? '−' : '+'}</span>
-            <span>{isOpen ? 'CLOSE' : 'MENU'}</span>
+            <span>{isOpen ? t('close') : t('menu')}</span>
           </button>
 
         </div>

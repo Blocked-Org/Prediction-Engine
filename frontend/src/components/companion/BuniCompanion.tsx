@@ -55,11 +55,11 @@ export const BuniCompanion: React.FC<BuniCompanionProps> = ({
             initial={{ opacity: 0, scale: 0.8, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 10 }}
-            className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 w-max max-w-xs bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 p-3 rounded-2xl rounded-br-sm shadow-xl border border-zinc-200 dark:border-zinc-700 z-10"
+            className="absolute bottom-full mb-4 -left-2 sm:left-1/2 sm:-translate-x-1/2 w-max max-w-[calc(100vw-2rem)] sm:max-w-xs bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 p-3 rounded-2xl rounded-bl-sm sm:rounded-bl-2xl sm:rounded-br-sm shadow-xl border border-zinc-200 dark:border-zinc-700 z-10"
           >
             <p className="text-sm font-medium">{displayedSpeech}</p>
             {/* Speech bubble pointer */}
-            <div className="absolute -bottom-2 right-4 w-4 h-4 bg-white dark:bg-zinc-800 border-b border-r border-zinc-200 dark:border-zinc-700 transform rotate-45" />
+            <div className="absolute -bottom-2 left-6 sm:left-auto sm:right-4 w-4 h-4 bg-white dark:bg-zinc-800 border-b border-r border-zinc-200 dark:border-zinc-700 transform rotate-45" />
           </motion.div>
         )}
       </AnimatePresence>
