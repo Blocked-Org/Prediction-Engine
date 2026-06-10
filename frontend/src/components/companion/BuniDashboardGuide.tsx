@@ -66,18 +66,6 @@ export function BuniDashboardGuide() {
     };
   }, [isActive, stepIndex, mounted]);
 
-  const handleNext = useCallback(() => {
-    if (stepIndex < GUIDE_STEPS.length - 1) {
-      setStepIndex((i) => i + 1);
-    } else {
-      handleDismiss();
-    }
-  }, [stepIndex]);
-
-  const handlePrev = useCallback(() => {
-    setStepIndex((i) => Math.max(0, i - 1));
-  }, []);
-
   const handleDismiss = useCallback(() => {
     setIsActive(false);
     localStorage.setItem(GUIDE_STORAGE_KEY, "true");
@@ -86,6 +74,18 @@ export function BuniDashboardGuide() {
       const el = document.getElementById(s.sectionId);
       el?.classList.remove("buni-guide-highlight");
     });
+  }, []);
+
+  const handleNext = useCallback(() => {
+    if (stepIndex < GUIDE_STEPS.length - 1) {
+      setStepIndex((i) => i + 1);
+    } else {
+      handleDismiss();
+    }
+  }, [stepIndex, handleDismiss]);
+
+  const handlePrev = useCallback(() => {
+    setStepIndex((i) => Math.max(0, i - 1));
   }, []);
 
   if (!mounted || !isActive) return null;
