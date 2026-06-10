@@ -13,6 +13,7 @@ import { DollarSign, CreditCard, Brain, ArrowRight, Sparkles, TrendingUp, Search
 import type { DashboardSimulationData } from "@/lib/dashboard";
 import type { ChannelAllocation } from "@/lib/types/contracts";
 import { BuniDashboardGuide } from "@/components/companion/BuniDashboardGuide";
+import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -158,13 +159,16 @@ export function DashboardView({ data }: DashboardViewProps) {
     <div className="flex flex-col gap-8 animate-fade-in-up">
       
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-black tracking-tight font-noto-bengali text-[#0A0A0A] uppercase">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h1 className="text-3xl font-black tracking-tight font-noto-bengali text-[#0A0A0A] uppercase flex items-center gap-3">
           {t("title")}
+          <Badge className="bg-[#0A0A0A] text-white border-none px-3 py-1 text-xs uppercase tracking-wider font-bold rounded-full hidden sm:inline-flex">
+            Live Model
+          </Badge>
         </h1>
-        <Badge className="bg-[#0A0A0A] text-white border-none px-3 py-1 text-xs uppercase tracking-wider font-bold rounded-full">
-          Live Model
-        </Badge>
+        <div className="flex items-center gap-3">
+          <WorkspaceSwitcher />
+        </div>
       </div>
 
       {/* ── TOP KPI METRICS (Full Width Grid) ────────────────────────────────── */}
