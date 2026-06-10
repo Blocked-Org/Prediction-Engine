@@ -1,7 +1,9 @@
-"""Simulation onboarding routes — Neo4j-free implementation.
+"""Simulation onboarding routes — PostgreSQL-backed workspace system.
 
-All graph-DB dependencies have been removed. Onboarding data is passed
-directly to the simulation engines without persisting to Neo4j first.
+All campaign data is persisted to the ``campaign_workspaces`` table in
+PostgreSQL (via ``campaign_persistence``).  Neo4j has been fully removed.
+Each user may have up to 3 workspaces; the active workspace is used by
+the dashboard and analytics endpoints.
 """
 
 from __future__ import annotations
@@ -15,6 +17,17 @@ from fastapi import APIRouter, Depends, HTTPException
 from src.api.auth import Role, require_role, require_authenticated_user, ClerkAuth
 
 from src.api.services.dashboard_results import build_dashboard_results
+from src.api.services.campaign_persistence import (
+    activate_workspace,
+    create_workspace,
+    delete_workspace,
+    get_active_workspace,
+    get_simulation_result,
+    get_workspace_count,
+    list_workspaces,
+    save_simulation_result,
+    upsert_workspace,
+)
 from src.schemas.dashboard import DashboardResultsResponse
 from src.schemas.simulation import (
     SimulationInitRequest,
@@ -23,14 +36,22 @@ from src.schemas.simulation import (
     SimulationOnboardingStatus,
     SimulationRequest,
 )
+from src.schemas.workspace import (
+    WorkspaceActivateRequest,
+    WorkspaceCreateRequest,
+    WorkspaceDeleteRequest,
+    WorkspaceListResponse,
+    WorkspaceSummary,
+)
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/simulate", tags=["simulate"])
 
-# ── In-memory store for onboarding payloads ──────────────────────────────
-# Maps clerk_user_id → campaign dict (used by /results to build dashboard)
-_user_campaigns: dict[str, dict[str, Any]] = {}
+# ── Default tenant ID for users without a real tenant row ────────────────
+# In production, derive this from the Clerk org → tenant mapping in auth.py.
+# For now, we use a fixed UUID so the FK constraint is satisfied.
+_DEFAULT_TENANT_ID = "00000000-0000-0000-0000-000000000001"
 
 
 @router.post("", status_code=202)
@@ -104,59 +125,78 @@ async def simulate_results(
     _user: ClerkAuth = Depends(require_authenticated_user),
 ) -> DashboardResultsResponse:
     """
-    Return dashboard-ready simulation data for the user's latest campaign.
+    Return dashboard-ready simulation data for the user's active workspace.
 
-    Uses in-memory campaign store (populated by /init) to build the dashboard
-    without requiring Neo4j. Falls back to a sensible default campaign if
-    the user's data is not in memory (e.g., after a server restart).
+    Read path (fast → slow):
+      1. PostgreSQL ``simulation_result`` column (instant, ~5ms)
+      2. Redis cache layer (fast, ~10ms)
+      3. Full simulation re-computation (slow, 10-30s) → result persisted to Postgres
     """
     if clerk_user_id != _user.user_id:
         raise HTTPException(status_code=403, detail="Not authorized to access these results.")
 
-    campaign = _user_campaigns.get(clerk_user_id)
-    if campaign is None:
-        logger.warning(
-            "No in-memory campaign for user %s — returning no_campaign. "
-            "User should re-run onboarding.",
-            clerk_user_id,
-        )
+    # ── 1. Check PostgreSQL for a cached simulation result ──────────────
+    workspace = get_active_workspace(clerk_user_id)
+    if workspace is None:
+        logger.warning("No workspace found for user %s — returning no_campaign.", clerk_user_id)
         return DashboardResultsResponse(status="no_campaign")
 
-    # ── Redis cache layer ────────────────────────────────────────────────
+    campaign = workspace.campaign_data
+    if campaign is None:
+        return DashboardResultsResponse(status="no_campaign")
+
+    # If a simulation result is already cached in Postgres, return it immediately
+    if workspace.simulation_result is not None:
+        try:
+            result = DashboardResultsResponse(**workspace.simulation_result)
+            logger.info("Returning Postgres-cached simulation result for user %s.", clerk_user_id)
+            return result
+        except Exception:
+            logger.warning("Cached Postgres payload failed validation — recomputing.")
+
+    # ── 2. Redis cache layer ────────────────────────────────────────────
     try:
         from src.api.cache import get_simulation_cache
         cache = get_simulation_cache()
         cache_ns = "simulate:results"
         cache_params = {
             "clerk_user_id": clerk_user_id,
-            **{k: v for k, v in campaign.items() if k != "competitor_names"},
-            "competitor_names": sorted(campaign.get("competitor_names") or []),
+            "campaign_id": workspace.campaign_id,
         }
 
         cached = await cache.get(cache_ns, cache_params)
         if cached is not None:
             try:
-                return DashboardResultsResponse(**cached)
+                result = DashboardResultsResponse(**cached)
+                # Also persist to Postgres so next request skips Redis too
+                save_simulation_result(clerk_user_id, cached, campaign_id=workspace.campaign_id)
+                return result
             except Exception:
-                logger.warning("Cached payload failed validation — recomputing.")
+                logger.warning("Cached Redis payload failed validation — recomputing.")
     except Exception as cache_exc:
         logger.warning("Redis cache check failed (non-fatal): %s", cache_exc)
 
+    # ── 3. Full simulation (slow path) ──────────────────────────────────
     try:
         result = build_dashboard_results(campaign)
-        # Persist to cache (1 hour TTL) — best effort
+
+        # Persist to PostgreSQL (primary cache — survives restarts)
+        result_dict = result.model_dump()
+        save_simulation_result(clerk_user_id, result_dict, campaign_id=workspace.campaign_id)
+
+        # Also persist to Redis (secondary cache — 1 hour TTL)
         try:
             from src.api.cache import get_simulation_cache
             cache = get_simulation_cache()
             cache_ns = "simulate:results"
             cache_params = {
                 "clerk_user_id": clerk_user_id,
-                **{k: v for k, v in campaign.items() if k != "competitor_names"},
-                "competitor_names": sorted(campaign.get("competitor_names") or []),
+                "campaign_id": workspace.campaign_id,
             }
-            await cache.set(cache_ns, cache_params, result.model_dump())
+            await cache.set(cache_ns, cache_params, result_dict)
         except Exception as cache_err:
-            logger.warning("Failed to write simulation cache: %s", cache_err)
+            logger.warning("Failed to write Redis simulation cache: %s", cache_err)
+
         return result
     except Exception as exc:
         logger.exception(
@@ -173,11 +213,11 @@ def simulate_onboarding_status(
 ) -> SimulationOnboardingStatus:
     """Return whether the user has completed onboarding.
     
-    With Neo4j removed, we check the in-memory store. If the user has
-    a campaign in memory, they are onboarded.
+    Checks PostgreSQL ``campaign_workspaces`` table for an active workspace.
     """
-    has_campaign = clerk_user_id in _user_campaigns
-    
+    workspace = get_active_workspace(clerk_user_id)
+    has_campaign = workspace is not None and workspace.campaign_data is not None
+
     return SimulationOnboardingStatus(
         clerk_user_id=clerk_user_id,
         is_onboarded=has_campaign,
@@ -191,11 +231,11 @@ def simulate_init(
     _user: ClerkAuth = Depends(require_authenticated_user),
 ) -> SimulationInitResponse:
     """
-    Validate onboarding matrices and store them in memory for dashboard use.
+    Validate onboarding matrices and persist to PostgreSQL workspace.
     
-    Neo4j has been removed — campaign data is stored in a process-local dict
-    keyed by clerk_user_id. The simulation engines will read from this store
-    when building dashboard results.
+    Campaign data is stored in the ``campaign_workspaces`` table. On first
+    onboarding, workspace slot 1 is created. On re-onboarding, the active
+    workspace is overwritten and cached results are cleared.
     """
     try:
         total_spend = payload.endogenous.total_spend
@@ -213,15 +253,14 @@ def simulate_init(
             len(payload.exogenous.competitor_urls),
         )
 
-        # Derive campaign properties from the payload (same logic as before)
+        # Derive campaign properties from the payload
         clicks = payload.endogenous.Clicks
         cpc = total_spend / clicks if clicks > 0 else 1.5
         conversions = payload.transactional.Total_Conversion
         revenue = payload.transactional.revenue
         aov = revenue / conversions if conversions > 0 else 100.0
 
-        # Store campaign in memory for /results to use
-        _user_campaigns[payload.clerk_user_id] = {
+        campaign_data = {
             "campaign_id": campaign_id,
             "budget": total_spend,
             "cpc": cpc,
@@ -238,11 +277,23 @@ def simulate_init(
             "competitor_names": payload.exogenous.competitors,
         }
 
+        # Determine tenant_id from auth context (fallback to default)
+        tenant_id = getattr(_user, "tenant_id", None) or _DEFAULT_TENANT_ID
+
+        # Persist to PostgreSQL (upsert into slot 1 by default)
+        upsert_workspace(
+            clerk_user_id=payload.clerk_user_id,
+            tenant_id=str(tenant_id),
+            workspace_name="Default Workspace",
+            campaign_id=campaign_id,
+            campaign_data=campaign_data,
+        )
+
         competitor_ids = payload.exogenous.competitors
         macro_context_ids = payload.exogenous.macroeconomic_flags
 
         logger.info(
-            "Simulation init complete for user %s — campaign_id=%s",
+            "Simulation init complete for user %s — campaign_id=%s (persisted to PostgreSQL)",
             payload.clerk_user_id,
             campaign_id,
         )
@@ -264,3 +315,82 @@ def simulate_init(
             status_code=500,
             detail="Internal server error during simulation initialization",
         ) from exc
+
+
+# ── Workspace Management Endpoints ──────────────────────────────────────────
+
+
+@router.get("/workspaces", response_model=WorkspaceListResponse)
+def list_user_workspaces(
+    _user: ClerkAuth = Depends(require_authenticated_user),
+) -> WorkspaceListResponse:
+    """List all workspaces for the authenticated user."""
+    workspaces = list_workspaces(_user.user_id)
+    return WorkspaceListResponse(
+        workspaces=[WorkspaceSummary(**ws) for ws in workspaces],
+        max_workspaces=3,
+        can_create=len(workspaces) < 3,
+    )
+
+
+@router.post("/workspaces", status_code=201)
+def create_user_workspace(
+    payload: WorkspaceCreateRequest,
+    _user: ClerkAuth = Depends(require_authenticated_user),
+) -> dict[str, Any]:
+    """Create a new workspace (max 3 per user).
+
+    Creates an empty workspace with the given name. The user must
+    run ``/init`` to populate it with campaign data.
+    """
+    count = get_workspace_count(_user.user_id)
+    if count >= 3:
+        raise HTTPException(
+            status_code=409,
+            detail="Maximum 3 workspaces allowed. Delete one to create a new one.",
+        )
+
+    tenant_id = getattr(_user, "tenant_id", None) or _DEFAULT_TENANT_ID
+    campaign_id = str(uuid.uuid4())
+
+    ws = create_workspace(
+        clerk_user_id=_user.user_id,
+        tenant_id=str(tenant_id),
+        workspace_name=payload.workspace_name,
+        campaign_id=campaign_id,
+        campaign_data={},  # Empty until /init is called
+    )
+
+    return {
+        "workspace_slot": ws.workspace_slot,
+        "workspace_name": ws.workspace_name,
+        "campaign_id": ws.campaign_id,
+        "is_active": ws.is_active,
+    }
+
+
+@router.put("/workspaces/activate")
+def activate_user_workspace(
+    payload: WorkspaceActivateRequest,
+    _user: ClerkAuth = Depends(require_authenticated_user),
+) -> dict[str, str]:
+    """Switch the active workspace."""
+    success = activate_workspace(_user.user_id, payload.workspace_slot)
+    if not success:
+        raise HTTPException(status_code=404, detail="Workspace slot not found.")
+    return {"status": "activated", "workspace_slot": str(payload.workspace_slot)}
+
+
+@router.delete("/workspaces/{workspace_slot}")
+def delete_user_workspace(
+    workspace_slot: int,
+    _user: ClerkAuth = Depends(require_authenticated_user),
+) -> dict[str, str]:
+    """Delete a workspace by slot number."""
+    if workspace_slot < 1 or workspace_slot > 3:
+        raise HTTPException(status_code=400, detail="Workspace slot must be between 1 and 3.")
+
+    success = delete_workspace(_user.user_id, workspace_slot)
+    if not success:
+        raise HTTPException(status_code=404, detail="Workspace slot not found.")
+    return {"status": "deleted", "workspace_slot": str(workspace_slot)}

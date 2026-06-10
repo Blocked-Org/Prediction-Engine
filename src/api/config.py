@@ -15,9 +15,10 @@ class Settings(BaseSettings):
 
     # Database URIs
     DATABASE_URL: str = "postgresql://app_user:secure_password_here@localhost:5432/postgres"
-    NEO4J_URI: str = "bolt://localhost:7687"
-    NEO4J_USERNAME: str = "neo4j"
-    NEO4J_PASSWORD: str = "secure_password_here"
+    # Neo4j settings — REMOVED. Re-enable when graph DB is reintroduced.
+    # NEO4J_URI: str = "bolt://localhost:7687"
+    # NEO4J_USERNAME: str = "neo4j"
+    # NEO4J_PASSWORD: str = "secure_password_here"
     WEAVIATE_URL: str = "http://localhost:8080"
 
     # Redis

@@ -93,7 +93,7 @@ class SimulationNodeCounts(BaseModel):
 
 
 class SimulationInitResponse(BaseModel):
-    """Graph node identifiers returned after Neo4j persistence."""
+    """Identifiers returned after PostgreSQL workspace persistence."""
 
     model_config = ConfigDict(extra="forbid")
 

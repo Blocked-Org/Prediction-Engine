@@ -50,9 +50,14 @@ def run_simulation_task(self, payload: Dict[str, Any]) -> Dict[str, Any]:
     """
     Celery task to run the micro-simulation asynchronously.
     
-    Executes the full pipeline: ABM → Markov attribution → Neo4j graph enrichment 
+    Executes the full pipeline: ABM → Markov attribution → competitor proxy
     → Bayesian MMM → Pareto budget generation. All heavy compute runs here,
     NOT in the FastAPI ASGI thread.
+    
+    .. note::
+        Previously included Neo4j graph enrichment step. Competitor proxy
+        now uses URL-count heuristic. When graph DB is re-introduced,
+        add graph traversal step back into the pipeline.
     
     Args:
         payload (Dict[str, Any]): A JSON dictionary containing the simulation request parameters.
@@ -113,13 +118,20 @@ def run_forecast_task(self, payload: Dict[str, Any]) -> Dict[str, Any]:
 @celery_app.task(name="scrape_competitor_data", bind=True)
 def scrape_competitor_data(self, url: str) -> Dict[str, Any]:
     """
-    Celery task to scrape competitor intelligence using Firecrawl and ingest into Neo4j.
+    Celery task to scrape competitor intelligence using Firecrawl.
+    
+    Scraped content is returned to the caller. The route layer is
+    responsible for persisting it to PostgreSQL via
+    ``campaign_persistence.save_competitor_context()``.
+    
+    TODO: When a graph DB is re-introduced, add ingestion step here
+          to write CompetitorContext nodes with relationship edges.
     
     Args:
         url (str): The competitor URL to scrape.
         
     Returns:
-        Dict[str, Any]: Execution status and metrics.
+        Dict[str, Any]: Execution status, URL, and scraped content.
     """
     logger.info(f"Task {self.request.id} started scraping: {url}")
     try:

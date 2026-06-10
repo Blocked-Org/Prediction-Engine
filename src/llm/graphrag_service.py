@@ -1,8 +1,21 @@
-"""GraphRAG retrieval service — hybrid text-match + k-hop graph traversal via Neo4j.
+"""GraphRAG retrieval service — campaign context for LLM system-prompt injection.
 
-Provides structured campaign context for LLM system-prompt injection.
-Uses the existing ``Neo4jManager`` singleton; no additional graph-store
-dependencies beyond the ``neo4j`` driver already in requirements.txt.
+.. warning::
+    This module previously used Neo4j for hybrid text-match + k-hop graph
+    traversal to retrieve campaign context. Neo4j has been removed from the
+    project.
+
+    The service is currently **non-functional** and will return fallback
+    messages. It is kept as a placeholder so the rest of the LLM orchestration
+    pipeline can reference it without import errors.
+
+    TODO: When a graph database is re-introduced, restore the full GraphRAG
+          implementation:
+          1. Replace the Neo4jManager import with the new graph DB client
+          2. Update Cypher templates to the new graph schema
+          3. Re-enable ``_execute_retrieval()`` with live graph queries
+          4. Consider using PostgreSQL campaign_workspaces as a fallback
+             data source when the graph DB is unavailable.
 """
 
 from __future__ import annotations
@@ -10,91 +23,29 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from src.api.db.neo4j_client import Neo4jManager
+# NOTE: Neo4j import removed. When re-introducing graph DB, add:
+# from src.api.db.<graph_client> import GraphManager
 
 logger = logging.getLogger(__name__)
 
 
-# ---------------------------------------------------------------------------
-# Cypher templates
-# ---------------------------------------------------------------------------
-
-# Stage 1: full-text keyword match against Campaign / Competitor / MacroContext
-# node properties.  Falls back to CONTAINS when no full-text index exists.
-_TEXT_MATCH_CYPHER = """
-MATCH (c:Campaign)
-WHERE c.budget IS NOT NULL
-   AND (
-        ANY(ch IN c.primary_channels WHERE toLower(ch) CONTAINS toLower($query))
-     OR toLower(toString(c.budget)) CONTAINS toLower($query)
-     OR c.id CONTAINS $query
-   )
-WITH c
-LIMIT $top_k
-
-// Stage 2: 2-hop graph traversal from matched campaigns
-OPTIONAL MATCH (c)-[:TARGETS]->(ac:AgentCluster)
-OPTIONAL MATCH (c)-[:COMPETES_WITH]->(comp:Competitor)
-OPTIONAL MATCH (c)-[:OPERATES_IN]->(mc:MacroContext)
-OPTIONAL MATCH (owner:User)-[:OWNS]->(c)
-
-RETURN
-  c.id              AS campaign_id,
-  c.budget          AS budget,
-  c.cpc             AS cpc,
-  c.base_price      AS base_price,
-  c.discount_rate   AS discount_rate,
-  c.primary_channels AS primary_channels,
-  c.historical_revenue AS historical_revenue,
-  c.aov             AS aov,
-  c.cac             AS cac,
-  c.ltv             AS ltv,
-  ac.regions        AS regions,
-  ac.target_age_range AS target_age_range,
-  ac.intent_clusters AS intent_clusters,
-  collect(DISTINCT comp.name)  AS competitors,
-  collect(DISTINCT mc.flag)    AS macro_flags,
-  owner.clerk_id    AS owner_id
-"""
-
-# Direct campaign lookup by ID (most common path)
-_CAMPAIGN_BY_ID_CYPHER = """
-MATCH (c:Campaign {id: $campaign_id})
-
-OPTIONAL MATCH (c)-[:TARGETS]->(ac:AgentCluster)
-OPTIONAL MATCH (c)-[:COMPETES_WITH]->(comp:Competitor)
-OPTIONAL MATCH (c)-[:OPERATES_IN]->(mc:MacroContext)
-OPTIONAL MATCH (owner:User)-[:OWNS]->(c)
-
-RETURN
-  c.id              AS campaign_id,
-  c.budget          AS budget,
-  c.cpc             AS cpc,
-  c.base_price      AS base_price,
-  c.discount_rate   AS discount_rate,
-  c.primary_channels AS primary_channels,
-  c.historical_revenue AS historical_revenue,
-  c.aov             AS aov,
-  c.cac             AS cac,
-  c.ltv             AS ltv,
-  ac.regions        AS regions,
-  ac.target_age_range AS target_age_range,
-  ac.intent_clusters AS intent_clusters,
-  collect(DISTINCT comp.name)  AS competitors,
-  collect(DISTINCT mc.flag)    AS macro_flags,
-  owner.clerk_id    AS owner_id
-"""
-
-
 class GraphRAGService:
-    """Hybrid text-match + 2-hop graph traversal retrieval over Neo4j.
+    """Hybrid text-match + 2-hop graph traversal retrieval.
 
-    Designed to feed structured campaign context into an LLM system prompt
-    alongside SHAP attribution data.
+    .. note::
+        Currently returns fallback messages — graph DB has been removed.
+        When re-introduced, restore the Cypher query templates and
+        live graph traversal logic.
     """
 
-    def __init__(self, neo4j_manager: Neo4jManager) -> None:
-        self._manager = neo4j_manager
+    def __init__(self, graph_manager: Any = None) -> None:
+        """Initialize with an optional graph database manager.
+
+        Args:
+            graph_manager: Graph DB manager instance. Currently unused
+                since Neo4j has been removed. Pass None for now.
+        """
+        self._manager = graph_manager
 
     # ------------------------------------------------------------------
     # Public API
@@ -109,116 +60,103 @@ class GraphRAGService:
     ) -> str:
         """Return a markdown-formatted context string for LLM injection.
 
-        Strategy:
-            1. If ``campaign_id`` is provided, do a direct lookup.
-            2. Otherwise, run a text-match search against campaign properties
-               and traverse 2 hops to gather audience/competitor/macro context.
-            3. Format the subgraph into a structured markdown block.
+        Currently returns a fallback message since Neo4j is removed.
+        When graph DB is restored, this will perform:
+            1. Direct campaign lookup by ID (if provided)
+            2. Text-match search against campaign properties
+            3. 2-hop graph traversal for audience/competitor/macro context
 
-        Parameters
-        ----------
-        query:
-            Natural-language user question (used for text matching).
-        campaign_id:
-            Optional direct campaign ID for deterministic lookup.
-        top_k:
-            Maximum number of matching campaigns to return (text-match path).
-
-        Returns
-        -------
-        str
-            Markdown context block, or a fallback message if nothing found.
+        TODO: Implement PostgreSQL fallback using campaign_workspaces:
+              - Query campaign_data JSONB for matching campaigns
+              - Format as markdown context block
+              - This would work even without a graph DB
         """
+        # TODO: When graph DB is re-introduced, restore this:
+        # try:
+        #     records = self._execute_retrieval(query, campaign_id=campaign_id, top_k=top_k)
+        # except Exception as exc:
+        #     logger.error("GraphRAG retrieval failed: %s", exc)
+        #     return "Error retrieving context from knowledge graph."
+
+        # For now, try to get context from PostgreSQL campaign_workspaces
         try:
-            records = self._execute_retrieval(query, campaign_id=campaign_id, top_k=top_k)
+            return self._retrieve_from_postgres(campaign_id)
         except Exception as exc:
-            logger.error("GraphRAG retrieval failed: %s", exc)
-            return "Error retrieving context from Neo4j knowledge graph."
-
-        if not records:
-            return "No matching campaign context found in the knowledge graph."
-
-        return self._format_records(records)
+            logger.warning("PostgreSQL campaign context retrieval failed: %s", exc)
+            return "No matching campaign context found. Graph database is not yet configured."
 
     # ------------------------------------------------------------------
-    # Internal helpers
+    # PostgreSQL fallback (temporary until graph DB is restored)
     # ------------------------------------------------------------------
-
-    def _ensure_driver(self) -> None:
-        if self._manager.driver is None:
-            self._manager.connect()
-        if self._manager.driver is None:
-            raise RuntimeError("Neo4j driver is not available.")
-
-    def _execute_retrieval(
-        self,
-        query: str,
-        *,
-        campaign_id: str | None = None,
-        top_k: int = 3,
-    ) -> list[dict[str, Any]]:
-        self._ensure_driver()
-        assert self._manager.driver is not None  # for type narrowing
-
-        with self._manager.driver.session() as session:
-            if campaign_id:
-                result = session.run(_CAMPAIGN_BY_ID_CYPHER, parameters={"campaign_id": campaign_id})
-            else:
-                result = session.run(_TEXT_MATCH_CYPHER, parameters={"query": query, "top_k": top_k})
-
-            return [dict(record) for record in result]
 
     @staticmethod
-    def _format_records(records: list[dict[str, Any]]) -> str:
-        """Convert Neo4j records into a structured markdown context block."""
-        lines: list[str] = ["### Neo4j Knowledge Graph Context"]
+    def _retrieve_from_postgres(campaign_id: str | None) -> str:
+        """Retrieve campaign context from PostgreSQL as a fallback."""
+        if not campaign_id:
+            return "No campaign_id provided for context retrieval."
 
-        for i, rec in enumerate(records, 1):
-            if len(records) > 1:
-                lines.append(f"\n#### Campaign {i}")
+        try:
+            from src.api.services.campaign_persistence import get_workspace_by_campaign_id
+            workspace = get_workspace_by_campaign_id(campaign_id)
+            if workspace is None or workspace.campaign_data is None:
+                return "No matching campaign context found in PostgreSQL."
 
-            campaign_id = rec.get("campaign_id", "unknown")
-            budget = rec.get("budget")
-            historical_revenue = rec.get("historical_revenue")
-            channels = rec.get("primary_channels") or []
-            regions = rec.get("regions") or []
-            age_range = rec.get("target_age_range", "N/A")
-            competitors = rec.get("competitors") or []
-            macro_flags = rec.get("macro_flags") or []
-            aov = rec.get("aov")
-            cac = rec.get("cac")
-            ltv = rec.get("ltv")
-            cpc = rec.get("cpc")
-            discount_rate = rec.get("discount_rate")
-
+            campaign = workspace.campaign_data
+            lines: list[str] = ["### Campaign Context (PostgreSQL)"]
             lines.append(f"- **Campaign ID**: `{campaign_id}`")
 
+            budget = campaign.get("budget")
             if budget is not None:
                 lines.append(f"- **Budget**: ${budget:,.2f}")
-            if historical_revenue is not None:
-                lines.append(f"- **Historical Revenue**: ${historical_revenue:,.2f}")
 
+            revenue = campaign.get("historical_revenue")
+            if revenue is not None:
+                lines.append(f"- **Historical Revenue**: ${revenue:,.2f}")
+
+            channels = campaign.get("primary_channels", [])
             if channels:
                 lines.append(f"- **Channels**: {', '.join(str(c) for c in channels)}")
+
+            regions = campaign.get("regions", [])
             if regions:
                 lines.append(f"- **Target Regions**: {', '.join(str(r) for r in regions)}")
 
-            lines.append(f"- **Target Age Range**: {age_range}")
+            age = campaign.get("target_age_range", "N/A")
+            lines.append(f"- **Target Age Range**: {age}")
 
-            if aov is not None:
-                lines.append(f"- **AOV**: ${aov:,.2f}")
-            if cac is not None:
-                lines.append(f"- **CAC**: ${cac:,.2f}")
-            if ltv is not None:
-                lines.append(f"- **LTV**: ${ltv:,.2f}")
-            if cpc is not None:
-                lines.append(f"- **CPC**: ${cpc:,.2f}")
-            if discount_rate is not None:
-                lines.append(f"- **Discount Rate**: {discount_rate:.1%}")
-
+            competitors = campaign.get("competitor_names", [])
             if competitors:
                 lines.append(f"- **Competitors**: {', '.join(competitors)}")
-            if macro_flags:
-                lines.append(f"- **Macro Conditions**: {', '.join(macro_flags)}")
 
-        return "\n".join(lines)
+            return "\n".join(lines)
+        except Exception as exc:
+            logger.warning("PostgreSQL context fallback failed: %s", exc)
+            return "Error retrieving campaign context."
+
+    # ------------------------------------------------------------------
+    # Original Cypher templates (preserved for future graph DB restore)
+    # ------------------------------------------------------------------
+
+    # TODO: When restoring Neo4j / graph DB, use these Cypher templates:
+    #
+    # _TEXT_MATCH_CYPHER = """
+    # MATCH (c:Campaign)
+    # WHERE c.budget IS NOT NULL
+    #    AND (
+    #         ANY(ch IN c.primary_channels WHERE toLower(ch) CONTAINS toLower($query))
+    #      OR toLower(toString(c.budget)) CONTAINS toLower($query)
+    #      OR c.id CONTAINS $query
+    #    )
+    # WITH c LIMIT $top_k
+    # OPTIONAL MATCH (c)-[:TARGETS]->(ac:AgentCluster)
+    # OPTIONAL MATCH (c)-[:COMPETES_WITH]->(comp:Competitor)
+    # OPTIONAL MATCH (c)-[:OPERATES_IN]->(mc:MacroContext)
+    # OPTIONAL MATCH (owner:User)-[:OWNS]->(c)
+    # RETURN c.id AS campaign_id, c.budget AS budget, ...
+    # """
+    #
+    # _CAMPAIGN_BY_ID_CYPHER = """
+    # MATCH (c:Campaign {id: $campaign_id})
+    # OPTIONAL MATCH (c)-[:TARGETS]->(ac:AgentCluster)
+    # ...
+    # """

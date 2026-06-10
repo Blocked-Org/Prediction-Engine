@@ -129,7 +129,7 @@ def get_facade() -> FastApiPredictionFacade:
 @app.get("/health")
 def health_check() -> dict[str, Any]:
     """
-    Live health-check endpoint. Probes Neo4j and Redis connectivity.
+    Live health-check endpoint. Probes PostgreSQL and Redis connectivity.
     Each probe is isolated — a failing service reports 'error' without crashing.
     
     Returns:
@@ -137,8 +137,16 @@ def health_check() -> dict[str, Any]:
     """
     services: dict[str, str] = {}
 
-    # --- Neo4j Probe (skipped — Neo4j dependency removed) ---
-    services["neo4j"] = "skipped"
+    # --- PostgreSQL Probe (replaces Neo4j probe) ---
+    try:
+        from src.api.db.database import engine
+        from sqlalchemy import text
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        services["postgres"] = "ok"
+    except Exception as exc:
+        logger.warning("PostgreSQL health probe failed: %s", exc)
+        services["postgres"] = "error"
 
     # --- Redis Probe ---
     try:

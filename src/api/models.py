@@ -17,14 +17,17 @@ from typing import Any, Optional
 
 from sqlalchemy import (
     Boolean,
+    CheckConstraint,
     Date,
     DateTime,
     ForeignKey,
     Index,
     Integer,
     Numeric,
+    SmallInteger,
     String,
     Text,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.dialects.postgresql import JSON, UUID
@@ -353,4 +356,91 @@ class PlatformDocsSettings(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
     updated_by: Mapped[Optional[str]] = mapped_column(String(255))
+
+
+# ── 11. Campaign Workspaces (replaces Neo4j + in-memory dict) ───────
+class CampaignWorkspace(Base):
+    """Persistent campaign workspace — replaces the volatile in-memory
+    ``_user_campaigns`` dict and the removed Neo4j graph store.
+
+    Each user may have up to **3 workspaces** (enforced by a CHECK on
+    ``workspace_slot``).  Only one workspace can be ``is_active=True``
+    at a time per user; the dashboard/analytics endpoints read the
+    active workspace.
+
+    JSONB columns:
+      * ``campaign_data``      — the full campaign dict (budget, channels, audience …)
+      * ``simulation_result``  — cached ``DashboardResultsResponse`` payload
+      * ``competitor_context``  — array of scraped competitor intelligence docs
+    """
+    __tablename__ = "campaign_workspaces"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("tenants.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    clerk_user_id: Mapped[str] = mapped_column(
+        String(255), nullable=False, index=True,
+        comment="Clerk user ID — the owner of this workspace.",
+    )
+    workspace_name: Mapped[str] = mapped_column(
+        String(255), nullable=False, server_default="'Default Workspace'",
+        comment="User-chosen label, e.g. 'Summer 2025 Campaign'.",
+    )
+    workspace_slot: Mapped[int] = mapped_column(
+        SmallInteger, nullable=False, server_default="1",
+        comment="Slot number 1-3.  Max 3 workspaces per user.",
+    )
+    campaign_id: Mapped[str] = mapped_column(
+        String(36), nullable=False,
+        comment="UUID identifier for the campaign within this workspace.",
+    )
+
+    # ── JSONB payload columns ────────────────────────────────────────
+    campaign_data: Mapped[Optional[Any]] = mapped_column(
+        JSON, nullable=True,
+        comment="Full campaign dict: budget, cpc, channels, audience, etc.",
+    )
+    simulation_result: Mapped[Optional[Any]] = mapped_column(
+        JSON, nullable=True,
+        comment="Cached DashboardResultsResponse payload (set after first simulation run).",
+    )
+    competitor_context: Mapped[Optional[Any]] = mapped_column(
+        JSON, nullable=True,
+        comment="Array of competitor scrape results (replaces Neo4j CompetitorContext nodes).",
+    )
+
+    is_active: Mapped[bool] = mapped_column(
+        Boolean, default=True, server_default="true",
+        comment="Only one workspace per user should be active at a time.",
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    # relationships
+    tenant: Mapped["Tenant"] = relationship()
+
+    __table_args__ = (
+        # Enforce max 3 workspaces per user (slot must be 1, 2, or 3)
+        CheckConstraint(
+            "workspace_slot >= 1 AND workspace_slot <= 3",
+            name="ck_workspace_slot_range",
+        ),
+        # One slot number per user — prevents duplicate slots
+        UniqueConstraint(
+            "clerk_user_id", "workspace_slot",
+            name="uq_user_workspace_slot",
+        ),
+        Index("idx_campaign_workspaces_tenant_id", "tenant_id"),
+        Index("idx_campaign_workspaces_clerk_user_id", "clerk_user_id"),
+    )
 

@@ -37,6 +37,6 @@ firecrawl-py>=0.0.10
 # Crawl4AI currently pulls lxml without a Windows wheel on this toolchain, so keep it optional there.
 crawl4ai>=0.4.0; platform_system != "Windows"
 llama-index>=0.10.0
-neo4j>=5.14.0
+# neo4j>=5.14.0  # REMOVED — Neo4j replaced by PostgreSQL JSONB. Re-add when graph DB is reintroduced.
 weaviate-client>=4.4.0
 sentence-transformers>=2.3.0

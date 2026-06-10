@@ -63,10 +63,10 @@ export async function completeOnboarding(
         if (response.ok) {
           graphWriteSucceeded = true;
         } else if (response.status === 503) {
-          // Neo4j / graph DB is unavailable — non-fatal for onboarding.
-          // The user can proceed; graph data will be written on next init.
+          // Backend DB unavailable — non-fatal for onboarding.
+          // The user can proceed; workspace data will be written on next init.
           console.warn(
-            "[completeOnboarding] Graph DB unavailable (503) — proceeding with onboarding anyway."
+            "[completeOnboarding] Backend DB unavailable (503) — proceeding with onboarding anyway."
           );
         } else {
           const errText = await response.text();
@@ -110,8 +110,8 @@ export async function completeOnboarding(
 
     if (!graphWriteSucceeded) {
       console.warn(
-        "[completeOnboarding] Onboarding completed without graph persistence. " +
-        "The user's campaign data was NOT saved to Neo4j."
+        "[completeOnboarding] Onboarding completed without workspace persistence. " +
+        "The user's campaign data was NOT saved to PostgreSQL."
       );
     }
 

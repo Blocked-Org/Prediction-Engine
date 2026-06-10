@@ -20,7 +20,7 @@ and writes the result into ``tenant_context`` (a ``ContextVar``).
 
 The ``ClerkTenantMiddleware`` in ``src.api.middleware`` invokes these
 helpers *before* any route handler runs, so downstream code (SQLAlchemy
-RLS, Neo4j queries) automatically operates in the correct tenant scope.
+RLS, PostgreSQL queries) automatically operates in the correct tenant scope.
 """
 
 from __future__ import annotations
@@ -233,13 +233,10 @@ class ClerkAuth:
     Immutable value object carrying the resolved identity for one request.
 
     Attached to ``request.state.auth`` by the middleware so that any route
-    handler (or Neo4j query builder) can access the tenant-scoped identity:
+    handler can access the tenant-scoped identity:
 
         auth: ClerkAuth = request.state.auth
-        neo4j_session.run(
-            "MATCH (c:Campaign {tenant_id: $tid}) RETURN c",
-            tid=auth.tenant_id,
-        )
+        # PostgreSQL RLS is automatically scoped via tenant_context ContextVar
     """
 
     user_id: str

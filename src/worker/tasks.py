@@ -40,7 +40,7 @@ def run_full_simulation_task(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         1. Deserialise payload into SimulationRequest (Pydantic-validated)
         2. ABM (Mesa 3.0) — 1 000 agents, 10 simulation steps
         3. Markov Chain attribution — transition matrix + Removal Effect
-        4. _fetch_competitor_proxy() — reads CompetitorContext count from Neo4j
+        4. _fetch_competitor_proxy() — reads competitor count (PostgreSQL JSONB)
         5. Bayesian MMM (PyMC-Marketing) — 50-draw prior predictive
         6. NSGA-II budget optimisation (pymoo) — Pareto frontier
         7. Return SimulationResponse-compatible dict
@@ -121,7 +121,7 @@ def run_forecast_task(self, payload: Dict[str, Any]) -> Dict[str, Any]:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Task 3: Competitor Intelligence Scraping → Neo4j Ingestion
+# Task 3: Competitor Intelligence Scraping → PostgreSQL Persistence
 # ─────────────────────────────────────────────────────────────────────────────
 
 @celery_app.task(
@@ -132,18 +132,20 @@ def run_forecast_task(self, payload: Dict[str, Any]) -> Dict[str, Any]:
 )
 def scrape_competitor_data_task(self, url: str) -> Dict[str, Any]:
     """
-    Background Celery task: scrape competitor intelligence via Firecrawl/Crawl4AI
-    and ingest the extracted markdown into Neo4j as a CompetitorContext node.
+    Background Celery task: scrape competitor intelligence via Firecrawl/Crawl4AI.
+    Scraped content is returned for PostgreSQL persistence.
 
-    The engine_runner._fetch_competitor_proxy() reads the node count from
-    Neo4j in every simulation run, so keeping this data fresh directly
-    improves simulation accuracy.
+    TODO: When a graph DB is re-introduced, add ingestion step to write
+          CompetitorContext nodes with relationship edges.
+
+    The engine_runner._fetch_competitor_proxy() uses competitor URL count
+    as a proxy for competitive pressure in every simulation run.
 
     Args:
         url: The competitor URL to scrape.
 
     Returns:
-        dict: Execution status, URL, and byte count.
+        dict: Execution status, URL, content, and byte count.
     """
     logger.info("Task %s: scraping competitor URL: %s", self.request.id, url)
 

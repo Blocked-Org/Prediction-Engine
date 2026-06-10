@@ -1,15 +1,36 @@
+"""Attribution sync service — Markov Chain analysis using PostgreSQL data.
+
+Reads raw user journeys from PostgreSQL and computes Markov Chain removal
+effects for Pareto-optimal budget allocation.
+
+.. note::
+    Previously, this module synced journey data TO Neo4j as graph nodes and
+    edges, then queried Neo4j for transition weights. Neo4j has been removed.
+    All Markov chain computations now use the Python-native implementations
+    in ``src.simulation.markov_attribution`` directly.
+
+    TODO: When a graph database is re-introduced, consider re-implementing
+          the graph-based transition matrix:
+          - Import journeys as connected (Touchpoint)-[:TRANSITION_TO]->(Touchpoint) edges
+          - Use Cypher to query transition weights: MATCH (n)-[r:TRANSITION_TO]->(m) RETURN ...
+          - This enables richer multi-hop graph traversals for attribution.
+"""
+
 import os
 import json
 import pandas as pd
 import numpy as np
-from neo4j import GraphDatabase
 from sqlalchemy import create_engine, text
 
 # Database Connection Settings
 POSTGRES_URL = os.getenv("DATABASE_URL", "postgresql://app_user:secure_password_here@localhost:5432/postgres")
-NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
-NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
-NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "secure_password_here")
+
+# NOTE: Neo4j connection settings removed. When re-introducing a graph DB,
+# add connection settings here:
+# GRAPH_DB_URI = os.getenv("GRAPH_DB_URI", "bolt://localhost:7687")
+# GRAPH_DB_USER = os.getenv("GRAPH_DB_USER", "neo4j")
+# GRAPH_DB_PASSWORD = os.getenv("GRAPH_DB_PASSWORD", "secure_password_here")
+
 
 def get_raw_journeys_from_postgres():
     """
@@ -43,21 +64,22 @@ def get_raw_journeys_from_postgres():
         print("PostgreSQL connection or table 'raw_tracking_events' missing. Using mock paths for now.")
         return mock_data
 
-def import_journeys_to_neo4j(driver, journeys):
+
+def calculate_markov_chain_allocations_from_journeys(journeys):
     """
-    Ingests the path arrays into Neo4j as connected Graph nodes and edges.
+    Calculates the transition probabilities and the 'Removal Effect'
+    for each marketing channel using Absorbing Markov Chains math.
+    Returns the final Pareto-optimal JSON allocation payload.
+
+    This is a pure-Python implementation that replaces the old Neo4j-based
+    graph traversal approach. The math is identical.
+
+    TODO: When a graph database is re-introduced, consider a hybrid approach:
+          1. Store transitions as graph edges for visualization (GraphRAG)
+          2. Keep this Python implementation for the actual Markov computation
+             (Python NumPy is faster than Cypher for matrix inversion)
     """
-    query = """
-    UNWIND $paths AS path
-    // Create the sequential transitions
-    UNWIND range(0, size(path)-2) AS i
-    MERGE (n1:Touchpoint {name: path[i]})
-    MERGE (n2:Touchpoint {name: path[i+1]})
-    MERGE (n1)-[r:TRANSITION_TO]->(n2)
-    ON CREATE SET r.weight = 1
-    ON MATCH SET r.weight = r.weight + 1
-    """
-    
+    # 1. Build paths with Start/Conversion/Null anchors
     paths_list = []
     for j in journeys:
         path = j['path'].copy()
@@ -74,33 +96,24 @@ def import_journeys_to_neo4j(driver, journeys):
             
         paths_list.append(path)
 
-    with driver.session() as session:
-        # Clear existing graph for a fresh sync (in production, use selective updates)
-        session.run("MATCH (n:Touchpoint) DETACH DELETE n")
-        session.run(query, paths=paths_list)
-        print("Successfully synced user journeys into Neo4j graph nodes and edges.")
+    # 2. Build transition counts (replaces Neo4j edge weights)
+    transitions = []
+    for path in paths_list:
+        for i in range(len(path) - 1):
+            transitions.append({
+                "source": path[i],
+                "target": path[i + 1],
+                "weight": 1,
+            })
 
-def calculate_markov_chain_allocations(driver):
-    """
-    Calculates the transition probabilities and the 'Removal Effect' 
-    for each marketing channel using Absorbing Markov Chains math.
-    Returns the final Pareto-optimal JSON allocation payload.
-    """
-    # 1. Fetch transition counts from Neo4j
-    query = """
-    MATCH (n:Touchpoint)-[r:TRANSITION_TO]->(m:Touchpoint)
-    RETURN n.name AS source, m.name AS target, r.weight AS weight
-    """
-    
-    with driver.session() as session:
-        result = session.run(query)
-        transitions = pd.DataFrame([dict(record) for record in result])
-        
-    if transitions.empty:
-        return {"error": "No transition data available in Neo4j."}
+    if not transitions:
+        return {"error": "No transition data available."}
 
-    # 2. Build the Transition Matrix
-    pivot_df = transitions.pivot_table(index='source', columns='target', values='weight', fill_value=0)
+    transitions_df = pd.DataFrame(transitions)
+    transitions_df = transitions_df.groupby(["source", "target"])["weight"].sum().reset_index()
+
+    # 3. Build the Transition Matrix
+    pivot_df = transitions_df.pivot_table(index='source', columns='target', values='weight', fill_value=0)
     
     # Ensure Absorbing States (Conversion, Null) exist and transition to themselves 100%
     for state in ['Conversion', 'Null']:
@@ -139,13 +152,13 @@ def calculate_markov_chain_allocations(driver):
         
         return B[start_idx, conv_idx]
         
-    # 3. Calculate Baseline Conversion Probability
+    # 4. Calculate Baseline Conversion Probability
     baseline_prob = calculate_conversion_prob(trans_matrix)
     
     if baseline_prob == 0:
         return {"error": "Baseline conversion probability is 0."}
 
-    # 4. Calculate Removal Effect for each Channel
+    # 5. Calculate Removal Effect for each Channel
     removal_effects = {}
     for channel in channels:
         temp_matrix = trans_matrix.copy()
@@ -167,7 +180,7 @@ def calculate_markov_chain_allocations(driver):
         removal_effect = 1 - (new_prob / baseline_prob)
         removal_effects[channel] = max(0, removal_effect)
         
-    # 5. Calculate Credit Share Percentage for Pareto-optimal Allocation Dashboard
+    # 6. Calculate Credit Share Percentage for Pareto-optimal Allocation Dashboard
     total_removal_effect = sum(removal_effects.values())
     
     allocations = []
@@ -188,26 +201,25 @@ def calculate_markov_chain_allocations(driver):
         "allocations": allocations
     }
 
+
 def run_sync():
+    """Run the full attribution sync pipeline using PostgreSQL data.
+
+    TODO: When a graph database is re-introduced, add a step to sync
+          the transition data to graph nodes/edges for GraphRAG visualization.
+    """
     print("Fetching raw journeys from PostgreSQL...")
     journeys = get_raw_journeys_from_postgres()
+
+    print("\nCalculating Markov Chain removal effects (pure Python — no graph DB)...")
+    results = calculate_markov_chain_allocations_from_journeys(journeys)
     
-    # Using the local Neo4j Docker container URI
-    driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
+    print("\n--- Final JSON Allocation Payload ---")
+    json_output = json.dumps(results, indent=2)
+    print(json_output)
     
-    try:
-        import_journeys_to_neo4j(driver, journeys)
-        
-        print("\nCalculating Markov Chain removal effects...")
-        results = calculate_markov_chain_allocations(driver)
-        
-        print("\n--- Final JSON Allocation Payload ---")
-        json_output = json.dumps(results, indent=2)
-        print(json_output)
-        
-        return json_output
-    finally:
-        driver.close()
+    return json_output
+
 
 if __name__ == "__main__":
     run_sync()

@@ -1,9 +1,11 @@
 """Analytics endpoints — ROI time-series and Markov funnel data.
 
 These endpoints compute real analytics from the simulation engine and cache
-the results in Redis via ``SimulationCache`` so that demo re-loads are instant.
+the results in both PostgreSQL (primary) and Redis (secondary) so that
+dashboard navigation is instant.
 
-Neo4j dependency removed — campaigns are fetched from the in-memory store.
+Campaign data is fetched from PostgreSQL ``campaign_workspaces`` table —
+Neo4j dependency removed.
 """
 
 from __future__ import annotations
@@ -18,6 +20,10 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from src.api.auth import Role, require_role
 from src.api.cache import get_simulation_cache
+from src.api.services.campaign_persistence import (
+    get_active_workspace,
+    get_workspace_by_campaign_id,
+)
 from src.schemas.analytics import (
     MarkovAnalyticsResponse,
     MarkovEdge,
@@ -33,13 +39,12 @@ router = APIRouter(prefix="/api/v1/analytics", tags=["analytics"])
 # ── Helpers ────────────────────────────────────────────────────────────────
 
 
-def _fetch_campaign_from_memory(campaign_id: str) -> dict[str, Any] | None:
-    """Fetch a campaign dict from the in-memory store by campaign ID."""
-    from src.api.routes.simulate import _user_campaigns
-    for user_id, campaign in _user_campaigns.items():
-        if campaign.get("campaign_id") == campaign_id:
-            return campaign
-    return None
+def _fetch_campaign_from_postgres(campaign_id: str) -> dict[str, Any] | None:
+    """Fetch a campaign dict from PostgreSQL by campaign ID."""
+    workspace = get_workspace_by_campaign_id(campaign_id)
+    if workspace is None or workspace.campaign_data is None:
+        return None
+    return workspace.campaign_data
 
 
 def _as_float(value: Any, default: float) -> float:
@@ -137,7 +142,7 @@ async def get_roi_analytics(
 
     # ── Compute from simulation engine ─────────────────────────────────
     try:
-        campaign = _fetch_campaign_from_memory(campaign_id)
+        campaign = _fetch_campaign_from_postgres(campaign_id)
         if campaign is None:
             raise HTTPException(status_code=404, detail="Campaign not found.")
 
@@ -322,7 +327,7 @@ async def get_markov_analytics(
 
     # ── Compute from simulation engine ─────────────────────────────────
     try:
-        campaign = _fetch_campaign_from_memory(campaign_id)
+        campaign = _fetch_campaign_from_postgres(campaign_id)
         if campaign is None:
             raise HTTPException(status_code=404, detail="Campaign not found.")
 
