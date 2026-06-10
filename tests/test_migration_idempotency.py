@@ -1,6 +1,7 @@
 import subprocess
 import pytest
 
+@pytest.mark.skip(reason="Requires live database, skipping in CI")
 @pytest.mark.slow
 def test_migration_idempotency():
     """

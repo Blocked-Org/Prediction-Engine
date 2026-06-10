@@ -52,7 +52,7 @@ def test_health_returns_200():
         f"Status must be 'ok' or 'degraded', got: {data['status']}"
     )
     assert "services" in data, "Health response must contain 'services' key"
-    assert "neo4j" in data["services"]
+    assert "postgres" in data["services"]
     assert "redis" in data["services"]
 
 

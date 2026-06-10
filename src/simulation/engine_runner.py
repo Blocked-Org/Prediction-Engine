@@ -72,7 +72,6 @@ def _fetch_competitor_proxy(competitor_urls: list[str] | None = None) -> float:
     # TODO: When a graph database (e.g. Neo4j, Memgraph) is re-introduced,
     #       replace this with a proper graph query for richer relationship data.
     try:
-        from src.api.services.campaign_persistence import get_competitor_count
         # We don't have a clerk_user_id here, so we fall back to 0.0
         # The competitor count will be populated by the workspace system.
         # For now, return a baseline based on competitor_urls count.

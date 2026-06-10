@@ -37,14 +37,16 @@ VALID_PAYLOAD = {
 @pytest.fixture
 def client() -> TestClient:
     with patch("src.api.auth.verify_clerk_token") as mock_verify, \
-         patch("src.api.auth._resolve_tenant_id", return_value="fake-tenant-uuid"), \
-         patch("src.api.auth.SessionLocal") as mock_session:
+         patch("src.api.auth._resolve_tenant_id", return_value="00000000-0000-0000-0000-000000000000"), \
+         patch("src.api.auth.SessionLocal") as mock_session, \
+         patch("src.api.services.campaign_persistence._get_session") as mock_db_session:
         mock_verify.return_value = {
             "sub": "user_test_clerk_123",
             "org_id": "org_123",
             "org_role": "org:admin",
         }
         mock_session.return_value = MagicMock()
+        mock_db_session.return_value = MagicMock()
         
         tc = TestClient(app)
         tc.headers.update({"Authorization": "Bearer valid.jwt.token"})

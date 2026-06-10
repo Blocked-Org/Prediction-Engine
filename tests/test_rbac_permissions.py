@@ -113,6 +113,7 @@ def test_unknown_role_defaults_to_viewer():
         ("org:member", 403),  # Default viewer is blocked
     ],
 )
+@patch("src.api.services.campaign_persistence._get_session")
 @patch("src.api.auth._resolve_tenant_id", return_value=FAKE_TENANT_ID)
 @patch("src.api.auth.SessionLocal")
 @patch("src.api.auth.verify_clerk_token")
@@ -124,12 +125,14 @@ def test_rbac_simulate_endpoint(
     mock_verify,
     mock_session,
     mock_resolve,
+    mock_db_session,
     role,
     expected_status,
 ):
     """Test RBAC on POST /api/v1/simulate."""
     mock_verify.return_value = _make_claims(role)
     mock_session.return_value = MagicMock()
+    mock_db_session.return_value = MagicMock()
     
     # Mock cache search to miss
     from unittest.mock import AsyncMock
@@ -162,6 +165,7 @@ def test_rbac_simulate_endpoint(
         ("org:viewer", 200),
     ],
 )
+@patch("src.api.services.campaign_persistence._get_session")
 @patch("src.api.auth._resolve_tenant_id", return_value=FAKE_TENANT_ID)
 @patch("src.api.auth.SessionLocal")
 @patch("src.api.auth.verify_clerk_token")
@@ -169,12 +173,14 @@ def test_rbac_simulate_init_endpoint(
     mock_verify,
     mock_session,
     mock_resolve,
+    mock_db_session,
     role,
     expected_status,
 ):
     """Test RBAC on POST /api/v1/simulate/init."""
     mock_verify.return_value = _make_claims(role)
     mock_session.return_value = MagicMock()
+    mock_db_session.return_value = MagicMock()
 
     headers = {"Authorization": "Bearer valid.jwt.token"}
     response = client.post(
@@ -194,6 +200,7 @@ def test_rbac_simulate_init_endpoint(
         ("org:viewer", 200),
     ],
 )
+@patch("src.api.services.campaign_persistence._get_session")
 @patch("src.api.auth._resolve_tenant_id", return_value=FAKE_TENANT_ID)
 @patch("src.api.auth.SessionLocal")
 @patch("src.api.auth.verify_clerk_token")
@@ -203,6 +210,7 @@ def test_rbac_simulate_results_endpoint(
     mock_verify,
     mock_session,
     mock_resolve,
+    mock_db_session,
     role,
     expected_status,
 ):
@@ -211,6 +219,7 @@ def test_rbac_simulate_results_endpoint(
 
     mock_verify.return_value = _make_claims(role)
     mock_session.return_value = MagicMock()
+    mock_db_session.return_value = MagicMock()
 
     # Mock dashboard results service response
     mock_results.return_value = DashboardResultsResponse(

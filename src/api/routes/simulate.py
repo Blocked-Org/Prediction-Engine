@@ -22,7 +22,6 @@ from src.api.services.campaign_persistence import (
     create_workspace,
     delete_workspace,
     get_active_workspace,
-    get_simulation_result,
     get_workspace_count,
     list_workspaces,
     save_simulation_result,
@@ -39,7 +38,6 @@ from src.schemas.simulation import (
 from src.schemas.workspace import (
     WorkspaceActivateRequest,
     WorkspaceCreateRequest,
-    WorkspaceDeleteRequest,
     WorkspaceListResponse,
     WorkspaceSummary,
 )

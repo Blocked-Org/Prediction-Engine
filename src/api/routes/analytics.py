@@ -21,7 +21,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from src.api.auth import Role, require_role
 from src.api.cache import get_simulation_cache
 from src.api.services.campaign_persistence import (
-    get_active_workspace,
     get_workspace_by_campaign_id,
 )
 from src.schemas.analytics import (

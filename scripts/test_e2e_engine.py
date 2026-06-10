@@ -2,7 +2,7 @@
 scripts/test_e2e_engine.py - End-to-end integration test for the Simulation Engine.
 
 This script executes the complete backend data flow:
-1. Connects to Neo4j and checks onboarding status.
+1. Connects to Postgres and checks onboarding status.
 2. Extracts campaign parameters using the seed data clerk_user_id.
 3. Triggers the ABM (Micro) and Bayesian (Macro) engines.
 4. Outputs the combined dashboard payload (projected ROI, Pareto budgets).
@@ -11,22 +11,25 @@ Run via: python -m scripts.test_e2e_engine
 """
 
 import logging
-from src.api.db.neo4j_client import Neo4jManager
-from src.api.services.dashboard_results import get_dashboard_results
+from src.api.services.campaign_persistence import get_active_workspace
+from src.api.services.dashboard_results import build_dashboard_results
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("e2e_test")
 
 def run_e2e():
-    logger.info("Initializing Neo4j Manager...")
-    neo4j = Neo4jManager()
-    neo4j.connect()
+    logger.info("Initializing E2E test...")
 
     clerk_user_id = "demo_clerk_user_001"
     
     logger.info(f"Triggering dashboard results generation for {clerk_user_id}...")
     try:
-        response = get_dashboard_results(neo4j, clerk_user_id)
+        workspace = get_active_workspace(clerk_user_id)
+        if workspace is None or workspace.campaign_data is None:
+            logger.error("No active workspace found for user.")
+            return
+
+        response = build_dashboard_results(workspace.campaign_data)
         
         logger.info(f"Dashboard status: {response.status}")
         if response.status == "ready":
@@ -48,8 +51,6 @@ def run_e2e():
             
     except Exception as e:
         logger.error(f"E2E simulation failed: {e}", exc_info=True)
-    finally:
-        neo4j.close()
 
 if __name__ == "__main__":
     run_e2e()
