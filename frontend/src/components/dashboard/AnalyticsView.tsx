@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
+import { toast } from "sonner";
 
 import { ExecutiveReport } from "@/components/ExecutiveReport";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -131,12 +132,14 @@ export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
             ...(result as Record<string, unknown>),
           },
         }));
+        toast.success("Simulation Complete", { description: "Charts have been updated." });
       }
       setActiveTaskId(null);
       setSimulationError(null);
     },
     onError: (errMsg) => {
       setSimulationError(errMsg);
+      toast.error("Simulation Error", { description: errMsg });
       setActiveTaskId(null);
     },
   });
@@ -208,6 +211,7 @@ export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
         if (!res.ok) {
           const errorText = await res.text();
           setSimulationError(`Simulation request failed: ${errorText}`);
+          toast.error("Request Failed", { description: errorText });
           return;
         }
 
@@ -221,6 +225,7 @@ export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
         if (data.task_id) {
           // Backend returned a Celery task — poll for result
           setActiveTaskId(data.task_id);
+          toast.info("Simulation Running", { description: "Task dispatched to worker." });
         } else if (data.optimization_result || data.optimized_allocations) {
           // Synchronous result (or fallback) — merge immediately
           setSimulationData((prev) => ({
@@ -230,11 +235,16 @@ export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
               ...data,
             },
           }));
+          if (data._fallback) {
+             toast.warning("Fallback Mode", { description: "Using client-side estimate." });
+          } else {
+             toast.success("Simulation Complete", { description: "Charts updated immediately." });
+          }
         }
       } catch (err) {
-        setSimulationError(
-          err instanceof Error ? err.message : "Network error"
-        );
+        const msg = err instanceof Error ? err.message : "Network error";
+        setSimulationError(msg);
+        toast.error("Error", { description: msg });
       }
     },
     [userId, simulationData]

@@ -1,12 +1,19 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { Loader2, FlaskConical } from "lucide-react";
+import { Loader2, FlaskConical, RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { motion } from "framer-motion";
 
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Card,
   CardContent,
@@ -222,50 +229,93 @@ export function SimulationControls({
         
         {/* ── Quick-action Preset Buttons ───────────────────────────────── */}
         <div className="space-y-2 pb-2">
-          <Label className="text-[10px] font-bold uppercase tracking-widest text-[#6B6B6B]">
-            Goal-Oriented Presets
-          </Label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="flex items-center justify-between">
+            <Label className="text-[10px] font-bold uppercase tracking-widest text-[#6B6B6B]">
+              Goal-Oriented Presets
+            </Label>
             <Button
               type="button"
-              variant="outline"
-              disabled={isLoading}
-              onClick={() => handleApplyPreset("profit")}
-              className={`text-xs font-bold uppercase tracking-wider h-9 rounded-full transition-all duration-300 ${
-                isPresetActive("profit")
-                  ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-sm hover:bg-[#0A0A0A] hover:text-white"
-                  : "bg-white text-[#0A0A0A] border-[#E5E5E5] hover:bg-[#F5F5F0]"
-              }`}
+              variant="ghost"
+              size="sm"
+              onClick={() => setBudgets(initialBudgets)}
+              className="h-6 px-2 text-[10px] uppercase font-bold tracking-widest text-muted-foreground hover:text-foreground"
             >
-              📈 Maximize Profit
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isLoading}
-              onClick={() => handleApplyPreset("traffic")}
-              className={`text-xs font-bold uppercase tracking-wider h-9 rounded-full transition-all duration-300 ${
-                isPresetActive("traffic")
-                  ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-sm hover:bg-[#0A0A0A] hover:text-white"
-                  : "bg-white text-[#0A0A0A] border-[#E5E5E5] hover:bg-[#F5F5F0]"
-              }`}
-            >
-              ⚡ Maximize Traffic
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isLoading}
-              onClick={() => handleApplyPreset("risk")}
-              className={`text-xs font-bold uppercase tracking-wider h-9 rounded-full transition-all duration-300 ${
-                isPresetActive("risk")
-                  ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-sm hover:bg-[#0A0A0A] hover:text-white"
-                  : "bg-white text-[#0A0A0A] border-[#E5E5E5] hover:bg-[#F5F5F0]"
-              }`}
-            >
-              🛡️ Lowest Risk
+              <RotateCcw className="mr-1 h-3 w-3" />
+              Reset
             </Button>
           </div>
+          <TooltipProvider>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <motion.div whileHover={isLoading ? {} : { scale: 1.02 }} whileTap={isLoading ? {} : { scale: 0.98 }}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={isLoading}
+                      onClick={() => handleApplyPreset("profit")}
+                      className={`w-full text-xs font-bold uppercase tracking-wider h-9 rounded-full transition-all duration-300 ${
+                        isPresetActive("profit")
+                          ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-sm"
+                          : "bg-white text-[#0A0A0A] border-[#E5E5E5] hover:bg-[#F5F5F0]"
+                      }`}
+                    >
+                      📈 Maximize Profit
+                    </Button>
+                  </motion.div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <span className="text-xs">Prioritizes high-ROAS channels (Meta) over sheer volume.</span>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <motion.div whileHover={isLoading ? {} : { scale: 1.02 }} whileTap={isLoading ? {} : { scale: 0.98 }}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={isLoading}
+                      onClick={() => handleApplyPreset("traffic")}
+                      className={`w-full text-xs font-bold uppercase tracking-wider h-9 rounded-full transition-all duration-300 ${
+                        isPresetActive("traffic")
+                          ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-sm"
+                          : "bg-white text-[#0A0A0A] border-[#E5E5E5] hover:bg-[#F5F5F0]"
+                      }`}
+                    >
+                      ⚡ Maximize Traffic
+                    </Button>
+                  </motion.div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <span className="text-xs">Allocates heavily to Search (Google) for high-intent clicks.</span>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <motion.div whileHover={isLoading ? {} : { scale: 1.02 }} whileTap={isLoading ? {} : { scale: 0.98 }}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={isLoading}
+                      onClick={() => handleApplyPreset("risk")}
+                      className={`w-full text-xs font-bold uppercase tracking-wider h-9 rounded-full transition-all duration-300 ${
+                        isPresetActive("risk")
+                          ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-sm"
+                          : "bg-white text-[#0A0A0A] border-[#E5E5E5] hover:bg-[#F5F5F0]"
+                      }`}
+                    >
+                      🛡️ Lowest Risk
+                    </Button>
+                  </motion.div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <span className="text-xs">Balanced portfolio spreading budget to minimize variance.</span>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
         </div>
 
         {/* ── Slider controls ──────────────────────────────────────────── */}
@@ -323,25 +373,27 @@ export function SimulationControls({
         </div>
 
         {/* ── Run button ───────────────────────────────────────────────── */}
-        <Button
-          id="run-simulation-btn"
-          onClick={handleRun}
-          disabled={isLoading || totalAllocated === 0}
-          className="w-full bg-[#0A0A0A] text-white shadow-sm transition-all hover:bg-[#333] active:scale-[0.98] disabled:opacity-60 rounded-full font-bold text-sm uppercase tracking-wide h-11"
-          size="lg"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 size-4 animate-spin" />
-              {t("running")}
-            </>
-          ) : (
-            <>
-              <FlaskConical className="mr-2 size-4" />
-              {t("run_button")}
-            </>
-          )}
-        </Button>
+        <motion.div whileHover={isLoading || totalAllocated === 0 ? {} : { scale: 1.02 }} whileTap={isLoading || totalAllocated === 0 ? {} : { scale: 0.98 }}>
+          <Button
+            id="run-simulation-btn"
+            onClick={handleRun}
+            disabled={isLoading || totalAllocated === 0}
+            className="w-full bg-[#0A0A0A] text-white shadow-sm transition-all hover:bg-[#333] disabled:opacity-60 rounded-full font-bold text-sm uppercase tracking-wide h-11"
+            size="lg"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 size-4 animate-spin" />
+                {t("running")}
+              </>
+            ) : (
+              <>
+                <FlaskConical className="mr-2 size-4" />
+                {t("run_button")}
+              </>
+            )}
+          </Button>
+        </motion.div>
         <p className="text-center text-xs text-[#6B6B6B] mt-1">
           Sliders update the preview curve instantly. This button runs a full Bayesian re-optimization on the server.
         </p>
