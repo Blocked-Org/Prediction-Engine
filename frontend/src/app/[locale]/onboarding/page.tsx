@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Activity } from "lucide-react";
 
-import { SimulationWizard } from "@/components/onboarding/SimulationWizard";
+import { ConversationalOnboarding } from "@/components/onboarding/ConversationalOnboarding";
 import { resolveIsOnboarded } from "@/lib/onboarding";
 import { syncOnboardingMetadata } from "@/actions/onboarding";
 
@@ -49,7 +49,7 @@ export default async function OnboardingPage({
           <span>Buni<span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">OS</span></span>
         </div>
 
-        <SimulationWizard locale={locale} />
+        <ConversationalOnboarding locale={locale} />
       </div>
     </main>
   );

@@ -8,6 +8,7 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { LayoutDashboard, Settings, BarChart3, Home, FileText } from "lucide-react"
+import { ShowGuideAgainButton } from "@/components/companion/BuniDashboardGuide"
 
 import {
   Sidebar,
@@ -128,6 +129,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarFooter className="border-t border-[#E5E5E5] pt-4">
         <SidebarMenu>
+          {/* Show Buni Guide Again */}
+          <SidebarMenuItem>
+            <ShowGuideAgainButton />
+          </SidebarMenuItem>
+
           <SidebarMenuItem>
             <div className="flex items-center justify-between w-full px-2 py-1.5 rounded-lg hover:bg-[#F5F5F0] transition-all duration-200">
               <div className="flex items-center gap-2">

@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { DollarSign, CreditCard, Brain, ArrowRight, Sparkles, TrendingUp, Search, Clock, CheckCircle } from "lucide-react";
 import type { DashboardSimulationData } from "@/lib/dashboard";
 import type { ChannelAllocation } from "@/lib/types/contracts";
+import { BuniDashboardGuide } from "@/components/companion/BuniDashboardGuide";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -167,7 +168,7 @@ export function DashboardView({ data }: DashboardViewProps) {
       </div>
 
       {/* ── TOP KPI METRICS (Full Width Grid) ────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div id="dashboard-kpi-section" className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         {/* Estimated Revenue Card */}
         <Card className="border border-[#E5E5E5] bg-white shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1 rounded-2xl">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -253,7 +254,7 @@ export function DashboardView({ data }: DashboardViewProps) {
       </div>
 
       {/* ── AI RECOMMENDATIONS (Directly Below KPIs, Full Width) ───────────────── */}
-      <Card className="border border-[#E5E5E5] bg-white shadow-sm transition-all hover:shadow-md rounded-2xl">
+      <Card id="dashboard-recommendations-section" className="border border-[#E5E5E5] bg-white shadow-sm transition-all hover:shadow-md rounded-2xl">
         <CardHeader className="pb-4 border-b border-[#E5E5E5]">
           <CardTitle className="text-xs font-bold uppercase tracking-widest text-[#6B6B6B] font-noto-bengali flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-[#FACC15] relative">
@@ -304,7 +305,7 @@ export function DashboardView({ data }: DashboardViewProps) {
         {/* Left Column (lg:col-span-2) */}
         <div className="lg:col-span-2 flex flex-col gap-8 min-w-0">
           {/* Hero Trend Chart */}
-          <Card className="relative overflow-hidden border border-[#E5E5E5] bg-white shadow-sm min-h-[320px] flex flex-col transition-all duration-300 hover:shadow-md rounded-2xl">
+          <Card id="dashboard-performance-section" className="relative overflow-hidden border border-[#E5E5E5] bg-white shadow-sm min-h-[320px] flex flex-col transition-all duration-300 hover:shadow-md rounded-2xl">
              <CardHeader className="border-b border-[#E5E5E5] pb-4">
                 <CardTitle className="text-sm font-bold text-[#0A0A0A] flex items-center justify-between uppercase tracking-wider">
                   <span>Performance Trajectory</span>
@@ -363,7 +364,7 @@ export function DashboardView({ data }: DashboardViewProps) {
           </Card>
 
           {/* Data Table */}
-          <div className="flex flex-col gap-4">
+          <div id="dashboard-table-section" className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-black font-noto-bengali tracking-tight text-[#0A0A0A] uppercase">
                 {t("transactional_logs")}
@@ -382,7 +383,7 @@ export function DashboardView({ data }: DashboardViewProps) {
         {/* Right Column (lg:col-span-1) */}
         <div className="flex flex-col gap-8 min-w-0">
           {/* Status Widget */}
-          <Card className="border border-[#E5E5E5] bg-white shadow-sm relative overflow-hidden rounded-2xl">
+          <Card id="dashboard-status-section" className="border border-[#E5E5E5] bg-white shadow-sm relative overflow-hidden rounded-2xl">
              <div className="absolute top-0 right-0 p-4 opacity-5">
                <Brain className="h-24 w-24 text-[#0A0A0A]" />
              </div>
@@ -408,6 +409,9 @@ export function DashboardView({ data }: DashboardViewProps) {
         </div>
 
       </div>
+
+      {/* Buni Dashboard Guide — shows on first visit */}
+      <BuniDashboardGuide />
     </div>
   );
 }

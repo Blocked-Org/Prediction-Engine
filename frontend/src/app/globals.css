@@ -465,6 +465,25 @@
   animation: chatPulse 2s ease-in-out infinite;
 }
 
+/* ─── Buni Dashboard Guide Spotlight ─── */
+
+@keyframes guideHighlight {
+  0%, 100% {
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.4), 0 0 20px rgba(99, 102, 241, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.6), 0 0 30px rgba(99, 102, 241, 0.15);
+  }
+}
+
+.buni-guide-highlight {
+  position: relative;
+  z-index: 55;
+  border-radius: 1rem;
+  animation: guideHighlight 2s ease-in-out infinite;
+  transition: box-shadow 0.3s ease;
+}
+
 /* Scrollbar styling */
 .scrollbar-thin::-webkit-scrollbar {
   width: 4px;

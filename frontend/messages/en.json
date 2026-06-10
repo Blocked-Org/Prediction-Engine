@@ -270,5 +270,56 @@
       "step5": "Neo4j GraphRAG",
       "step6": "SHAP Verified Report"
     }
+  },
+  "Onboarding": {
+    "welcome": "Hi! I'm Buni 🐰 Welcome to BuniOS! Tell me, have you run any ad campaigns before?",
+    "answer_yes": "Yes, I have!",
+    "answer_no": "No, not yet",
+    "excited_response": "Awesome! That's amazing! 🎉✨ I love working with experienced marketers! Let's set up your simulation with your real data — this is going to be exciting!",
+    "encourage_response": "No worries at all! 🐰 You can still simulate and predict what will happen if you increase or decrease your ad budget. That's the magic of this platform!",
+    "demo_notice": "Since you haven't run campaigns yet, I'll use sample numbers for the ad metrics. You only need to pick your target audience! 📊",
+    "q_impressions": "How many total ad impressions have you gotten so far? 👀",
+    "q_clicks": "And how many clicks did those ads get? 🖱️",
+    "q_spend_meta": "Now let's talk budgets! How much did you spend on Meta/Facebook ads? (in ৳) 💰",
+    "q_spend_google": "How about Google Ads? (in ৳)",
+    "q_spend_tiktok": "And TikTok Ads? (in ৳)",
+    "q_revenue": "What was your total revenue from all channels? (in ৳) 📈",
+    "q_conversions": "How many total conversions (sales or sign-ups) did you get? 🎯",
+    "q_age": "Which age group is your target audience? 👥",
+    "q_gender": "Target gender?",
+    "q_interest": "What's your audience's core interest? 🎯",
+    "q_competitor_urls": "Last one! Drop in some competitor website URLs (comma-separated) and I'll analyze their strategies! 🔍",
+    "q_competitor_urls_optional": "Optionally, you can add some competitor website URLs (comma-separated) for competitive analysis. Or just skip this! 🔍",
+    "ready_to_launch": "Perfect! Everything looks great! 🚀 Hit the button below and I'll launch the simulation engine for you!",
+    "launch_button": "Launch Simulation",
+    "launching": "Launching Simulation…",
+    "launch_success": "Simulation launched successfully! 🎉 Taking you to your dashboard now...",
+    "demo_loaded": "Demo preset loaded!",
+    "demo_preset_ready": "I've loaded the demo data! 🎮 Everything is filled in with sample campaign data. Hit launch and let's see what the engine predicts!",
+    "demo_preset": "Demo Preset",
+    "online": "Online",
+    "type_number": "Type a number...",
+    "type_urls": "https://example.com, https://...",
+    "skip": "Skip",
+    "skipped": "(Skipped)",
+    "male": "Male",
+    "female": "Female",
+    "buni_typing": "Buni is thinking...",
+    "auth_error": "You must be signed in to launch a simulation.",
+    "connection_error": "Connection error. Please try again."
+  },
+  "BuniGuide": {
+    "title": "Buni's Dashboard Tour 🐰",
+    "show_again": "Show Buni's Guide Again",
+    "prev": "Back",
+    "next": "Next",
+    "done": "Got it!",
+    "steps": {
+      "kpi_cards": "These are your Key Performance Indicators! 📊 The first card shows how much revenue the simulation predicts you'll earn. The second shows your total optimized ad spend across all channels. And the third shows your ROI — how many times your investment comes back!",
+      "recommendations": "These are AI-generated recommendations! 🧠 Our engine analyzes your campaign data and suggests smart moves — like shifting budget from one channel to another to maximize your profits. Each card is an actionable suggestion!",
+      "performance_chart": "This bar chart shows how your budget is distributed across Meta, Google, and TikTok. Hover over the bars to see the exact amounts! The taller the bar, the more budget allocated to that channel.",
+      "data_table": "Here's a detailed breakdown of each channel's performance — impressions, clicks, conversions, click-through rate, and cost per click. Think of it as your campaign's report card! 📋",
+      "system_status": "This widget shows whether the simulation engine is running smoothly. A green dot means everything is synced and optimal! ✅"
+    }
   }
 }
