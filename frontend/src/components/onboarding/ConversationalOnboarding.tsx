@@ -97,6 +97,8 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
     }, 100);
   }, []);
 
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping, scrollToBottom]);
@@ -279,17 +281,20 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
       const flow = getQuestionFlow(null);
       setBuniMood("happy");
       setIsTyping(true);
-      setTimeout(() => {
+      
+      const initFlow = async () => {
+        await sleep(800);
         setMessages([flow[0]]);
         setCurrentStep(1);
         setIsTyping(false);
-      }, 800);
+      };
+      initFlow();
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Advance to next question ─────────────────────────────────────────── */
   const advanceToNext = useCallback(
-    (
+    async (
       userAnswer: string,
       updatedFormData: Partial<SimulationWizardInput>,
       experience: boolean | null
@@ -309,6 +314,7 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
       };
 
       setMessages((prev) => [...prev, userMsg]);
+      scrollToBottom();
 
       // Find position of the last-shown buni message in the flow, then advance past it
       const currentBuniIdx = lastShownBuni
@@ -329,29 +335,24 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
         if (q.inputType !== "none") break;
       }
 
-      let delay = 600;
-      toAdd.forEach((msg, idx) => {
-        setTimeout(() => {
-          setMessages((prev) => [...prev, msg]);
-          if (idx === toAdd.length - 1) {
-            setIsTyping(false);
-            setBuniMood(
-              msg.inputType === "submit" ? "happy" : "idle"
-            );
-            setTimeout(() => inputRef.current?.focus(), 200);
-          }
-          scrollToBottom();
-        }, delay);
-        delay += 500;
-      });
+      for (const msg of toAdd) {
+        await sleep(600);
+        setMessages((prev) => [...prev, msg]);
+        scrollToBottom();
+      }
 
+      setIsTyping(false);
+      setBuniMood(
+        toAdd[toAdd.length - 1].inputType === "submit" ? "happy" : "idle"
+      );
+      setTimeout(() => inputRef.current?.focus(), 200);
       setCurrentStep((s) => s + toAdd.length);
     },
     [messages, getQuestionFlow, scrollToBottom]
   );
 
   /* ── Handle yes/no ────────────────────────────────────────────────────── */
-  const handleYesNo = (answer: boolean) => {
+  const handleYesNo = async (answer: boolean) => {
     setHasPreviousCampaign(answer);
 
     if (answer) {
@@ -373,20 +374,16 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
         (m) => m.role === "buni" && m.id !== "welcome"
       );
 
-      let delay = 600;
       const batch = toAdd.slice(0, 2); // "excited" + first question
-      batch.forEach((msg, idx) => {
-        setTimeout(() => {
-          setMessages((prev) => [...prev, msg]);
-          if (idx === batch.length - 1) {
-            setIsTyping(false);
-            setBuniMood("idle");
-            setTimeout(() => inputRef.current?.focus(), 200);
-          }
-          scrollToBottom();
-        }, delay);
-        delay += 600;
-      });
+      for (const msg of batch) {
+        await sleep(600);
+        setMessages((prev) => [...prev, msg]);
+        scrollToBottom();
+      }
+
+      setIsTyping(false);
+      setBuniMood("idle");
+      setTimeout(() => inputRef.current?.focus(), 200);
       setCurrentStep(3);
     } else {
       // User said no — use demo preset for numeric fields
@@ -417,19 +414,15 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
       );
 
       // Add "encourage" + "demo-notice" + first question (age)
-      let delay = 600;
       const batch = toAdd.slice(0, 3);
-      batch.forEach((msg, idx) => {
-        setTimeout(() => {
-          setMessages((prev) => [...prev, msg]);
-          if (idx === batch.length - 1) {
-            setIsTyping(false);
-            setBuniMood("idle");
-          }
-          scrollToBottom();
-        }, delay);
-        delay += 700;
-      });
+      for (const msg of batch) {
+        await sleep(600);
+        setMessages((prev) => [...prev, msg]);
+        scrollToBottom();
+      }
+
+      setIsTyping(false);
+      setBuniMood("idle");
       setCurrentStep(4);
     }
   };
@@ -489,7 +482,7 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
   };
 
   /* ── Handle demo preset fill ──────────────────────────────────────────── */
-  const handleDemoPreset = () => {
+  const handleDemoPreset = async () => {
     setFormData(simulationInitDemoPreset);
     setBuniMood("happy");
 
@@ -507,18 +500,18 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
     ]);
 
     setIsTyping(true);
-    setTimeout(() => {
-      const readyMsg: ChatMessage = {
-        id: "ready-demo",
-        role: "buni",
-        text: t("demo_preset_ready"),
-        inputType: "submit",
-      };
-      setMessages((prev) => [...prev, readyMsg]);
-      setIsTyping(false);
-      setBuniMood("happy");
-      scrollToBottom();
-    }, 800);
+    await sleep(800);
+    
+    const readyMsg: ChatMessage = {
+      id: "ready-demo",
+      role: "buni",
+      text: t("demo_preset_ready"),
+      inputType: "submit",
+    };
+    setMessages((prev) => [...prev, readyMsg]);
+    setIsTyping(false);
+    setBuniMood("happy");
+    scrollToBottom();
   };
 
   /* ── Handle final submit ──────────────────────────────────────────────── */
