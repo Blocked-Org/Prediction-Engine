@@ -1,7 +1,7 @@
 """
 Unit Test Suite for Preprocessing (Web Scraper)
 """
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from src.preprocessing.web_scraper import CompetitorScraper
 
 @patch("src.preprocessing.web_scraper.FirecrawlApp")
