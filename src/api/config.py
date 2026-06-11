@@ -58,7 +58,6 @@ class Settings(BaseSettings):
 
         Falls back to SQLite when no PostgreSQL connection is available,
         enabling the app to run in demo/offline mode without Postgres."""
-        import pathlib
 
         default_url = "postgresql://app_user:secure_password_here@localhost:5432/postgres"
         if self.DATABASE_URL != default_url:
