@@ -58,11 +58,13 @@ async function resolveOnboarded(
   // Try fetching from backend
   const status = await fetchOnboardingStatus(userId);
 
-  // Backend unreachable — don't block the user. They may have just
-  // completed onboarding and Clerk claims haven't propagated yet.
+  // Backend unreachable — if Clerk claims didn't already confirm
+  // onboarding (fast path above), we must assume NOT onboarded and
+  // redirect to the onboarding page. This prevents new users from
+  // skipping onboarding when the Python backend is down.
   if (status === null) {
-    console.warn("[middleware] Backend unreachable for onboarding check — allowing through");
-    return true;
+    console.warn("[middleware] Backend unreachable for onboarding check — redirecting to onboarding");
+    return false;
   }
 
   if (!status.is_onboarded) {

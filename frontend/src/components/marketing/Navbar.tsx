@@ -80,7 +80,7 @@ export function Navbar() {
               <UserButton />
             </Show>
             <Show when="signed-out">
-              <SignInButton mode="modal" forceRedirectUrl={dashboardUrl} signUpForceRedirectUrl={onboardingUrl}>
+              <SignInButton mode="modal" forceRedirectUrl={onboardingUrl} signUpForceRedirectUrl={onboardingUrl}>
                 <Button size="sm" className="rounded-full bg-[#0A0A0A] text-white hover:bg-[#333] text-xs font-semibold uppercase tracking-wide px-4">
                   {t('dashboard')}
                 </Button>
@@ -144,7 +144,7 @@ export function Navbar() {
                 </Link>
               </Show>
               <Show when="signed-out">
-                <SignInButton mode="modal" forceRedirectUrl={dashboardUrl} signUpForceRedirectUrl={onboardingUrl}>
+                <SignInButton mode="modal" forceRedirectUrl={onboardingUrl} signUpForceRedirectUrl={onboardingUrl}>
                   <button className="pill-btn w-full justify-center">
                     {t('dashboard')}
                   </button>

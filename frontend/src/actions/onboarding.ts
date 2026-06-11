@@ -3,6 +3,7 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
 
 import type { SimulationRequest } from "@/lib/types/contracts";
+import type { OnboardingProfile } from "@/components/onboarding/ConversationalOnboarding";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -12,7 +13,8 @@ export type OnboardingActionResult =
 
 export async function completeOnboarding(
   locale: string,
-  payload: SimulationRequest
+  payload: SimulationRequest,
+  profile?: OnboardingProfile
 ): Promise<OnboardingActionResult> {
   const isMockMode = process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true";
 
@@ -101,7 +103,14 @@ export async function completeOnboarding(
     try {
       const client = await clerkClient();
       await client.users.updateUser(userId, {
-        publicMetadata: { isOnboarded: true },
+        publicMetadata: {
+          isOnboarded: true,
+          ...(profile && {
+            nickname: profile.nickname,
+            businessType: profile.businessType,
+            experienceLevel: profile.experienceLevel,
+          }),
+        },
       });
     } catch (clerkErr) {
       console.warn("[completeOnboarding] Clerk metadata update failed:", clerkErr);

@@ -30,7 +30,7 @@ export default async function SignInPage({
             routing="path"
             path={`/${locale}/sign-in`}
             signUpUrl={`/${locale}/sign-up`}
-            forceRedirectUrl={`/${locale}/dashboard`}
+            forceRedirectUrl={`/${locale}/onboarding`}
           />
         </div>
 

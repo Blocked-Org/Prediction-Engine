@@ -40,6 +40,9 @@ import { LoadingOverlay } from "@/components/ui/LoadingOverlay";
 
 type MessageRole = "buni" | "user";
 
+/** Keys for the profile phase (before campaign data). */
+type ProfileFieldKey = "nickname" | "businessType" | "experienceLevel";
+
 interface ChatMessage {
   id: string;
   role: MessageRole;
@@ -48,14 +51,34 @@ interface ChatMessage {
   selectOptions?: readonly string[];
   selectLabels?: Record<string, string>;
   fieldKey?: keyof SimulationWizardInput;
+  /** Field key used during the profile-gathering phase. */
+  profileKey?: ProfileFieldKey;
   answered?: boolean;
 }
 
 type BuniMood = "idle" | "happy" | "thinking" | "confused";
 
+export interface OnboardingProfile {
+  nickname: string;
+  businessType: string;
+  experienceLevel: string;
+}
+
 /* ────────────────────────────────────────────────────────────────────────── */
 /*  Constants                                                                */
 /* ────────────────────────────────────────────────────────────────────────── */
+
+const BUSINESS_TYPES = [
+  "E-commerce",
+  "F-commerce",
+  "SaaS",
+  "Restaurant/Food",
+  "Fashion",
+  "Education",
+  "Other",
+] as const;
+
+const EXPERIENCE_LEVELS = ["beginner", "intermediate", "expert"] as const;
 
 const buniImages: Record<BuniMood, string> = {
   idle: "/companion/bunny-idle.webp.webp",
@@ -80,6 +103,9 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
     boolean | null
   >(null);
   const [formData, setFormData] = useState<Partial<SimulationWizardInput>>({});
+  const [profileData, setProfileData] = useState<Partial<OnboardingProfile>>({});
+  /** Tracks whether the 3 profile questions have been completed. */
+  const [profilePhaseComplete, setProfilePhaseComplete] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [buniMood, setBuniMood] = useState<BuniMood>("idle");
@@ -103,14 +129,47 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
     scrollToBottom();
   }, [messages, isTyping, scrollToBottom]);
 
-  /* ── Build the question flow ──────────────────────────────────────────── */
+  /* ── Build the profile question flow (Phase 1) ──────────────────────── */
+  const getProfileFlow = useCallback((): ChatMessage[] => [
+    {
+      id: "p-welcome",
+      role: "buni",
+      text: t("q_nickname"),
+      inputType: "text",
+      profileKey: "nickname",
+    },
+    {
+      id: "p-business",
+      role: "buni",
+      text: "", // filled dynamically with user's name
+      inputType: "select",
+      selectOptions: BUSINESS_TYPES,
+      profileKey: "businessType",
+    },
+    {
+      id: "p-experience",
+      role: "buni",
+      text: t("q_experience"),
+      inputType: "select",
+      selectOptions: EXPERIENCE_LEVELS,
+      selectLabels: {
+        beginner: t("exp_beginner"),
+        intermediate: t("exp_intermediate"),
+        expert: t("exp_expert"),
+      },
+      profileKey: "experienceLevel",
+    },
+  ], [t]);
+
+  /* ── Build the campaign question flow (Phase 2) ────────────────────── */
   const getQuestionFlow = useCallback(
     (hasExperience: boolean | null): ChatMessage[] => {
+      const name = profileData.nickname || "";
       const flow: ChatMessage[] = [
         {
           id: "welcome",
           role: "buni",
-          text: t("welcome"),
+          text: t("greeting_transition", { name }),
           inputType: "yesno",
         },
       ];
@@ -272,19 +331,19 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
 
       return flow;
     },
-    [t]
+    [t, profileData.nickname]
   );
 
-  /* ── Initialize first message ─────────────────────────────────────────── */
+  /* ── Initialize first message (profile phase) ────────────────────────── */
   useEffect(() => {
     if (messages.length === 0) {
-      const flow = getQuestionFlow(null);
+      const profileFlow = getProfileFlow();
       setBuniMood("happy");
       setIsTyping(true);
-      
+
       const initFlow = async () => {
         await sleep(800);
-        setMessages([flow[0]]);
+        setMessages([profileFlow[0]]);
         setCurrentStep(1);
         setIsTyping(false);
       };
@@ -350,6 +409,90 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
     },
     [messages, getQuestionFlow, scrollToBottom]
   );
+
+  /* ── Handle profile phase answers ─────────────────────────────────────── */
+  const handleProfileTextSubmit = async () => {
+    const val = textInput.trim();
+    if (!val) return;
+
+    const lastBuniMsg = [...messages]
+      .reverse()
+      .find((m) => m.role === "buni" && m.profileKey);
+    if (!lastBuniMsg?.profileKey) return;
+
+    const updated = { ...profileData, [lastBuniMsg.profileKey]: val };
+    setProfileData(updated);
+    setTextInput("");
+
+    // Add user response bubble
+    const userMsg: ChatMessage = {
+      id: `user-profile-${Date.now()}`,
+      role: "user",
+      text: val,
+      answered: true,
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    scrollToBottom();
+
+    // Advance to next profile question
+    await advanceProfilePhase(updated);
+  };
+
+  const handleProfileSelectSubmit = async (value: string) => {
+    const lastBuniMsg = [...messages]
+      .reverse()
+      .find((m) => m.role === "buni" && m.profileKey);
+    if (!lastBuniMsg?.profileKey) return;
+
+    const updated = { ...profileData, [lastBuniMsg.profileKey]: value };
+    setProfileData(updated);
+
+    const displayLabel = lastBuniMsg.selectLabels?.[value] ?? value;
+
+    const userMsg: ChatMessage = {
+      id: `user-profile-${Date.now()}`,
+      role: "user",
+      text: displayLabel,
+      answered: true,
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    scrollToBottom();
+
+    await advanceProfilePhase(updated);
+  };
+
+  const advanceProfilePhase = async (updated: Partial<OnboardingProfile>) => {
+    const profileFlow = getProfileFlow();
+    const profileKeys: ProfileFieldKey[] = ["nickname", "businessType", "experienceLevel"];
+    const answeredCount = profileKeys.filter((k) => updated[k]).length;
+
+    setBuniMood("thinking");
+    setIsTyping(true);
+
+    if (answeredCount < profileKeys.length) {
+      // Show next profile question
+      const nextQ = { ...profileFlow[answeredCount] };
+      // Personalise the business-type question with the user's name
+      if (nextQ.profileKey === "businessType" && updated.nickname) {
+        nextQ.text = t("q_business_type", { name: updated.nickname });
+      }
+      await sleep(600);
+      setMessages((prev) => [...prev, nextQ]);
+      setIsTyping(false);
+      setBuniMood("happy");
+      setTimeout(() => inputRef.current?.focus(), 200);
+    } else {
+      // Profile phase complete → transition to campaign questions
+      setProfilePhaseComplete(true);
+      setBuniMood("happy");
+
+      await sleep(600);
+      const flow = getQuestionFlow(null);
+      setMessages((prev) => [...prev, flow[0]]);
+      setIsTyping(false);
+      setBuniMood("idle");
+    }
+  };
 
   /* ── Handle yes/no ────────────────────────────────────────────────────── */
   const handleYesNo = async (answer: boolean) => {
@@ -562,8 +705,15 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
       }),
     };
 
+    // Build profile for Clerk metadata
+    const profile: OnboardingProfile = {
+      nickname: profileData.nickname || "",
+      businessType: profileData.businessType || "",
+      experienceLevel: profileData.experienceLevel || "",
+    };
+
     try {
-      const result = await completeOnboarding(locale, payload);
+      const result = await completeOnboarding(locale, payload, profile);
       if (result.success) {
         setBuniMood("happy");
         const successMsg: ChatMessage = {
@@ -593,11 +743,15 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
   /* ── Get last interactive message ─────────────────────────────────────── */
   const lastBuniMsg = [...messages].reverse().find((m) => m.role === "buni");
   const activeInputType = lastBuniMsg?.inputType ?? "none";
-  const showNumberInput = activeInputType === "number" && !lastBuniMsg?.answered;
-  const showSelectInput = activeInputType === "select" && !lastBuniMsg?.answered;
-  const showTextInput = activeInputType === "text" && !lastBuniMsg?.answered;
+  const isProfilePhase = !profilePhaseComplete && !!lastBuniMsg?.profileKey;
+  const showNumberInput = activeInputType === "number" && !lastBuniMsg?.answered && !isProfilePhase;
+  const showSelectInput = activeInputType === "select" && !lastBuniMsg?.answered && !isProfilePhase;
+  const showTextInput = activeInputType === "text" && !lastBuniMsg?.answered && !isProfilePhase;
   const showYesNo = activeInputType === "yesno" && !lastBuniMsg?.answered;
   const showSubmit = activeInputType === "submit" && !lastBuniMsg?.answered;
+  // Profile phase inputs
+  const showProfileTextInput = isProfilePhase && activeInputType === "text" && !lastBuniMsg?.answered;
+  const showProfileSelectInput = isProfilePhase && activeInputType === "select" && !lastBuniMsg?.answered;
 
   /* ── Render ───────────────────────────────────────────────────────────── */
   return (
@@ -835,6 +989,55 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
                 {t("skip")}
               </Button>
             </motion.form>
+          )}
+
+          {/* Profile phase — text input (nickname) */}
+          {showProfileTextInput && !isTyping && (
+            <motion.form
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleProfileTextSubmit();
+              }}
+              className="flex gap-2"
+            >
+              <Input
+                ref={inputRef}
+                type="text"
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                placeholder={t("q_nickname_placeholder")}
+                className="flex-1 bg-zinc-800/60 border-zinc-700/40 text-white placeholder:text-zinc-500 rounded-xl h-12 focus-visible:ring-indigo-500/50"
+                autoFocus
+              />
+              <Button
+                type="submit"
+                disabled={!textInput.trim()}
+                className="rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white h-12 px-5 shadow-lg shadow-indigo-500/20"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </motion.form>
+          )}
+
+          {/* Profile phase — select input (business type, experience) */}
+          {showProfileSelectInput && !isTyping && lastBuniMsg?.selectOptions && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-wrap gap-2"
+            >
+              {lastBuniMsg.selectOptions.map((opt) => (
+                <Button
+                  key={opt}
+                  onClick={() => handleProfileSelectSubmit(opt)}
+                  className="rounded-xl bg-zinc-800/80 hover:bg-indigo-600/80 text-zinc-200 hover:text-white border border-zinc-700/40 hover:border-indigo-500/40 h-10 px-4 text-sm font-medium transition-all"
+                >
+                  {lastBuniMsg.selectLabels?.[opt] ?? opt}
+                </Button>
+              ))}
+            </motion.div>
           )}
 
           {/* Submit/Launch button */}

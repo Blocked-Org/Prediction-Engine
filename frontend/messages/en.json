@@ -299,6 +299,14 @@
     }
   },
   "Onboarding": {
+    "q_nickname": "Hi! I'm Buni 🐰 Welcome to BuniOS! What should I call you?",
+    "q_nickname_placeholder": "Your name or nickname...",
+    "q_business_type": "Nice to meet you, {name}! 🎉 What's your business or brand about?",
+    "q_experience": "Got it! How experienced are you with digital marketing? 📊",
+    "exp_beginner": "Beginner — just starting out",
+    "exp_intermediate": "Intermediate — some experience",
+    "exp_expert": "Expert — I know my stuff",
+    "greeting_transition": "Awesome, {name}! Let's set up your simulation now. 🚀 Tell me, have you run any ad campaigns before?",
     "welcome": "Hi! I'm Buni 🐰 Welcome to BuniOS! Tell me, have you run any ad campaigns before?",
     "answer_yes": "Yes, I have!",
     "answer_no": "No, not yet",
