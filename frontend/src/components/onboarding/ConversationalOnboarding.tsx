@@ -816,7 +816,7 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
         </div>
 
         {/* Messages */}
-        <div className="relative z-10 flex flex-col gap-3 p-5 min-h-[450px] max-h-[600px] overflow-y-auto scroll-smooth">
+        <div className="relative z-10 flex flex-col justify-end gap-3 p-5 min-h-[450px] max-h-[600px] overflow-y-auto scroll-smooth">
             {messages.map((msg) => (
               <div
                 key={msg.id}
