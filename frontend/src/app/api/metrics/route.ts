@@ -11,7 +11,7 @@ export async function GET() {
       throw new Error(`Backend returned ${response.status}`);
     }
     return NextResponse.json(await response.json());
-  } catch (error) {
+  } catch {
     // Graceful fallback with realistic mock data for UI demo purposes
     return NextResponse.json(
       { 

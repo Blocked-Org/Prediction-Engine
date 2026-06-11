@@ -1,6 +1,6 @@
 {
   "HomePage": {
-    "title": "BuniOS — Predictive Marketing Intelligence",
+    "title": "brandOS — Predictive Marketing Intelligence",
     "description": "A high-performance Graph-Augmented Bayesian Simulation platform. Optimize marketing spend with predictive MMM, multi-agent frameworks, and advanced deterministic metrics.",
     "top_badge": "Version 1.0 is live",
     "get_started": "Enter Dashboard",
@@ -81,7 +81,7 @@
     "docs": "Docs",
     "contact": "Contact",
     "dashboard": "Dashboard",
-    "logo": "Brand<os>OS</os>",
+    "logo": "brand<os>OS</os>",
     "en": "EN",
     "bn": "বাং",
     "menu": "MENU",
@@ -179,7 +179,7 @@
   },
   "DocsPage": {
     "title": "Documentation",
-    "subtitle": "Everything you need to understand, deploy, and use BuniOS.",
+    "subtitle": "Everything you need to understand, deploy, and use brandOS.",
     "search_placeholder": "Search documentation...",
     "categories": {
       "litepaper": "Litepaper",
@@ -200,7 +200,7 @@
   },
   "ContactPage": {
     "title": "Get in Touch",
-    "subtitle": "Have questions about BuniOS? Let's connect.",
+    "subtitle": "Have questions about brandOS? Let's connect.",
     "name": "Full Name",
     "email": "Email Address",
     "message": "Message / Inquiry",
@@ -259,7 +259,7 @@
     },
     "bento": {
       "title": "Solving 4 Structural Blind Spots",
-      "subtitle": "Traditional attribution models fail in walled gardens. Here is how BuniOS fixes it.",
+      "subtitle": "Traditional attribution models fail in walled gardens. Here is how brandOS fixes it.",
       "spot1_title": "1. Cold-Start Problem",
       "spot1_desc": "Uses Transfer Learning to estimate curves for new products with no historical data. Includes deep cross-industry metadata matching models to build high-accuracy estimations from the very first hour.",
       "spot2_title": "2. Linear Scale Fallacy",
@@ -299,7 +299,7 @@
     }
   },
   "Onboarding": {
-    "q_nickname": "Hi! I'm Buni 🐰 Welcome to BuniOS! What should I call you?",
+    "q_nickname": "Hi! I'm Buni 🐰 Welcome to brandOS! What should I call you?",
     "q_nickname_placeholder": "Your name or nickname...",
     "q_business_type": "Nice to meet you, {name}! 🎉 What's your business or brand about?",
     "q_experience": "Got it! How experienced are you with digital marketing? 📊",
@@ -307,7 +307,7 @@
     "exp_intermediate": "Intermediate — some experience",
     "exp_expert": "Expert — I know my stuff",
     "greeting_transition": "Awesome, {name}! Let's set up your simulation now. 🚀 Tell me, have you run any ad campaigns before?",
-    "welcome": "Hi! I'm Buni 🐰 Welcome to BuniOS! Tell me, have you run any ad campaigns before?",
+    "welcome": "Hi! I'm Buni 🐰 Welcome to brandOS! Tell me, have you run any ad campaigns before?",
     "answer_yes": "Yes, I have!",
     "answer_no": "No, not yet",
     "excited_response": "Awesome! That's amazing! 🎉✨ I love working with experienced marketers! Let's set up your simulation with your real data — this is going to be exciting!",

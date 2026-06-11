@@ -12,98 +12,100 @@ export function Navbar() {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
 
-  const dashboardUrl = `/${locale}/dashboard`
+
   const onboardingUrl = `/${locale}/onboarding`
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 w-full bg-white/80 backdrop-blur-sm border-b border-[#E5E5E5] transition-all duration-300">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 md:px-8 py-4">
-        
-        {/* Brand Logo */}
-        <Link href="/" className="font-display text-xl font-black tracking-tight text-[#0A0A0A] uppercase hover:opacity-70 transition-opacity">
-          {t.rich('logo', {
-            os: (chunks) => (
-              <span className="text-[#0A0A0A]">
-                {chunks}
-              </span>
-            )
-          })}
-        </Link>
-
-        {/* Desktop Navigation — Parenthesized Links */}
-        <div className="hidden md:flex items-center gap-2">
-          <Link href="/features" className="nav-link-paren px-3 py-1.5">
-            ( {t('features')} )
-          </Link>
-          <Link href="/pricing" className="nav-link-paren px-3 py-1.5">
-            ( {t('pricing')} )
-          </Link>
-          <Link href="/docs" className="nav-link-paren px-3 py-1.5">
-            ( {t('docs')} )
-          </Link>
-          <Link href="/contact" className="nav-link-paren px-3 py-1.5">
-            ( {t('contact')} )
-          </Link>
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center gap-4">
+    <>
+      <nav className="fixed top-0 left-0 right-0 z-50 w-full bg-white/80 backdrop-blur-sm border-b border-[#E5E5E5] transition-all duration-300">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 md:px-8 py-4">
           
-          {/* Language Switcher — Minimal Pill */}
-          <div className="flex items-center gap-0.5 bg-[#F5F5F0] border border-[#E5E5E5] rounded-full p-0.5">
-            <Link
-              href={pathname}
-              locale="en"
-              prefetch={false}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 ${locale === 'en' ? 'bg-[#0A0A0A] text-white shadow-sm' : 'text-[#6B6B6B] hover:text-[#0A0A0A]'}`}
-            >
-              {t('en')}
+          {/* Brand Logo */}
+          <Link href="/" className="font-display text-xl font-black tracking-tight text-[#0A0A0A] uppercase hover:opacity-70 transition-opacity">
+            {t.rich('logo', {
+              os: (chunks) => (
+                <span className="text-[#0A0A0A]">
+                  {chunks}
+                </span>
+              )
+            })}
+          </Link>
+
+          {/* Desktop Navigation — Parenthesized Links */}
+          <div className="hidden md:flex items-center gap-2">
+            <Link href="/features" className="nav-link-paren px-3 py-1.5">
+              ( {t('features')} )
             </Link>
-            <Link
-              href={pathname}
-              locale="bn"
-              prefetch={false}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 ${locale === 'bn' ? 'bg-[#0A0A0A] text-white shadow-sm' : 'text-[#6B6B6B] hover:text-[#0A0A0A]'}`}
-            >
-              {t('bn')}
+            <Link href="/pricing" className="nav-link-paren px-3 py-1.5">
+              ( {t('pricing')} )
+            </Link>
+            <Link href="/docs" className="nav-link-paren px-3 py-1.5">
+              ( {t('docs')} )
+            </Link>
+            <Link href="/contact" className="nav-link-paren px-3 py-1.5">
+              ( {t('contact')} )
             </Link>
           </div>
 
-          {/* User Profile / Login */}
-          <div className="hidden sm:flex items-center gap-3">
-            <Show when="signed-in">
-              <Link href="/dashboard" prefetch={false}>
-                <Button size="sm" className="rounded-full bg-[#0A0A0A] text-white hover:bg-[#333] text-xs font-semibold uppercase tracking-wide px-4">
-                  {t('dashboard')}
-                </Button>
+          {/* Actions */}
+          <div className="flex items-center gap-4">
+            
+            {/* Language Switcher — Minimal Pill */}
+            <div className="flex items-center gap-0.5 bg-[#F5F5F0] border border-[#E5E5E5] rounded-full p-0.5">
+              <Link
+                href={pathname}
+                locale="en"
+                prefetch={false}
+                className={`px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 ${locale === 'en' ? 'bg-[#0A0A0A] text-white shadow-sm' : 'text-[#6B6B6B] hover:text-[#0A0A0A]'}`}
+              >
+                {t('en')}
               </Link>
-              <UserButton />
-            </Show>
-            <Show when="signed-out">
-              <SignInButton mode="modal" forceRedirectUrl={onboardingUrl} signUpForceRedirectUrl={onboardingUrl}>
-                <Button size="sm" className="rounded-full bg-[#0A0A0A] text-white hover:bg-[#333] text-xs font-semibold uppercase tracking-wide px-4">
-                  {t('dashboard')}
-                </Button>
-              </SignInButton>
-            </Show>
+              <Link
+                href={pathname}
+                locale="bn"
+                prefetch={false}
+                className={`px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 ${locale === 'bn' ? 'bg-[#0A0A0A] text-white shadow-sm' : 'text-[#6B6B6B] hover:text-[#0A0A0A]'}`}
+              >
+                {t('bn')}
+              </Link>
+            </div>
+
+            {/* User Profile / Login */}
+            <div className="hidden sm:flex items-center gap-3">
+              <Show when="signed-in">
+                <Link href="/dashboard" prefetch={false}>
+                  <Button size="sm" className="rounded-full bg-[#0A0A0A] text-white hover:bg-[#333] text-xs font-semibold uppercase tracking-wide px-4">
+                    {t('dashboard')}
+                  </Button>
+                </Link>
+                <UserButton />
+              </Show>
+              <Show when="signed-out">
+                <SignInButton mode="modal" forceRedirectUrl={onboardingUrl} signUpForceRedirectUrl={onboardingUrl}>
+                  <Button size="sm" className="rounded-full bg-[#0A0A0A] text-white hover:bg-[#333] text-xs font-semibold uppercase tracking-wide px-4">
+                    {t('dashboard')}
+                  </Button>
+                </SignInButton>
+              </Show>
+            </div>
+
+            {/* Mobile Menu Toggle — "+ MENU" style */}
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="md:hidden flex items-center gap-1.5 text-[#0A0A0A] font-semibold text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
+              aria-label="Toggle menu"
+            >
+              <span className="text-lg leading-none">{isOpen ? '−' : '+'}</span>
+              <span>{isOpen ? t('close') : t('menu')}</span>
+            </button>
+
           </div>
-
-          {/* Mobile Menu Toggle — "+ MENU" style */}
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden flex items-center gap-1.5 text-[#0A0A0A] font-semibold text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
-            aria-label="Toggle menu"
-          >
-            <span className="text-lg leading-none">{isOpen ? '−' : '+'}</span>
-            <span>{isOpen ? t('close') : t('menu')}</span>
-          </button>
-
         </div>
-      </div>
+      </nav>
 
-      {/* Mobile Menu — Full overlay */}
+      {/* Mobile Menu — Full overlay — moved outside <nav> to avoid backdrop-filter layout bug */}
       {isOpen && (
-        <div className="md:hidden fixed inset-0 top-[65px] bg-white z-40 animate-fade-in">
+        <div className="md:hidden fixed inset-0 top-[65px] bg-white z-[60] animate-fade-in">
           <div className="flex flex-col gap-0 p-8">
             <Link
               href="/features"
@@ -154,6 +156,6 @@ export function Navbar() {
           </div>
         </div>
       )}
-    </nav>
+    </>
   )
 }

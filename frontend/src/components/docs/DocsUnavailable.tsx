@@ -138,7 +138,7 @@ export function DocsUnavailable({ schedule, locale }: Props) {
         {/* Branding */}
         <div className="mt-16 flex items-center justify-center gap-2 text-muted-foreground/50">
           <Activity className="w-4 h-4" />
-          <span className="text-sm font-semibold tracking-tight">BuniOS</span>
+          <span className="text-sm font-semibold tracking-tight">brandOS</span>
         </div>
       </div>
     </div>

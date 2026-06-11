@@ -13,7 +13,7 @@ export async function GET() {
       throw new Error(`Backend returned ${response.status}`);
     }
     return NextResponse.json(await response.json());
-  } catch (error) {
+  } catch {
     // Graceful fallback for mock mode / offline backend
     return NextResponse.json({
       schedule: DEFAULT_DOCS_SCHEDULE,
@@ -55,7 +55,7 @@ export async function PUT(request: Request) {
     }
 
     return NextResponse.json(await response.json());
-  } catch (error) {
+  } catch {
     console.warn("Backend unreachable for saving docs config, simulating success for UI");
     return NextResponse.json({ success: true, message: "Simulated save" });
   }

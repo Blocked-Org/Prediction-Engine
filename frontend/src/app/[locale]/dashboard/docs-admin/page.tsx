@@ -13,7 +13,7 @@ export default function DocsAdminPage() {
   const [schedule, setSchedule] = useState<DocsSchedule>(DEFAULT_DOCS_SCHEDULE)
   const [config, setConfig] = useState<DocsConfigData | null>(null)
   const [isSaving, setIsSaving] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+
 
   useEffect(() => {
     fetch('/api/docs-config')
@@ -25,7 +25,6 @@ export default function DocsAdminPage() {
         }
       })
       .catch(err => console.error("Failed to load config", err))
-      .finally(() => setIsLoading(false))
   }, [])
 
   const handleSave = async () => {

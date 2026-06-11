@@ -1,9 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { Link } from '@/i18n/routing'
 import { Navbar } from '@/components/marketing/Navbar'
-import { Footer } from '@/components/marketing/Footer'
 import { DOCS_DATA, DocArticle } from '@/lib/docs-data'
 import { BookOpen, ChevronRight, Menu, X, Presentation, FileText, Search, Printer, Share2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -43,11 +41,11 @@ export function DocsLayout({ locale, initialSlug, config }: Props) {
     return () => observer.disconnect()
   }, [viewMode, activeSlug])
 
-  const categories = [
+  const categories = useMemo(() => [
     { id: 'litepaper', label: locale === 'bn' ? 'লাইটপেপার' : 'Litepaper' },
     { id: 'user_manual', label: locale === 'bn' ? 'ব্যবহারবিধি' : 'User Manual' },
     { id: 'api_reference', label: locale === 'bn' ? 'এপিআই রেফারেন্স' : 'API Reference' },
-  ]
+  ], [locale])
 
   const groupedArticles = useMemo(() => {
     const groups: Record<string, DocArticle[]> = {}
@@ -55,7 +53,7 @@ export function DocsLayout({ locale, initialSlug, config }: Props) {
       groups[cat.id] = DOCS_DATA.filter((art) => art.category === cat.id)
     })
     return groups
-  }, [locale])
+  }, [categories])
 
   const handlePrint = () => {
     window.print()
@@ -64,7 +62,7 @@ export function DocsLayout({ locale, initialSlug, config }: Props) {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: 'BuniOS Documentation',
+        title: 'brandOS Documentation',
         url: window.location.href,
       })
     } else {

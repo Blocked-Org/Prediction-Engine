@@ -1,6 +1,6 @@
 'use client'
 
-import { useTranslations, useLocale } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/routing'
 import { useState } from 'react'
 import { Navbar } from '@/components/marketing/Navbar'
@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label'
 
 export default function PricingPage() {
   const t = useTranslations('PricingPage')
-  const locale = useLocale()
+
   const router = useRouter()
 
   const [isAnnual, setIsAnnual] = useState(false)

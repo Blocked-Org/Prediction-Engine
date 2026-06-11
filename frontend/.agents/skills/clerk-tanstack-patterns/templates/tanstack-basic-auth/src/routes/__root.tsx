@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-head-element */
 /// <reference types="vite/client" />
 import * as React from 'react'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'

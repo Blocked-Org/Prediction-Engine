@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+
 import { useAuth, useUser } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
@@ -25,13 +25,7 @@ import {
 import type { SimulationRequest } from "@/lib/types/contracts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { LoadingOverlay } from "@/components/ui/LoadingOverlay";
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -92,13 +86,13 @@ const buniImages: Record<BuniMood, string> = {
 /* ────────────────────────────────────────────────────────────────────────── */
 
 export function ConversationalOnboarding({ locale }: { locale: string }) {
-  const router = useRouter();
+
   const { userId, isLoaded } = useAuth();
   const { user } = useUser();
   const t = useTranslations("Onboarding");
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [, setCurrentStep] = useState(0);
   const [hasPreviousCampaign, setHasPreviousCampaign] = useState<
     boolean | null
   >(null);
@@ -426,7 +420,7 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
 
     // Add user response bubble
     const userMsg: ChatMessage = {
-      id: `user-profile-${Date.now()}`,
+      id: `user-profile-${lastBuniMsg.profileKey}`,
       role: "user",
       text: val,
       answered: true,
@@ -450,7 +444,7 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
     const displayLabel = lastBuniMsg.selectLabels?.[value] ?? value;
 
     const userMsg: ChatMessage = {
-      id: `user-profile-${Date.now()}`,
+      id: `user-profile-${lastBuniMsg.profileKey}`,
       role: "user",
       text: displayLabel,
       answered: true,

@@ -22,7 +22,7 @@ export const DOCS_DATA: DocArticle[] = [
     content: {
       en: `# Executive Summary & Foundations
 
-**BuniOS** is the first causally rigorous, pre-launch campaign simulation system designed specifically for SME marketers in emerging markets like Bangladesh.
+**brandOS** is the first causally rigorous, pre-launch campaign simulation system designed specifically for SME marketers in emerging markets like Bangladesh.
 
 ## The Problem
 
@@ -41,7 +41,7 @@ Enterprise solutions from global providers — Google Meridian, Nielsen Marketin
 
 ## Theoretical Foundations
 
-To solve these challenges, BuniOS rejects user-level tracking and builds upon robust probabilistic modeling paradigms:
+To solve these challenges, brandOS rejects user-level tracking and builds upon robust probabilistic modeling paradigms:
 
 ### 1. Marketing Mix Modelling (MMM)
 We decompose total sales into two econometric components:
@@ -78,7 +78,7 @@ The platform is built using an AI-native development paradigm:
 `,
       bn: `# এক্সিকিউটিভ সারসংক্ষেপ ও তাত্ত্বিক ভিত্তি
 
-**BuniOS** হলো বাংলাদেশসহ উদীয়মান বাজারের SME মার্কেটারদের জন্য বিশেষভাবে ডিজাইন করা প্রথম কার্যকারণভিত্তিক (causally rigorous), প্রি-লঞ্চ ক্যাম্পেইন সিমুলেশন সিস্টেম।
+**brandOS** হলো বাংলাদেশসহ উদীয়মান বাজারের SME মার্কেটারদের জন্য বিশেষভাবে ডিজাইন করা প্রথম কার্যকারণভিত্তিক (causally rigorous), প্রি-লঞ্চ ক্যাম্পেইন সিমুলেশন সিস্টেম।
 
 ## সমস্যা
 
@@ -97,7 +97,7 @@ The platform is built using an AI-native development paradigm:
 
 ## তাত্ত্বিক ভিত্তি (Theoretical Foundations)
 
-এই সমস্যাগুলো সমাধানে BuniOS ব্যক্তিগত ট্র্যাকিং পরিহার করে তিনটি প্রধান প্যারাদাইমের সমন্বয় করেছে:
+এই সমস্যাগুলো সমাধানে brandOS ব্যক্তিগত ট্র্যাকিং পরিহার করে তিনটি প্রধান প্যারাদাইমের সমন্বয় করেছে:
 
 ### ১. মার্কেটিং মিক্স মডেলিং (MMM)
 আমরা মোট বিক্রিকে দুটি ভাগে বিভক্ত করি:
@@ -144,7 +144,7 @@ LLM কোনো ন্যারেটিভ রিপোর্ট তৈরি 
     content: {
       en: `# Architecture & Technical Transformations
 
-BuniOS operates on a highly decoupled **six-layer architecture** combined with mathematical transformations of consumer behavior.
+brandOS operates on a highly decoupled **six-layer architecture** combined with mathematical transformations of consumer behavior.
 
 ## Mathematical Transformations
 
@@ -228,7 +228,7 @@ Using the **Removal Effect** (excluding a node and recomputing transition probab
 
 ## GraphRAG & Retrieval Architecture
 
-Unlike vanilla vector RAG, BuniOS uses GraphRAG powered by **Neo4j** to resolve multi-hop causal queries.
+Unlike vanilla vector RAG, brandOS uses GraphRAG powered by **Neo4j** to resolve multi-hop causal queries.
 
 ### Neo4j Knowledge Graph Schema
 
@@ -265,7 +265,7 @@ For users with intermittent connectivity, the architecture falls back to an offl
 `,
       bn: `# আর্কিটেকচার ও কারিগরি ট্রান্সফরমেশন
 
-BuniOS একটি অত্যন্ত ডিকাপল্ড **ছয়-স্তর বিশিষ্ট আর্কিটেকচার** এবং ক্রেতা আচরণের গাণিতিক রূপান্তরের উপর ভিত্তি করে কাজ করে।
+brandOS একটি অত্যন্ত ডিকাপল্ড **ছয়-স্তর বিশিষ্ট আর্কিটেকচার** এবং ক্রেতা আচরণের গাণিতিক রূপান্তরের উপর ভিত্তি করে কাজ করে।
 
 ## গাণিতিক রূপান্তরসমূহ (Mathematical Transformations)
 
@@ -349,7 +349,7 @@ P = [
 
 ## GraphRAG ও রিট্রিভাল আর্কিটেকচার
 
-সাধারণ ভেক্টর সার্চের সীমাবদ্ধতা কাটিয়ে উঠতে BuniOS Neo4j-চালিত GraphRAG ব্যবহার করে, যা জটিল বহুধাপী (multi-hop) ক্যোয়ারী সমাধান করতে পারে।
+সাধারণ ভেক্টর সার্চের সীমাবদ্ধতা কাটিয়ে উঠতে brandOS Neo4j-চালিত GraphRAG ব্যবহার করে, যা জটিল বহুধাপী (multi-hop) ক্যোয়ারী সমাধান করতে পারে।
 
 ### Neo4j নলেজ গ্রাফ স্কিমা
 
@@ -395,10 +395,10 @@ SME মার্কেটারদের কাছে সহজে পৌঁছ�
     content: {
       en: `# Business Model & Commercialisation Strategy
 
-The mathematical rigor of BuniOS is paired with a highly optimized, sustainable commercialization architecture designed for emerging markets.
+The mathematical rigor of brandOS is paired with a highly optimized, sustainable commercialization architecture designed for emerging markets.
 
 ## Value Proposition & Commercial Moat
-BuniOS's core differentiator is its **proprietary, multi-engine simulation stack**. While competitors repackage open-source MMM libraries with basic wrapper UIs or rely on standard single-paradigm regression, BuniOS integrates Bayesian MMM, Agent-Based Modelling, Markov funnels, and NSGA-II genetic optimization within a unified, Neo4j-backed GraphRAG engine. This allows SME brands to run pre-launch "what-if" simulations, increasing client ROAS within 90 days.
+brandOS's core differentiator is its **proprietary, multi-engine simulation stack**. While competitors repackage open-source MMM libraries with basic wrapper UIs or rely on standard single-paradigm regression, brandOS integrates Bayesian MMM, Agent-Based Modelling, Markov funnels, and NSGA-II genetic optimization within a unified, Neo4j-backed GraphRAG engine. This allows SME brands to run pre-launch "what-if" simulations, increasing client ROAS within 90 days.
 
 ---
 
@@ -424,10 +424,10 @@ Our serverless stack is split to achieve high gross margins and scale to zero:
 ---
 
 ## Go-to-Market: White-Label Agency Distribution
-Direct B2B sales cycles are long and expensive. BuniOS scales capital-efficiently through a **White-Label Partnership Programme** for digital marketing agencies:
+Direct B2B sales cycles are long and expensive. brandOS scales capital-efficiently through a **White-Label Partnership Programme** for digital marketing agencies:
 1. **Wholesale Arbitrage:** Agencies purchase wholesale bulk licenses (\$49-\$99/account/mo) and rebrand the dashboard.
 2. **Retail Markup:** Agencies package the simulations as their proprietary analytical advantage and resell to SMB clients at \$197-\$497/mo, capturing massive high-margin software revenues.
-3. **Operational Leverage:** The agency bears the customer acquisition (CAC), training, and support costs, while BuniOS scales software infrastructure in the background.
+3. **Operational Leverage:** The agency bears the customer acquisition (CAC), training, and support costs, while brandOS scales software infrastructure in the background.
 
 ---
 
@@ -449,10 +449,10 @@ Direct B2B sales cycles are long and expensive. BuniOS scales capital-efficientl
 `,
       bn: `# ব্যবসায়িক মডেল ও বাণিজ্যিকীকরণ কৌশল
 
-BuniOS-এর গাণিতিক কার্যকারিতা উদীয়মান বাজারের জন্য একটি অত্যন্ত অপ্টিমাইজড ও টেকসই বাণিজ্যিক কাঠামোর সাথে যুক্ত।
+brandOS-এর গাণিতিক কার্যকারিতা উদীয়মান বাজারের জন্য একটি অত্যন্ত অপ্টিমাইজড ও টেকসই বাণিজ্যিক কাঠামোর সাথে যুক্ত।
 
 ## মূল্য প্রস্তাবনা ও বাণিজ্যিক সুবিধা
-প্রজেক্টের মূল চালিকাশক্তি হলো এর **স্বকীয় মাল্টি-ইঞ্জিন সিমুলেশন স্ট্যাক**। সাধারণ MMM লাইব্রেরি বা রিগ্রেশন মডেলের বাইরে গিয়ে BuniOS বেসিয়ান MMM, Mesa-ভিত্তিক ABM, মার্কভ চেইন এবং NSGA-II জেনেটিক অপ্টিমাইজেশনকে একটি Neo4j চালিত GraphRAG ইঞ্জিনের সাথে সংযুক্ত করেছে। এর ফলে SME ব্র্যান্ডগুলো আসল বাজেট খরচের আগেই সিমুলেশন করতে পারে, যা ৯০ দিনের মধ্যে তাদের বিজ্ঞাপনের কার্যকারিতা (ROAS) বৃদ্ধি করে।
+প্রজেক্টের মূল চালিকাশক্তি হলো এর **স্বকীয় মাল্টি-ইঞ্জিন সিমুলেশন স্ট্যাক**। সাধারণ MMM লাইব্রেরি বা রিগ্রেশন মডেলের বাইরে গিয়ে brandOS বেসিয়ান MMM, Mesa-ভিত্তিক ABM, মার্কভ চেইন এবং NSGA-II জেনেটিক অপ্টিমাইজেশনকে একটি Neo4j চালিত GraphRAG ইঞ্জিনের সাথে সংযুক্ত করেছে। এর ফলে SME ব্র্যান্ডগুলো আসল বাজেট খরচের আগেই সিমুলেশন করতে পারে, যা ৯০ দিনের মধ্যে তাদের বিজ্ঞাপনের কার্যকারিতা (ROAS) বৃদ্ধি করে।
 
 ---
 
@@ -478,10 +478,10 @@ compute খরচ সর্বনিম্নে রাখতে এবং ক�
 ---
 
 ## Go-to-Market: হোয়াইট-লেবেল এজেন্সি ডিস্ট্রিবিউশন
-সরাসরি ব্র্যান্ডের কাছে সফটওয়্যার বিক্রি করা দীর্ঘমেয়াদী ও ব্যয়বহুল। BuniOS ডিজিটাল এজেন্সিদের জন্য **হোয়াইট-লেবেল পার্টনারশিপ প্রোগ্রাম**-এর মাধ্যমে স্কেল করে:
+সরাসরি ব্র্যান্ডের কাছে সফটওয়্যার বিক্রি করা দীর্ঘমেয়াদী ও ব্যয়বহুল। brandOS ডিজিটাল এজেন্সিদের জন্য **হোয়াইট-লেবেল পার্টনারশিপ প্রোগ্রাম**-এর মাধ্যমে স্কেল করে:
 ১. **পাইকারি আরবিট্রেজ (Wholesale Arbitrage):** এজেন্সিরা পাইকারি মূল্যে (\$৪৯-\$৯৯/অ্যাকাউন্ট/মাস) ব্র্যান্ড ও লাইসেন্স কিনে নেয় এবং নিজেদের ব্র্যান্ড নেমে ড্যাশবোর্ড সাজায়।
 ২. **রিটেল মার্কআপ:** এজেন্সিরা এই সিমুলেটর ড্যাশবোর্ডকে তাদের নিজস্ব প্রযুক্তি দাবি করে তাদের ক্লায়েন্টদের কাছে \$১৯৭-\$৪৯৭/মাস মূল্যে রিসেল করে বিশাল প্রফিট অর্জন করে।
-৩. **অপারেশনাল লিভারেজ:** ক্লায়েন্ট সংগ্রহ (CAC), ট্রেইনিং ও ফার্স্ট-টায়ার সাপোর্ট পার্টনার এজেন্সিরাই বহন করে, আর BuniOS ব্যাকএন্ডে সফটওয়্যার ইনফ্রা নিয়ন্ত্রণ করে।
+৩. **অপারেশনাল লিভারেজ:** ক্লায়েন্ট সংগ্রহ (CAC), ট্রেইনিং ও ফার্স্ট-টায়ার সাপোর্ট পার্টনার এজেন্সিরাই বহন করে, আর brandOS ব্যাকএন্ডে সফটওয়্যার ইনফ্রা নিয়ন্ত্রণ করে।
 
 ---
 
@@ -517,7 +517,7 @@ compute খরচ সর্বনিম্নে রাখতে এবং ক�
       en: `
 # Dashboard Guide
 
-The BuniOS Dashboard is your central command centre for understanding campaign performance through the lens of causal simulation rather than retrospective analytics.
+The brandOS Dashboard is your central command centre for understanding campaign performance through the lens of causal simulation rather than retrospective analytics.
 
 ## Key Metrics
 
@@ -553,7 +553,7 @@ The system generates actionable recommendations based on simulation outputs, SHA
       bn: `
 # ড্যাশবোর্ড গাইড
 
-BuniOS ড্যাশবোর্ড হলো আপনার কেন্দ্রীয় কমান্ড সেন্টার যেখানে রেট্রোস্পেক্টিভ অ্যানালিটিক্সের বদলে কজাল সিমুলেশনের মাধ্যমে ক্যাম্পেইন পারফরম্যান্স বোঝা যায়।
+brandOS ড্যাশবোর্ড হলো আপনার কেন্দ্রীয় কমান্ড সেন্টার যেখানে রেট্রোস্পেক্টিভ অ্যানালিটিক্সের বদলে কজাল সিমুলেশনের মাধ্যমে ক্যাম্পেইন পারফরম্যান্স বোঝা যায়।
 
 ## প্রধান মেট্রিক্স
 
@@ -583,7 +583,7 @@ BuniOS ড্যাশবোর্ড হলো আপনার কেন্দ�
       en: `
 # Running Simulations
 
-The What-If Simulator is the core interaction point of BuniOS. It lets you test budget allocation scenarios before committing real capital.
+The What-If Simulator is the core interaction point of brandOS. It lets you test budget allocation scenarios before committing real capital.
 
 ## How It Works
 
@@ -620,7 +620,7 @@ The Genetic Algorithm outputs a mathematically verified set of budget allocation
       bn: `
 # সিমুলেশন চালানো
 
-ওয়াট-ইফ সিমুলেটর হলো BuniOS-এর মূল ইন্টারেকশন পয়েন্ট। এটি আপনাকে প্রকৃত পুঁজি ব্যয়ের আগে বাজেট বণ্টন পরিস্থিতি পরীক্ষা করতে দেয়।
+ওয়াট-ইফ সিমুলেটর হলো brandOS-এর মূল ইন্টারেকশন পয়েন্ট। এটি আপনাকে প্রকৃত পুঁজি ব্যয়ের আগে বাজেট বণ্টন পরিস্থিতি পরীক্ষা করতে দেয়।
 
 ## কীভাবে কাজ করে
 
@@ -653,7 +653,7 @@ The Genetic Algorithm outputs a mathematically verified set of budget allocation
       en: `
 # Reports & Export
 
-BuniOS generates executive-grade reports that translate complex mathematical outputs into actionable business intelligence.
+brandOS generates executive-grade reports that translate complex mathematical outputs into actionable business intelligence.
 
 ## AI Executive Report
 
@@ -692,7 +692,7 @@ All reports support full Bangla rendering via the \`csebuetnlp/banglabert\` NLP 
       bn: `
 # রিপোর্ট ও এক্সপোর্ট
 
-BuniOS এক্সিকিউটিভ-গ্রেড রিপোর্ট তৈরি করে যা জটিল গাণিতিক আউটপুটকে কার্যকর ব্যবসায়িক বুদ্ধিমত্তায় রূপান্তর করে।
+brandOS এক্সিকিউটিভ-গ্রেড রিপোর্ট তৈরি করে যা জটিল গাণিতিক আউটপুটকে কার্যকর ব্যবসায়িক বুদ্ধিমত্তায় রূপান্তর করে।
 
 ## AI এক্সিকিউটিভ রিপোর্ট
 
@@ -738,7 +738,7 @@ BuniOS এক্সিকিউটিভ-গ্রেড রিপোর্ট �
       en: `
 # API Reference
 
-The BuniOS backend exposes REST API endpoints via FastAPI for external automation, dashboard synchronisation, and programmatic simulation execution.
+The brandOS backend exposes REST API endpoints via FastAPI for external automation, dashboard synchronisation, and programmatic simulation execution.
 
 ## Authentication
 
@@ -847,7 +847,7 @@ Content-Type: application/json
       bn: `
 # এপিআই রেফারেন্স
 
-BuniOS ব্যাকএন্ড FastAPI এর মাধ্যমে REST API এন্ডপয়েন্ট সরবরাহ করে।
+brandOS ব্যাকএন্ড FastAPI এর মাধ্যমে REST API এন্ডপয়েন্ট সরবরাহ করে।
 
 ## অথেন্টিকেশন
 
@@ -947,7 +947,7 @@ Content-Type: application/json
     content: {
       en: `# Marketing Jargon Glossary
 
-To help you get the most out of BuniOS, here is a dedicated glossary of the key marketing metrics, mathematical formulas, and concepts used throughout the dashboard and reports.
+To help you get the most out of brandOS, here is a dedicated glossary of the key marketing metrics, mathematical formulas, and concepts used throughout the dashboard and reports.
 
 ---
 
@@ -969,7 +969,7 @@ To help you get the most out of BuniOS, here is a dedicated glossary of the key 
 
 ## 4. Agent-Based Modeling (ABM)
 * **What it is:** A micro-simulation technique that models the behaviors and interactions of individual consumer agents.
-* **Why it matters:** BuniOS uses Mesa 3.0 to simulate 1,000+ customer agents (each with different age, location, and interests) to observe how ad impressions convert into purchases and diffuse via word-of-mouth.
+* **Why it matters:** brandOS uses Mesa 3.0 to simulate 1,000+ customer agents (each with different age, location, and interests) to observe how ad impressions convert into purchases and diffuse via word-of-mouth.
 
 ## 5. Adstock (Carryover Effect)
 * **What it is:** The mathematical representation of memory decay. Advertising exposure does not disappear immediately; its impact carries over to subsequent days.
@@ -1007,7 +1007,7 @@ To help you get the most out of BuniOS, here is a dedicated glossary of the key 
 `,
       bn: `# মার্কেটিং শব্দকোষ (Glossary)
 
-BuniOS প্ল্যাটফর্মকে আরও ভালোভাবে বোঝার জন্য এখানে আমাদের ড্যাশবোর্ড ও রিপোর্টে ব্যবহৃত মূল মার্কেটিং মেট্রিক্স, গাণিতিক সূত্র এবং সংজ্ঞাসমূহের একটি বিস্তারিত তালিকা দেওয়া হলো।
+brandOS প্ল্যাটফর্মকে আরও ভালোভাবে বোঝার জন্য এখানে আমাদের ড্যাশবোর্ড ও রিপোর্টে ব্যবহৃত মূল মার্কেটিং মেট্রিক্স, গাণিতিক সূত্র এবং সংজ্ঞাসমূহের একটি বিস্তারিত তালিকা দেওয়া হলো।
 
 ---
 
@@ -1029,7 +1029,7 @@ BuniOS প্ল্যাটফর্মকে আরও ভালোভাব�
 
 ## ৪. এজেন্ট-বেসড মডেলিং (ABM)
 * **সংজ্ঞা:** ক্রেতাদের ব্যক্তিগত আচরণ এবং তাদের পারস্পরিক মিথস্ক্রিয়া বা মুখের কথা (word-of-mouth) সিমুলেট করার জন্য ব্যবহৃত মাইক্রো-সিমুলেশন পদ্ধতি।
-* **কেন গুরুত্বপূর্ণ:** BuniOS-এ ১,০০০+ কাল্পনিক কাস্টমার এজেন্টের সাহায্যে বিজ্ঞাপন দেখার প্রতিক্রিয়া এবং কেনাকাটার সিদ্ধান্ত নেওয়ার পুরো প্রক্রিয়াটি নিখুঁতভাবে পরীক্ষা করা হয়।
+* **কেন গুরুত্বপূর্ণ:** brandOS-এ ১,০০০+ কাল্পনিক কাস্টমার এজেন্টের সাহায্যে বিজ্ঞাপন দেখার প্রতিক্রিয়া এবং কেনাকাটার সিদ্ধান্ত নেওয়ার পুরো প্রক্রিয়াটি নিখুঁতভাবে পরীক্ষা করা হয়।
 
 ## ৫. অ্যাডস্টক (Carryover Effect)
 * **সংজ্ঞা:** বিজ্ঞাপনের দীর্ঘমেয়াদী বা বিলম্বিত প্রভাব যা ক্রেতার স্মৃতিতে থেকে যায় এবং ধীরে ধীরে হ্রাস পায়।

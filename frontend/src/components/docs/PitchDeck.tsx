@@ -1,7 +1,7 @@
 'use client'
 
 import { ARCHITECTURE_MERMAID } from '@/lib/docs-config'
-import { DOCS_DATA } from '@/lib/docs-data'
+
 import { TeamSection } from './TeamSection'
 import dynamic from 'next/dynamic'
 import { Activity, ArrowRight, Users, Zap } from 'lucide-react'
@@ -41,7 +41,7 @@ export function PitchDeck({ locale, onSwitchMode, config }: Props) {
             <span>Infinity AI BuildFest 2026</span>
           </div>
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-br from-foreground to-foreground/70">
-            {t('BuniOS', 'ব্র্যান্ডওএস')}
+            {t('brandOS', 'ব্র্যান্ডওএস')}
           </h1>
           <p className="text-xl md:text-3xl text-muted-foreground font-medium mb-10 text-balance leading-snug">
             {t('Predictive Marketing Intelligence for Emerging Markets', 'উদীয়মান বাজারের জন্য প্রেডিক্টিভ মার্কেটিং ইন্টেলিজেন্স')}
@@ -178,7 +178,7 @@ export function PitchDeck({ locale, onSwitchMode, config }: Props) {
               {t('Core Team', 'কোর টিম')}
             </h2>
             <p className="text-xl text-muted-foreground">
-              {t('The engineers and architects building BuniOS.', 'ব্র্যান্ডওএস-এর নির্মাতা ইঞ্জিনিয়ার ও আর্কিটেক্টবৃন্দ।')}
+              {t('The engineers and architects building brandOS.', 'ব্র্যান্ডওএস-এর নির্মাতা ইঞ্জিনিয়ার ও আর্কিটেক্টবৃন্দ।')}
             </p>
           </div>
           <TeamSection locale={locale} teamMembers={config.team_members} />

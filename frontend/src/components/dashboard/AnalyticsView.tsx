@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "sonner";
 
@@ -33,7 +33,7 @@ import {
   SimulationControls,
   type ChannelBudgets,
 } from "@/components/dashboard/SimulationControls";
-import { useTaskPoller, type TaskState } from "@/hooks/useTaskPoller";
+import { useTaskPoller } from "@/hooks/useTaskPoller";
 import { generateDemoROIData, generateDemoMarkovData } from "@/lib/demo-data";
 
 // ── Dynamic imports (SSR-safe, lazy-loaded) ──────────────────────────────────
@@ -268,7 +268,7 @@ export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
   // ── ROI data: fetched from backend ──────────────────────────────────────
   const [roiDataPoints, setRoiDataPoints] = useState<ROIDataPoint[]>([]);
   const [isLoadingROI, setIsLoadingROI] = useState(false);
-  const [roiError, setRoiError] = useState<string | null>(null);
+  const [, setRoiError] = useState<string | null>(null);
 
   // ── Markov data: fetched from backend ───────────────────────────────────
   const [markovData, setMarkovData] = useState<MarkovFunnelData>({
@@ -276,7 +276,7 @@ export function AnalyticsView({ data: initialData }: AnalyticsViewProps) {
     edges: [],
   });
   const [isLoadingMarkov, setIsLoadingMarkov] = useState(false);
-  const [markovError, setMarkovError] = useState<string | null>(null);
+  const [, setMarkovError] = useState<string | null>(null);
 
   // ── Fetch ROI analytics (falls back to demo data if backend unreachable) ──
   useEffect(() => {

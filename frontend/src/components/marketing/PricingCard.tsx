@@ -22,7 +22,7 @@ interface PricingCardProps {
 }
 
 export function PricingCard({
-  id,
+
   name,
   description,
   monthlyPriceBDT,
