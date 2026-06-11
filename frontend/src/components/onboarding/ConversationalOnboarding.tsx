@@ -816,17 +816,11 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
         </div>
 
         {/* Messages */}
-        <div className="relative z-10 flex flex-col gap-3 p-5 min-h-[380px] max-h-[500px] overflow-y-auto scroll-smooth">
-          <AnimatePresence>
+        <div className="relative z-10 flex flex-col gap-3 p-5 min-h-[450px] max-h-[600px] overflow-y-auto scroll-smooth">
             {messages.map((msg) => (
-              <motion.div
+              <div
                 key={msg.id}
-                layout
-                initial={{ opacity: 0, y: 12, scale: 0.97 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                className={`flex animate-fade-in-up ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
                   className={`max-w-[85%] px-4 py-3 text-sm leading-relaxed font-noto-bengali ${
@@ -837,9 +831,8 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
                 >
                   {msg.text}
                 </div>
-              </motion.div>
+              </div>
             ))}
-          </AnimatePresence>
 
           {/* Typing indicator */}
           {isTyping && (
