@@ -330,6 +330,7 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
 
   /* ── Initialize first message (profile phase) ────────────────────────── */
   useEffect(() => {
+    let mounted = true;
     if (messages.length === 0) {
       const profileFlow = getProfileFlow();
       setBuniMood("happy");
@@ -337,12 +338,14 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
 
       const initFlow = async () => {
         await sleep(800);
-        setMessages([profileFlow[0]]);
+        if (!mounted) return;
+        setMessages((prev) => prev.length === 0 ? [profileFlow[0]] : prev);
         setCurrentStep(1);
         setIsTyping(false);
       };
       initFlow();
     }
+    return () => { mounted = false; };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Advance to next question ─────────────────────────────────────────── */
@@ -814,10 +817,11 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
 
         {/* Messages */}
         <div className="relative z-10 flex flex-col gap-3 p-5 min-h-[380px] max-h-[500px] overflow-y-auto scroll-smooth">
-          <AnimatePresence mode="popLayout">
+          <AnimatePresence>
             {messages.map((msg) => (
               <motion.div
                 key={msg.id}
+                layout
                 initial={{ opacity: 0, y: 12, scale: 0.97 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
