@@ -16,6 +16,9 @@ with Postgres Row-Level Security policies created in Alembic migration 001.
 
 ``SET LOCAL`` scopes the setting to the *current transaction*, so it is
 automatically reverted on COMMIT/ROLLBACK — no cleanup needed.
+
+When running in SQLite demo mode, RLS is skipped entirely (SQLite does
+not support SET LOCAL or row-level security).
 """
 
 from __future__ import annotations
@@ -38,6 +41,8 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 DATABASE_URL = settings.DATABASE_URL
 
+_is_sqlite = DATABASE_URL.startswith("sqlite")
+
 # ── Thread-safe ContextVar for current tenant ───────────────────────
 # ContextVar natively supports async/await and thread-based concurrency
 # models in FastAPI.  Default is ``None`` (no tenant → RLS blocks everything
@@ -47,8 +52,24 @@ tenant_context: ContextVar[Optional[str]] = ContextVar(
 )
 
 # ── SQLAlchemy Engine & Session Setup ───────────────────────────────
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+if _is_sqlite:
+    # SQLite needs check_same_thread=False for FastAPI's async model
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={"check_same_thread": False},
+        pool_pre_ping=True,
+    )
+    logger.info("Using SQLite database (demo/offline mode): %s", DATABASE_URL)
+else:
+    engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+    logger.info("Using PostgreSQL database")
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# ── Auto-create tables for SQLite (no Alembic needed) ───────────────
+if _is_sqlite:
+    Base.metadata.create_all(bind=engine)
+    logger.info("SQLite tables created/verified via create_all()")
 
 
 # ── RLS Injection via Session Event ─────────────────────────────────
@@ -100,21 +121,24 @@ def get_db_session(
     The ``after_begin`` event listener above automatically executes
     ``SET LOCAL app.current_tenant_id`` for every transaction opened
     within this session.
+
+    In SQLite demo mode, the X-Tenant-ID header is optional.
     """
-    if not x_tenant_id:
+    if not x_tenant_id and not _is_sqlite:
         raise HTTPException(
             status_code=400,
             detail="X-Tenant-ID header is missing. Tenant context is required.",
         )
 
-    # Validate UUID early so callers get a 400, not a 500.
-    try:
-        uuid.UUID(x_tenant_id)
-    except ValueError:
-        raise HTTPException(
-            status_code=400,
-            detail="X-Tenant-ID header is not a valid UUID.",
-        )
+    if x_tenant_id:
+        # Validate UUID early so callers get a 400, not a 500.
+        try:
+            uuid.UUID(x_tenant_id)
+        except ValueError:
+            raise HTTPException(
+                status_code=400,
+                detail="X-Tenant-ID header is not a valid UUID.",
+            )
 
     # Set the ContextVar for the current request flow
     token = tenant_context.set(x_tenant_id)
@@ -138,4 +162,3 @@ def get_global_db() -> Generator[Session, None, None]:
         yield db
     finally:
         db.close()
-

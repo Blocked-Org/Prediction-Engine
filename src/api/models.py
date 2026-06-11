@@ -29,9 +29,78 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     func,
+    types as sa_types,
 )
-from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+# ── Dialect-agnostic type wrappers ──────────────────────────────────
+# These use native PostgreSQL types when connected to Postgres, and
+# fall back to CHAR(32) / JSON-in-TEXT for SQLite (demo / offline mode).
+
+import json as _json
+
+class _GUID(sa_types.TypeDecorator):
+    """Platform-independent UUID type.
+    Uses PostgreSQL's UUID type, otherwise CHAR(32) storing hex strings.
+    """
+    impl = sa_types.CHAR
+    cache_ok = True
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == "postgresql":
+            from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+            return dialect.type_descriptor(PG_UUID(as_uuid=True))
+        else:
+            return dialect.type_descriptor(sa_types.CHAR(32))
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return value
+        if dialect.name == "postgresql":
+            return value if isinstance(value, uuid.UUID) else uuid.UUID(value)
+        else:
+            return value.hex if isinstance(value, uuid.UUID) else uuid.UUID(value).hex
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return value
+        if not isinstance(value, uuid.UUID):
+            return uuid.UUID(value)
+        return value
+
+
+class _JSON(sa_types.TypeDecorator):
+    """Platform-independent JSON type.
+    Uses PostgreSQL's native JSON, otherwise TEXT with json serialization.
+    """
+    impl = sa_types.Text
+    cache_ok = True
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == "postgresql":
+            from sqlalchemy.dialects.postgresql import JSON as PG_JSON
+            return dialect.type_descriptor(PG_JSON())
+        else:
+            return dialect.type_descriptor(sa_types.Text())
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return value
+        if dialect.name == "postgresql":
+            return value
+        return _json.dumps(value)
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return value
+        if dialect.name == "postgresql":
+            return value
+        return _json.loads(value) if isinstance(value, str) else value
+
+
+# Aliases used throughout the model definitions
+UUID = _GUID
+JSON = _JSON
 
 
 # ── Shared declarative base ─────────────────────────────────────────
@@ -45,7 +114,7 @@ class Tenant(Base):
     __tablename__ = "tenants"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+        UUID(), primary_key=True, default=uuid.uuid4
     )
     company_name: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
@@ -81,10 +150,10 @@ class Organization(Base):
     __tablename__ = "organizations"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+        UUID(), primary_key=True, default=uuid.uuid4
     )
     tenant_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("tenants.id", ondelete="CASCADE"),
         nullable=False,
     )
@@ -107,10 +176,10 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+        UUID(), primary_key=True, default=uuid.uuid4
     )
     tenant_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("tenants.id", ondelete="CASCADE"),
         nullable=False,
     )
@@ -133,10 +202,10 @@ class Channel(Base):
     __tablename__ = "channels"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+        UUID(), primary_key=True, default=uuid.uuid4
     )
     tenant_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("tenants.id", ondelete="CASCADE"),
         nullable=False,
     )
@@ -158,15 +227,15 @@ class Campaign(Base):
     __tablename__ = "campaigns"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+        UUID(), primary_key=True, default=uuid.uuid4
     )
     tenant_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("tenants.id", ondelete="CASCADE"),
         nullable=False,
     )
     channel_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("channels.id", ondelete="CASCADE"),
         nullable=False,
     )
@@ -201,12 +270,12 @@ class DailyAdPerformance(Base):
 
     date: Mapped[date] = mapped_column(Date, primary_key=True)
     tenant_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("tenants.id", ondelete="CASCADE"),
         primary_key=True,
     )
     campaign_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("campaigns.id", ondelete="CASCADE"),
         primary_key=True,
     )
@@ -240,15 +309,15 @@ class Transaction(Base):
     __tablename__ = "transactions"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+        UUID(), primary_key=True, default=uuid.uuid4
     )
     tenant_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("tenants.id", ondelete="CASCADE"),
         nullable=False,
     )
     campaign_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("campaigns.id", ondelete="SET NULL"),
     )
     amount: Mapped[float] = mapped_column(Numeric(14, 2), nullable=False)
@@ -273,15 +342,15 @@ class SimulationResult(Base):
     __tablename__ = "simulation_results"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+        UUID(), primary_key=True, default=uuid.uuid4
     )
     tenant_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("tenants.id", ondelete="CASCADE"),
         nullable=False,
     )
     campaign_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("campaigns.id", ondelete="SET NULL"),
     )
     projected_roi: Mapped[Optional[float]] = mapped_column(Numeric(10, 4))
@@ -303,10 +372,10 @@ class ApiKey(Base):
     __tablename__ = "api_keys"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+        UUID(), primary_key=True, default=uuid.uuid4
     )
     tenant_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("tenants.id", ondelete="CASCADE"),
         nullable=False,
     )
@@ -340,7 +409,7 @@ class PlatformDocsSettings(Base):
     __tablename__ = "platform_docs_settings"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+        UUID(), primary_key=True, default=uuid.uuid4
     )
     # Schedule
     is_enabled: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
@@ -349,8 +418,8 @@ class PlatformDocsSettings(Base):
     override_active: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     
     # JSON content
-    team_members: Mapped[Any] = mapped_column(JSON, default=list, server_default="'[]'::jsonb")
-    pitch_sections: Mapped[Any] = mapped_column(JSON, default=list, server_default="'[]'::jsonb")
+    team_members: Mapped[Any] = mapped_column(JSON, default=list, server_default="[]")
+    pitch_sections: Mapped[Any] = mapped_column(JSON, default=list, server_default="[]")
     
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
@@ -376,10 +445,10 @@ class CampaignWorkspace(Base):
     __tablename__ = "campaign_workspaces"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+        UUID(), primary_key=True, default=uuid.uuid4
     )
     tenant_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("tenants.id", ondelete="CASCADE"),
         nullable=False,
     )

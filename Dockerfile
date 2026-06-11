@@ -51,6 +51,12 @@ COPY --from=builder --chown=appuser:appgroup /app/venv /app/venv
 COPY --chown=appuser:appgroup src/ ./src/
 COPY --chown=appuser:appgroup alembic.ini ./
 
+# Copy models directory (needed for prediction engine)
+COPY --chown=appuser:appgroup models/ ./models/
+
+# Ensure data directory is created and writable for SQLite fallback
+RUN mkdir -p /app/data && chown appuser:appgroup /app/data
+
 USER appuser
 
 EXPOSE ${PORT}

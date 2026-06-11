@@ -80,11 +80,11 @@ def _ensure_default_tenant() -> None:
             logger.info("Created default tenant row: %s", _DEFAULT_TENANT_ID)
     except Exception:
         db.rollback()
-        logger.error(
-            "Could not ensure default tenant exists (DB may be unavailable).",
+        logger.warning(
+            "Could not ensure default tenant exists (non-fatal, continuing).",
             exc_info=True,
         )
-        raise
+        # Do NOT re-raise — allow simulation to proceed without the tenant
     finally:
         db.close()
 

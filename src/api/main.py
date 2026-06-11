@@ -137,16 +137,17 @@ def health_check() -> dict[str, Any]:
     """
     services: dict[str, str] = {}
 
-    # --- PostgreSQL Probe (replaces Neo4j probe) ---
+    # --- Database Probe (PostgreSQL or SQLite) ---
     try:
-        from src.api.db.database import engine
+        from src.api.db.database import engine, _is_sqlite
         from sqlalchemy import text
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
-        services["postgres"] = "ok"
+        db_label = "sqlite" if _is_sqlite else "postgres"
+        services[db_label] = "ok"
     except Exception as exc:
-        logger.warning("PostgreSQL health probe failed: %s", exc)
-        services["postgres"] = "error"
+        logger.warning("Database health probe failed: %s", exc)
+        services["database"] = "error"
 
     # --- Redis Probe ---
     try:
