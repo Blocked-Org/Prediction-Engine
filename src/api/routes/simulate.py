@@ -52,6 +52,43 @@ router = APIRouter(prefix="/api/v1/simulate", tags=["simulate"])
 _DEFAULT_TENANT_ID = "00000000-0000-0000-0000-000000000001"
 
 
+def _ensure_default_tenant() -> None:
+    """Create the default tenant row if it doesn't already exist.
+
+    The ``campaign_workspaces`` table has a FK to ``tenants.id``.  When a
+    user onboards *without* a Clerk Organization (common during first-time
+    sign-up), we fall back to ``_DEFAULT_TENANT_ID``.  This helper
+    guarantees the row is present so the FK constraint is satisfied.
+    """
+    from sqlalchemy import select
+    from src.api.db.database import SessionLocal
+    from src.api.models import Tenant
+
+    db = SessionLocal()
+    try:
+        exists = db.execute(
+            select(Tenant.id).where(Tenant.id == uuid.UUID(_DEFAULT_TENANT_ID))
+        ).scalar_one_or_none()
+
+        if exists is None:
+            tenant = Tenant(
+                id=uuid.UUID(_DEFAULT_TENANT_ID),
+                company_name="Default Tenant (Auto-created)",
+            )
+            db.add(tenant)
+            db.commit()
+            logger.info("Created default tenant row: %s", _DEFAULT_TENANT_ID)
+    except Exception:
+        db.rollback()
+        logger.error(
+            "Could not ensure default tenant exists (DB may be unavailable).",
+            exc_info=True,
+        )
+        raise
+    finally:
+        db.close()
+
+
 @router.post("", status_code=202)
 async def simulate(
     payload: SimulationRequest,
@@ -278,6 +315,10 @@ def simulate_init(
         # Determine tenant_id from auth context (fallback to default)
         tenant_id = getattr(_user, "tenant_id", None) or _DEFAULT_TENANT_ID
 
+        # Ensure the default tenant row exists in the DB so the FK is satisfied
+        if str(tenant_id) == _DEFAULT_TENANT_ID:
+            _ensure_default_tenant()
+
         # Persist to PostgreSQL (upsert into slot 1 by default)
         upsert_workspace(
             clerk_user_id=payload.clerk_user_id,
@@ -307,11 +348,13 @@ def simulate_init(
             ),
             is_onboarded=True,
         )
+    except HTTPException:
+        raise  # Re-raise HTTP exceptions (e.g. from auth) as-is
     except Exception as exc:
-        logger.exception("Unexpected error during simulate/init")
+        logger.exception("Unexpected error during simulate/init for user %s", payload.clerk_user_id)
         raise HTTPException(
             status_code=500,
-            detail="Internal server error during simulation initialization",
+            detail=f"Internal server error during simulation initialization: {exc}",
         ) from exc
 
 

@@ -87,7 +87,7 @@ const buniImages: Record<BuniMood, string> = {
 
 export function ConversationalOnboarding({ locale }: { locale: string }) {
 
-  const { userId, isLoaded } = useAuth();
+  const { userId, isLoaded, getToken } = useAuth();
   const { user } = useUser();
   const t = useTranslations("Onboarding");
 
@@ -707,7 +707,11 @@ export function ConversationalOnboarding({ locale }: { locale: string }) {
     };
 
     try {
-      const result = await completeOnboarding(locale, payload, profile);
+      // Get a fresh JWT from the client-side Clerk SDK (auto-refreshes).
+      // The server-side cookie may hold a stale token if the user spent
+      // several minutes answering onboarding questions.
+      const freshToken = await getToken();
+      const result = await completeOnboarding(locale, payload, profile, freshToken ?? undefined);
       if (result.success) {
         setBuniMood("happy");
         const successMsg: ChatMessage = {

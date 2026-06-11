@@ -14,7 +14,8 @@ export type OnboardingActionResult =
 export async function completeOnboarding(
   locale: string,
   payload: SimulationRequest,
-  profile?: OnboardingProfile
+  profile?: OnboardingProfile,
+  clientToken?: string
 ): Promise<OnboardingActionResult> {
   const isMockMode = process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true";
 
@@ -28,7 +29,10 @@ export async function completeOnboarding(
     let graphWriteSucceeded = false;
     if (!isMockMode) {
       try {
-        const token = await getToken();
+        // Prefer the fresh client-side token over the server-side one.
+        // The server-side `getToken()` reads from the request cookie which
+        // may hold a stale JWT if the user spent minutes on onboarding.
+        const token = clientToken || (await getToken());
 
         // Warm-up ping: wake up a sleeping Railway container before the
         // heavy /init request.  Fire-and-forget with a short timeout so
