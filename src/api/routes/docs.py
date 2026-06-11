@@ -45,13 +45,16 @@ def get_public_docs_config(db: Session = Depends(get_global_db)):
     settings = db.query(PlatformDocsSettings).first()
     
     if not settings:
-        # Return default if not initialized in DB yet
+        # Return default if not initialized in DB yet.
+        # overrideActive=True + enabled=True means docs are publicly
+        # accessible until an admin explicitly configures a schedule.
+        # This matches the frontend DEFAULT_DOCS_SCHEDULE.
         return DocsConfigResponse(
             schedule=DocsScheduleSchema(
                 enabled=True,
                 startDate=datetime.now(timezone.utc).isoformat(),
                 endDate=datetime.now(timezone.utc).isoformat(),
-                overrideActive=False
+                overrideActive=True
             ),
             team_members=[],
             pitch_sections=[]
