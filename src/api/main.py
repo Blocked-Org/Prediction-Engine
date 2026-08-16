@@ -161,7 +161,12 @@ def health_check() -> dict[str, Any]:
         services["redis"] = "error"
 
     overall = "ok" if all(v == "ok" for v in services.values()) else "degraded"
-    return {"status": overall, "services": services}
+    return {
+        "status": overall,
+        "services": services,
+        "version": app.version,
+        "environment": get_settings().ENVIRONMENT
+    }
 
 
 @app.get("/healthz", response_model=ApiHealth)
