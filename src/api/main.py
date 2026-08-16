@@ -136,6 +136,7 @@ def health_check() -> dict[str, Any]:
         dict: Overall status ('ok'/'degraded') and per-service statuses.
     """
     services: dict[str, str] = {}
+    environment = "unknown"
 
     # --- Database Probe (PostgreSQL or SQLite) ---
     try:
@@ -153,6 +154,7 @@ def health_check() -> dict[str, Any]:
     try:
         import redis as redis_lib
         settings = get_settings()
+        environment = settings.ENVIRONMENT
         r = redis_lib.from_url(settings.REDIS_URL, socket_connect_timeout=2)
         r.ping()
         services["redis"] = "ok"
@@ -161,7 +163,12 @@ def health_check() -> dict[str, Any]:
         services["redis"] = "error"
 
     overall = "ok" if all(v == "ok" for v in services.values()) else "degraded"
-    return {"status": overall, "services": services}
+    return {
+        "status": overall,
+        "services": services,
+        "version": app.version,
+        "environment": environment
+    }
 
 
 @app.get("/healthz", response_model=ApiHealth)
